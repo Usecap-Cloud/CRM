@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}Cursos - USECAP CRM{% endblock %}
+{% block nav_cursos %}active{% endblock %}
+
+{% block extra_styles %}
+.page-actions { display: flex; gap: 10px; }
+.btn {
+padding: 10px 20px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+font-weight: 500;
+transition: all 0.3s;
+}
+.btn-primary {
+background: linear-gradient(90deg, #1e90ff, #00bfff);
+color: #fff;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-secondary {
+background: rgba(255,255,255,0.1);
+color: #fff;
+border: 1px solid rgba(255,255,255,0.2);
+}
+.courses-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 20px;
+margin-top: 20px;
+}
+.course-card {
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.08);
+border-radius: 16px;
+padding: 20px;
+transition: all 0.3s;
+}
+.course-card:hover {
+border-color: #00d9ff;
+transform: translateY(-3px);
+}
+.course-card .name { font-size: 1.1rem; font-weight: 500; margin-bottom: 10px; }
+.course-card .detail { font-size: 0.85rem; color: #888; margin-bottom: 5px; }
+.loading { text-align: center; padding: 50px; color: #888; }
+.alert {
+padding: 15px;
+border-radius: 8px;
+margin-bottom: 20px;
+display: none;
+}
+.alert.success { background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; }
+
+/* Form Page Styles */
+.form-page {
+display: none;
+background: #0f1525;
+border-radius: 16px;
+overflow: hidden;
+}
+.form-page.active { display: block; }
+.form-header {
+display: flex;
+align-items: center;
+padding: 20px;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.form-header .back-btn {
+background: none;
+border: none;
+color: #fff;
+font-size: 1.2rem;
+cursor: pointer;
+margin-right: 15px;
+}
+.form-header h2 { font-size: 1.1rem; }
+.form-body { padding: 30px; }
+.form-section { margin-bottom: 30px; }
+.form-section-title {
+color: #00ff88;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 5px;
+}
+.form-section-subtitle {
+font-size: 1.3rem;
+margin-bottom: 5px;
+}
+.form-section-desc {
+color: #666;
+font-size: 0.85rem;
+margin-bottom: 20px;
+}
+.section-label {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 15px;
+color: #00d9ff;
+font-size: 0.9rem;
+font-weight: 500;
+}
+.form-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 15px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { margin-bottom: 0; }
+.form-group label {
+display: block;
+margin-bottom: 8px;
+color: #888;
+font-size: 0.85rem;
+}
+.form-group input, .form-group select, .form-group textarea {
+width: 100%;
+padding: 14px 16px;
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 8px;
+color: #fff;
+font-size: 0.95rem;
+}
+.form-group input::placeholder, .form-group textarea::placeholder {
+color: #555;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+outline: none;
+border-color: #00ff88;
+}
+.form-actions {
+display: flex;
+gap: 15px;
+justify-content: center;
+margin-top: 30px;
+padding-top: 20px;
+border-top: 1px solid rgba(255,255,255,0.08);
+}
+.form-actions .btn { min-width: 150px; }
+{% endblock %}
+
+{% block content %}
+<!-- List View -->
+<div id="list-view">
+    <div class="page-header">
+        <div>
+            <small>CAPACITACION</small>
+            <h1>Cursos</h1>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="showForm()">+ Nuevo Curso</button>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+    <div id="loading" class="loading">Cargando cursos...</div>
+    <div class="courses-grid" id="courses-grid"></div>
+</div>
+
+<!-- Form View -->
+<div class="form-page" id="form-view">
+    <div class="form-header">
+        <button class="back-btn" onclick="hideForm()">&#x2190;</button>
+        <h2>Registro de Curso</h2>
+    </div>
+    <div class="form-body">
+        <form id="course-form" onsubmit="saveCourse(event)">
+            <div class="form-section">
+                <div class="form-section-title">NUEVO CURSO</div>
+                <div class="form-section-subtitle">Datos del Programa</div>
+                <div class="form-section-desc">Complete la informacion del curso de capacitacion.</div>
+            </div>
+
+            <div class="section-label">&#x1F4DA; INFORMACION GENERAL</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Nombre del Curso</label>
+                    <input type="text" name="nombre" placeholder="Ej: Primeros Auxilios Avanzado" required>
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Descripcion</label>
+                    <textarea name="descripcion" rows="3" placeholder="Descripcion detallada del curso..."></textarea>
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #ff9f43;">&#x23F0; DURACION Y MODALIDAD</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Duracion (horas)</label>
+                    <input type="number" name="duracion" placeholder="8" required>
+                </div>
+                <div class="form-group">
+                    <label>Modalidad</label>
+                    <select name="modalidad">
+                        <option value="presencial">Presencial</option>
+                        <option value="online">Online</option>
+                        <option value="hibrido">Hibrido</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="categoria">
+                        <option value="">Seleccione categoria</option>
+                        <option value="seguridad">Seguridad Industrial</option>
+                        <option value="salud">Salud Ocupacional</option>
+                        <option value="prevencion">Prevencion de Riesgos</option>
+                        <option value="liderazgo">Liderazgo</option>
+                        <option value="tecnico">Tecnico Especializado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Coordinador</label>
+                    <select name="coordinador" id="coordinador-select" required>
+                        <option value="">Seleccionar coordinador...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #a855f7;">&#x1F4B0; VALOR Y CERTIFICACION</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor por Participante (CLP)</label>
+                    <input type="number" name="valor" placeholder="150000">
+                </div>
+                <div class="form-group">
+                    <label>Codigo SENCE</label>
+                    <input type="text" name="sence" placeholder="1234567890">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Curso</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showForm() {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('form-view').classList.add('active');
+    }
+
+    function hideForm() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('form-view').classList.remove('active');
+        document.getElementById('course-form').reset();
+    }
+
+    async function loadCourses() {
+        try {
+            const response = await fetch('/api/cursos/');
+            const data = await response.json();
+
+            document.getElementById('loading').style.display = 'none';
+            const grid = document.getElementById('courses-grid');
+
+            if (data.length === 0) {
+                grid.innerHTML = '<p style="color: #888;">No hay cursos registrados.</p>';
+                return;
+            }
+
+            grid.innerHTML = data.map(course => `
+                    <div class="course-card">
+                        <div class="name">${course.nombre}</div>
+                        <div class="detail">Duracion: ${course.duracion_horas || 0} horas</div>
+                        <div class="detail">Coordinador: ${course.coordinador_nombre || 'Sin asignar'}</div>
+                    </div>
+                `).join('');
+        } catch (error) {
+            document.getElementById('loading').textContent = 'Error cargando datos';
+        }
+    }
+
+    async function loadCoordinadores() {
+        try {
+            const response = await fetch('/api/coordinadores/');
+            const data = await response.json();
+            const select = document.getElementById('coordinador-select');
+            data.forEach(coord => {
+                select.innerHTML += `<option value="${coord.id}">${coord.nombre}</option>`;
+            });
+        } catch (error) { console.error('Error loading coordinadores'); }
+    }
+
+    async function saveCourse(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            nombre: form.nombre.value,
+            descripcion: form.descripcion.value,
+            duracion_horas: parseInt(form.duracion.value),
+            coordinador: parseInt(form.coordinador.value)
+        };
+
+        try {
+            const response = await fetch('/api/cursos/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert('Curso creado exitosamente', 'success');
+                hideForm();
+                loadCourses();
+            } else {
+                showAlert('Error al crear curso', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexion', 'error');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = 'alert ' + type;
+        alert.style.display = 'block';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    loadCourses();
+    loadCoordinadores();
+</script>
+{% endblock %}

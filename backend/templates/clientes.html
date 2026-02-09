@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes - USECAP CRM{% endblock %}
+{% block nav_clientes %}active{% endblock %}
+
+{% block extra_styles %}
+.page-actions { display: flex; gap: 10px; }
+.btn {
+padding: 10px 20px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+font-weight: 500;
+transition: all 0.3s;
+}
+.btn-primary {
+background: linear-gradient(90deg, #1e90ff, #00bfff);
+color: #fff;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-secondary {
+background: rgba(255,255,255,0.1);
+color: #fff;
+border: 1px solid rgba(255,255,255,0.2);
+}
+.clients-table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 20px;
+}
+.clients-table th, .clients-table td {
+padding: 15px;
+text-align: left;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.clients-table th { color: #888; font-weight: 500; font-size: 0.85rem; }
+.clients-table tr:hover { background: rgba(255,255,255,0.03); }
+.status-badge {
+padding: 5px 12px;
+border-radius: 15px;
+font-size: 0.8rem;
+}
+.status-badge.active { background: rgba(0,255,136,0.2); color: #00ff88; }
+.loading { text-align: center; padding: 50px; color: #888; }
+.alert {
+padding: 15px;
+border-radius: 8px;
+margin-bottom: 20px;
+display: none;
+}
+.alert.success { background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; }
+
+/* Form Page Styles */
+.form-page {
+display: none;
+background: #0f1525;
+border-radius: 16px;
+overflow: hidden;
+}
+.form-page.active { display: block; }
+.form-header {
+display: flex;
+align-items: center;
+padding: 20px;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.form-header .back-btn {
+background: none;
+border: none;
+color: #fff;
+font-size: 1.2rem;
+cursor: pointer;
+margin-right: 15px;
+}
+.form-header h2 { font-size: 1.1rem; }
+.form-body { padding: 30px; }
+.form-section { margin-bottom: 30px; }
+.form-section-title {
+color: #ff6b6b;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 5px;
+}
+.form-section-subtitle {
+font-size: 1.3rem;
+margin-bottom: 5px;
+}
+.form-section-desc {
+color: #666;
+font-size: 0.85rem;
+margin-bottom: 20px;
+}
+.section-label {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 15px;
+color: #1e90ff;
+font-size: 0.9rem;
+font-weight: 500;
+}
+.form-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 15px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { margin-bottom: 0; }
+.form-group label {
+display: block;
+margin-bottom: 8px;
+color: #888;
+font-size: 0.85rem;
+}
+.form-group input, .form-group select, .form-group textarea {
+width: 100%;
+padding: 14px 16px;
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 8px;
+color: #fff;
+font-size: 0.95rem;
+}
+.form-group input::placeholder, .form-group textarea::placeholder {
+color: #555;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+outline: none;
+border-color: #1e90ff;
+}
+.form-actions {
+display: flex;
+gap: 15px;
+justify-content: center;
+margin-top: 30px;
+padding-top: 20px;
+border-top: 1px solid rgba(255,255,255,0.08);
+}
+.form-actions .btn { min-width: 150px; }
+{% endblock %}
+
+{% block content %}
+<!-- List View -->
+<div id="list-view">
+    <div class="page-header">
+        <div>
+            <small>GESTION</small>
+            <h1>Clientes</h1>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="showForm()">+ Nuevo Cliente</button>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="card">
+        <div id="loading" class="loading">Cargando clientes...</div>
+        <table class="clients-table" id="clients-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>RUT</th>
+                    <th>Razon Social</th>
+                    <th>Ejecutivo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="clients-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Form View -->
+<div class="form-page" id="form-view">
+    <div class="form-header">
+        <button class="back-btn" onclick="hideForm()">&#x2190;</button>
+        <h2>Registro de Empresa</h2>
+    </div>
+    <div class="form-body">
+        <form id="client-form" onsubmit="saveClient(event)">
+            <div class="form-section">
+                <div class="form-section-title">NUEVA FICHA</div>
+                <div class="form-section-subtitle">Datos Corporativos</div>
+                <div class="form-section-desc">Complete la informacion legal y operativa de la empresa.</div>
+            </div>
+
+            <div class="section-label">&#x1F4CB; IDENTIFICACION</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>RUT Empresa</label>
+                    <input type="text" name="rut" placeholder="77.888.555-K" required>
+                </div>
+                <div class="form-group">
+                    <label>Razon Social</label>
+                    <input type="text" name="razon_social" placeholder="Tech Solutions SpA" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sector / Industria</label>
+                    <select name="sector">
+                        <option value="">Seleccione sector</option>
+                        <option value="mineria">Mineria</option>
+                        <option value="construccion">Construccion</option>
+                        <option value="energia">Energia</option>
+                        <option value="servicios">Servicios</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Origen / Referencia</label>
+                    <input type="text" name="origen" placeholder="¿Como nos conocio?">
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #00d9ff;">&#x1F4CD; UBICACION</div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Direccion</label>
+                    <input type="text" name="direccion" placeholder="Av. Principal 123, Oficina 402">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Region</label>
+                    <select name="region">
+                        <option value="">Seleccione Region</option>
+                        <option value="metropolitana">Region Metropolitana</option>
+                        <option value="valparaiso">Valparaiso</option>
+                        <option value="biobio">Biobio</option>
+                        <option value="antofagasta">Antofagasta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Comuna</label>
+                    <input type="text" name="comuna" placeholder="Ej: Las Condes">
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #ff9f43;">&#x1F4C8; SEGUIMIENTO</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha Inscripcion</label>
+                    <input type="date" name="fecha_inscripcion">
+                </div>
+                <div class="form-group">
+                    <label>Estado Cliente</label>
+                    <select name="estado">
+                        <option value="nuevo">Nuevo</option>
+                        <option value="prospecto">Prospecto</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ejecutivo Asignado</label>
+                    <select name="ejecutivo" id="ejecutivo-select" required>
+                        <option value="">Seleccionar ejecutivo...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" rows="3"
+                        placeholder="Notas adicionales sobre la empresa..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Empresa</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showForm() {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('form-view').classList.add('active');
+    }
+
+    function hideForm() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('form-view').classList.remove('active');
+        document.getElementById('client-form').reset();
+    }
+
+    async function loadClients() {
+        try {
+            const response = await fetch('/api/clientes/');
+            const data = await response.json();
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('clients-table').style.display = 'table';
+
+            const tbody = document.getElementById('clients-body');
+            tbody.innerHTML = data.map(client => `
+                    <tr>
+                        <td>${client.rut}</td>
+                        <td>${client.razon_social}</td>
+                        <td>${client.ejecutivo_nombre || 'Sin asignar'}</td>
+                        <td><span class="status-badge active">Activo</span></td>
+                    </tr>
+                `).join('');
+        } catch (error) {
+            document.getElementById('loading').textContent = 'Error cargando datos';
+        }
+    }
+
+    async function loadEjecutivos() {
+        try {
+            const response = await fetch('/api/ejecutivos/');
+            const data = await response.json();
+            const select = document.getElementById('ejecutivo-select');
+            data.forEach(ej => {
+                select.innerHTML += `<option value="${ej.id}">${ej.nombre}</option>`;
+            });
+        } catch (error) {
+            console.error('Error loading ejecutivos');
+        }
+    }
+
+    async function saveClient(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            rut: form.rut.value,
+            razon_social: form.razon_social.value,
+            ejecutivo: parseInt(form.ejecutivo.value)
+        };
+
+        try {
+            const response = await fetch('/api/clientes/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert('Cliente creado exitosamente', 'success');
+                hideForm();
+                loadClients();
+            } else {
+                showAlert('Error al crear cliente', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexion', 'error');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = 'alert ' + type;
+        alert.style.display = 'block';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    loadClients();
+    loadEjecutivos();
+</script>
+{% endblock %}

@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+
+{% block title %}Contratos - USECAP CRM{% endblock %}
+{% block nav_contratos %}active{% endblock %}
+
+{% block extra_styles %}
+.page-actions { display: flex; gap: 10px; }
+.btn {
+padding: 10px 20px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+font-weight: 500;
+transition: all 0.3s;
+}
+.btn-primary {
+background: linear-gradient(90deg, #1e90ff, #00bfff);
+color: #fff;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-secondary {
+background: rgba(255,255,255,0.1);
+color: #fff;
+border: 1px solid rgba(255,255,255,0.2);
+}
+.contracts-table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 20px;
+}
+.contracts-table th, .contracts-table td {
+padding: 15px;
+text-align: left;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.contracts-table th { color: #888; font-weight: 500; font-size: 0.85rem; }
+.contracts-table tr:hover { background: rgba(255,255,255,0.03); }
+.status-badge {
+padding: 5px 12px;
+border-radius: 15px;
+font-size: 0.8rem;
+}
+.status-badge.vigente { background: rgba(0,255,136,0.2); color: #00ff88; }
+.status-badge.pendiente { background: rgba(255,159,67,0.2); color: #ff9f43; }
+.status-badge.vencido { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+.loading { text-align: center; padding: 50px; color: #888; }
+.alert {
+padding: 15px;
+border-radius: 8px;
+margin-bottom: 20px;
+display: none;
+}
+.alert.success { background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; }
+
+/* Form Page Styles */
+.form-page {
+display: none;
+background: #0f1525;
+border-radius: 16px;
+overflow: hidden;
+}
+.form-page.active { display: block; }
+.form-header {
+display: flex;
+align-items: center;
+padding: 20px;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.form-header .back-btn {
+background: none;
+border: none;
+color: #fff;
+font-size: 1.2rem;
+cursor: pointer;
+margin-right: 15px;
+}
+.form-header h2 { font-size: 1.1rem; }
+.form-body { padding: 30px; }
+.form-section { margin-bottom: 30px; }
+.form-section-title {
+color: #ff9f43;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 5px;
+}
+.form-section-subtitle {
+font-size: 1.3rem;
+margin-bottom: 5px;
+}
+.form-section-desc {
+color: #666;
+font-size: 0.85rem;
+margin-bottom: 20px;
+}
+.section-label {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 15px;
+color: #1e90ff;
+font-size: 0.9rem;
+font-weight: 500;
+}
+.form-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 15px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { margin-bottom: 0; }
+.form-group label {
+display: block;
+margin-bottom: 8px;
+color: #888;
+font-size: 0.85rem;
+}
+.form-group input, .form-group select, .form-group textarea {
+width: 100%;
+padding: 14px 16px;
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 8px;
+color: #fff;
+font-size: 0.95rem;
+}
+.form-group input::placeholder, .form-group textarea::placeholder {
+color: #555;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+outline: none;
+border-color: #ff9f43;
+}
+.form-actions {
+display: flex;
+gap: 15px;
+justify-content: center;
+margin-top: 30px;
+padding-top: 20px;
+border-top: 1px solid rgba(255,255,255,0.08);
+}
+.form-actions .btn { min-width: 150px; }
+{% endblock %}
+
+{% block content %}
+<!-- List View -->
+<div id="list-view">
+    <div class="page-header">
+        <div>
+            <small>DOCUMENTOS</small>
+            <h1>Contratos</h1>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="showForm()">+ Nuevo Contrato</button>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="card">
+        <div id="loading" class="loading">Cargando contratos...</div>
+        <table class="contracts-table" id="contracts-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Curso</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="contracts-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Form View -->
+<div class="form-page" id="form-view">
+    <div class="form-header">
+        <button class="back-btn" onclick="hideForm()">&#x2190;</button>
+        <h2>Nuevo Contrato</h2>
+    </div>
+    <div class="form-body">
+        <form id="contract-form" onsubmit="saveContract(event)">
+            <div class="form-section">
+                <div class="form-section-title">NUEVO CONTRATO</div>
+                <div class="form-section-subtitle">Datos del Contrato</div>
+                <div class="form-section-desc">Complete la informacion del contrato de servicio.</div>
+            </div>
+
+            <div class="section-label">&#x1F4DD; PARTES DEL CONTRATO</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cliente</label>
+                    <select name="cliente" id="cliente-select" required>
+                        <option value="">Seleccionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Curso</label>
+                    <select name="curso" id="curso-select" required>
+                        <option value="">Seleccionar curso...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #00d9ff;">&#x1F4C5; VIGENCIA</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Fin</label>
+                    <input type="date" name="fecha_fin" required>
+                </div>
+            </div>
+
+            <div class="section-label" style="color: #00ff88;">&#x1F4B0; CONDICIONES COMERCIALES</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Monto Total (CLP)</label>
+                    <input type="number" name="monto" placeholder="1000000" required>
+                </div>
+                <div class="form-group">
+                    <label>Numero de Participantes</label>
+                    <input type="number" name="participantes" placeholder="15">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Forma de Pago</label>
+                    <select name="forma_pago">
+                        <option value="contado">Contado</option>
+                        <option value="credito30">Credito 30 dias</option>
+                        <option value="credito60">Credito 60 dias</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado">
+                        <option value="borrador">Borrador</option>
+                        <option value="pendiente">Pendiente Firma</option>
+                        <option value="activo">Activo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" rows="3"
+                        placeholder="Notas adicionales sobre el contrato..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Contrato</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showForm() {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('form-view').classList.add('active');
+    }
+
+    function hideForm() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('form-view').classList.remove('active');
+        document.getElementById('contract-form').reset();
+    }
+
+    async function loadContracts() {
+        try {
+            const response = await fetch('/api/contratos/');
+            const data = await response.json();
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('contracts-table').style.display = 'table';
+
+            const tbody = document.getElementById('contracts-body');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="color: #888; text-align: center;">No hay contratos registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(contract => {
+                const status = getStatus(contract.fecha_fin);
+                return `
+                        <tr>
+                            <td>${contract.cliente_nombre || 'N/A'}</td>
+                            <td>${contract.curso_nombre || 'N/A'}</td>
+                            <td>${contract.fecha_inicio || 'N/A'}</td>
+                            <td>${contract.fecha_fin || 'N/A'}</td>
+                            <td><span class="status-badge ${status.class}">${status.text}</span></td>
+                        </tr>
+                    `;
+            }).join('');
+        } catch (error) {
+            document.getElementById('loading').textContent = 'Error cargando datos';
+        }
+    }
+
+    function getStatus(fechaFin) {
+        if (!fechaFin) return { text: 'Pendiente', class: 'pendiente' };
+        const today = new Date();
+        const end = new Date(fechaFin);
+        if (end < today) return { text: 'Vencido', class: 'vencido' };
+        return { text: 'Vigente', class: 'vigente' };
+    }
+
+    async function loadClientes() {
+        try {
+            const response = await fetch('/api/clientes/');
+            const data = await response.json();
+            const select = document.getElementById('cliente-select');
+            data.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.razon_social}</option>`;
+            });
+        } catch (error) { console.error('Error loading clientes'); }
+    }
+
+    async function loadCursos() {
+        try {
+            const response = await fetch('/api/cursos/');
+            const data = await response.json();
+            const select = document.getElementById('curso-select');
+            data.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+            });
+        } catch (error) { console.error('Error loading cursos'); }
+    }
+
+    async function saveContract(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            cliente: parseInt(form.cliente.value),
+            curso: parseInt(form.curso.value),
+            fecha_inicio: form.fecha_inicio.value,
+            fecha_fin: form.fecha_fin.value,
+            monto: parseInt(form.monto.value)
+        };
+
+        try {
+            const response = await fetch('/api/contratos/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert('Contrato creado exitosamente', 'success');
+                hideForm();
+                loadContracts();
+            } else {
+                showAlert('Error al crear contrato', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexion', 'error');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = 'alert ' + type;
+        alert.style.display = 'block';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    loadContracts();
+    loadClientes();
+    loadCursos();
+</script>
+{% endblock %}

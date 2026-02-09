@@ -20,7 +20,7 @@ router.register(r'contratos-servicios', ContratoServicioViewSet)
 router.register(r'contratos-proveedores', ContratoProveedorViewSet)
 router.register(r'seguimientos', SeguimientoViewSet)
 
-from .views import DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view
+from .views import DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view, estadisticas_view, clientes_view, cursos_view, contratos_view
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -28,4 +28,8 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard'),
     path('portfolio-data/', PortfolioAPIView.as_view(), name='portfolio-data'),
     path('portfolio/', portfolio_view, name='portfolio'),
+    path('estadisticas/', estadisticas_view, name='estadisticas'),
+    path('clientes-page/', clientes_view, name='clientes-page'),
+    path('cursos-page/', cursos_view, name='cursos-page'),
+    path('contratos-page/', contratos_view, name='contratos-page'),
 ]

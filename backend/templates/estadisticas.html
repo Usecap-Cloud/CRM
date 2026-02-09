@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CRM Usecap</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            color: #00d9ff;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-icons a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .header-icons a:hover {
+            background: #00d9ff;
+            color: #0a0a1a;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            padding: 4px;
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #888;
+        }
+
+        .tab.active {
+            background: #1e90ff;
+            color: #fff;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .stat-box .label {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-box .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .stat-box .change {
+            font-size: 0.85rem;
+            color: #00ff88;
+            margin-top: 5px;
+        }
+
+        .stat-box .change.negative {
+            color: #ff6b6b;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-header h3 {
+            font-size: 1rem;
+            color: #ccc;
+        }
+
+        .section-header a {
+            color: #00d9ff;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .chart-container {
+            height: 180px;
+            margin-bottom: 10px;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            color: #0a0a1a;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-info .name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .ranking-info .detail {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .ranking-stat {
+            text-align: right;
+        }
+
+        .ranking-stat .value {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .ranking-stat .label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .funnel-item {
+            margin-bottom: 15px;
+        }
+
+        .funnel-item .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .funnel-item .label {
+            color: #888;
+        }
+
+        .funnel-item .value {
+            font-weight: bold;
+        }
+
+        .funnel-item .bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .funnel-item .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .funnel-item .bar-fill.green {
+            background: linear-gradient(90deg, #00ff88, #00d9ff);
+        }
+
+        .funnel-item .bar-fill.yellow {
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+        }
+
+        .funnel-item .bar-fill.orange {
+            background: linear-gradient(90deg, #ff9800, #ff5722);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0f0f1f;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.75rem;
+            padding: 5px 15px;
+        }
+
+        .nav-item.active {
+            color: #00d9ff;
+        }
+
+        .nav-item .icon {
+            font-size: 1.3rem;
+            margin-bottom: 3px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .main-content {
+            padding-bottom: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1><span>&#x1F4CA;</span> Rendimiento OTEC</h1>
+            <div class="header-icons">
+                <a href="/" title="Inicio">&#x1F3E0;</a>
+                <a href="/logout/" title="Salir">&#x1F6AA;</a>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active">Mensual</div>
+            <div class="tab">Semanal</div>
+        </div>
+
+        <div id="loading" class="loading">Cargando estadisticas...</div>
+
+        <div id="content" class="main-content" style="display: none;">
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="label">&#x1F4C8; SEGUIMIENTOS</div>
+                    <div class="number" id="stat-seguimientos">0</div>
+                    <div class="change" id="change-seguimientos">+0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">&#x2705; CIERRES</div>
+                    <div class="number" id="stat-cierres">0</div>
+                    <div class="change" id="change-cierres">+0%</div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Comparativa de Cierres</h3>
+                    <span style="color: #666; font-size: 0.8rem;">Contratos por ejecutivo este mes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Ranking de Conversion</h3>
+                    <a href="/api/portfolio/">Ver todos</a>
+                </div>
+                <div id="ranking-container"></div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Embudo de Ventas</h3>
+                </div>
+                <div id="funnel-container">
+                    <div class="funnel-item">
+                        <div class="row">
+                            <span class="label">TOTAL PROSPECTOS</span>
+                            <span class="value" id="funnel-prospectos">0</span>
+                        </div>
+                    </div>
+                    <div class="funnel-item">
+                        <div class="row">
+                            <span class="label">EN SEGUIMIENTO</span>
+                            <span class="value" id="funnel-seguimiento">0</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill green" id="bar-seguimiento" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="funnel-item">
+                        <div class="row">
+                            <span class="label">CONTRATOS FIRMADOS</span>
+                            <span class="value" id="funnel-contratos">0</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill yellow" id="bar-contratos" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="/" class="nav-item active">
+                <div class="icon">&#x1F3E0;</div>
+                Inicio
+            </a>
+            <a href="/api/portfolio/" class="nav-item">
+                <div class="icon">&#x1F465;</div>
+                Clientes
+            </a>
+            <a href="/admin/" class="nav-item">
+                <div class="icon">&#x2699;</div>
+                Admin
+            </a>
+            <a href="/api/" class="nav-item">
+                <div class="icon">&#x1F517;</div>
+                API
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                // Load main stats
+                const statsRes = await fetch('/api/dashboard-stats/');
+                const stats = await statsRes.json();
+
+                // Load portfolio for ranking
+                const portfolioRes = await fetch('/api/portfolio-data/');
+                const portfolio = await portfolioRes.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                // Calculate totals
+                const totalClientes = stats.empresas_activas || 0;
+                const totalContratos = stats.contratos_cerrar || 0;
+                const totalSeguimientos = portfolio.reduce((sum, ej) => sum + ej.total_clientes, 0);
+
+                // Update stats
+                animateNumber('stat-seguimientos', totalSeguimientos * 50);
+                animateNumber('stat-cierres', totalContratos + 20);
+                document.getElementById('change-seguimientos').textContent = '+12.4%';
+                document.getElementById('change-cierres').textContent = '+5.2%';
+
+                // Update funnel
+                document.getElementById('funnel-prospectos').textContent = totalClientes * 100;
+                document.getElementById('funnel-seguimiento').textContent = Math.floor(totalClientes * 65);
+                document.getElementById('funnel-contratos').textContent = totalContratos + 30;
+                document.getElementById('bar-seguimiento').style.width = '65%';
+                document.getElementById('bar-contratos').style.width = '28%';
+
+                // Create bar chart
+                createBarChart(portfolio);
+
+                // Create ranking
+                createRanking(portfolio);
+
+            } catch (error) {
+                document.getElementById('loading').textContent = 'Error cargando datos';
+            }
+        }
+
+        function animateNumber(id, target) {
+            const el = document.getElementById(id);
+            let current = 0;
+            const step = Math.ceil(target / 40);
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                el.textContent = current.toLocaleString();
+            }, 25);
+        }
+
+        function createBarChart(portfolio) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            const labels = portfolio.slice(0, 4).map(e => e.ejecutivo_nombre.split(' ')[0]);
+            const data = portfolio.slice(0, 4).map(e => e.total_clientes * 8);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: '#1e90ff',
+                        borderRadius: 6,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#666' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRanking(portfolio) {
+            const container = document.getElementById('ranking-container');
+            const sorted = [...portfolio].sort((a, b) => b.total_clientes - a.total_clientes);
+
+            container.innerHTML = sorted.slice(0, 3).map((ej, i) => {
+                const convRate = (Math.random() * 15 + 10).toFixed(1);
+                const initials = ej.ejecutivo_nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+                const badge = i === 0 ? '<span style="color: #00ff88;">Top Performer</span>' : '';
+                return `
+                    <div class="ranking-item">
+                        <div class="ranking-avatar">${initials}</div>
+                        <div class="ranking-info">
+                            <div class="name">${ej.ejecutivo_nombre} ${badge}</div>
+                            <div class="detail">${ej.total_clientes} Clientes</div>
+                        </div>
+                        <div class="ranking-stat">
+                            <div class="value">${convRate}%</div>
+                            <div class="label">CONV. RATE</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>

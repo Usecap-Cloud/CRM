@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}USECAP CRM{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #0f0f1f;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-logo {
+            padding: 0 20px 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo span {
+            color: #a855f7;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(168, 85, 247, 0.1);
+            color: #fff;
+            border-left-color: #a855f7;
+        }
+
+        .nav-item .icon {
+            font-size: 1.2rem;
+        }
+
+        .user-profile {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7, #00d9ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-info .name {
+            font-size: 0.9rem;
+        }
+
+        .user-info .role {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 25px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .page-header small {
+            color: #666;
+            font-weight: normal;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+            {
+            % block extra_styles %
+        }
+
+            {
+            % endblock %
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span>&#x1F4CA;</span> USECAP<span>CRM</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item {% block nav_inicio %}{% endblock %}">
+                <span class="icon">&#x1F3E0;</span> Inicio
+            </a>
+            <a href="/api/clientes-page/" class="nav-item {% block nav_clientes %}{% endblock %}">
+                <span class="icon">&#x1F465;</span> Clientes
+            </a>
+            <a href="/api/cursos-page/" class="nav-item {% block nav_cursos %}{% endblock %}">
+                <span class="icon">&#x1F4DA;</span> Cursos
+            </a>
+            <a href="/api/contratos-page/" class="nav-item {% block nav_contratos %}{% endblock %}">
+                <span class="icon">&#x1F4DD;</span> Contratos
+            </a>
+            <a href="/api/estadisticas/" class="nav-item {% block nav_estadisticas %}{% endblock %}">
+                <span class="icon">&#x1F4CA;</span> Estadisticas
+            </a>
+            <a href="/api/portfolio/" class="nav-item {% block nav_cartera %}{% endblock %}">
+                <span class="icon">&#x1F4BC;</span> Cartera
+            </a>
+        </nav>
+        <div class="user-profile">
+            <div class="user-avatar">AD</div>
+            <div class="user-info">
+                <div class="name">Admin</div>
+                <div class="role">Administrador</div>
+            </div>
+            <a href="/logout/" style="color: #666; margin-left: auto;">&#x1F6AA;</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

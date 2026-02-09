@@ -78,8 +78,32 @@ def dashboard_view(request):
     return render(request, 'dashboard.html')
 
 def home_view(request):
-    from django.shortcuts import render
-    return render(request, 'home.html')
+    from django.shortcuts import render, redirect
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'dashboard.html')
+
+def login_view(request):
+    from django.shortcuts import render, redirect
+    from django.contrib.auth import authenticate, login
+    if request.user.is_authenticated:
+        return redirect('home')
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            return render(request, 'login.html', {'error': 'Usuario o contrasena incorrectos'})
+    return render(request, 'login.html')
+
+def logout_view(request):
+    from django.shortcuts import redirect
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('login')
 
 class PortfolioAPIView(APIView):
     def get(self, request):
@@ -107,5 +131,18 @@ def portfolio_view(request):
     from django.shortcuts import render
     return render(request, 'portfolio.html')
 
+def estadisticas_view(request):
+    from django.shortcuts import render
+    return render(request, 'estadisticas.html')
 
+def clientes_view(request):
+    from django.shortcuts import render
+    return render(request, 'clientes.html')
 
+def cursos_view(request):
+    from django.shortcuts import render
+    return render(request, 'cursos.html')
+
+def contratos_view(request):
+    from django.shortcuts import render
+    return render(request, 'contratos.html')
