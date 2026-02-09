@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Usecap - Sistema de Gestion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #888;
+            margin-bottom: 50px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.3);
+            border-color: #00d9ff;
+        }
+
+        .nav-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .nav-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-card p {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .nav-card.dashboard .icon {
+            color: #00d9ff;
+        }
+
+        .nav-card.admin .icon {
+            color: #00ff88;
+        }
+
+        .nav-card.api .icon {
+            color: #ff6b6b;
+        }
+
+        .footer {
+            margin-top: 60px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">CRM Usecap</div>
+        <p class="subtitle">Sistema de Gestion de Clientes y Contratos</p>
+
+        <div class="nav-grid">
+            <a href="/api/dashboard/" class="nav-card dashboard">
+                <div class="icon">&#x1F4CA;</div>
+                <h3>Dashboard</h3>
+                <p>Panel de control con estadisticas y graficos de tu negocio</p>
+            </a>
+
+            <a href="/admin/" class="nav-card admin">
+                <div class="icon">&#x2699;</div>
+                <h3>Administracion</h3>
+                <p>Gestiona clientes, ejecutivos, contratos y mas</p>
+            </a>
+
+            <a href="/api/" class="nav-card api">
+                <div class="icon">&#x1F517;</div>
+                <h3>API</h3>
+                <p>Endpoints REST para integracion con otros sistemas</p>
+            </a>
+
+            <a href="/api/portfolio/" class="nav-card" style="border-color: #a855f7;">
+                <div class="icon" style="color: #a855f7;">&#x1F4BC;</div>
+                <h3>Cartera de Clientes</h3>
+                <p>Ver clientes asignados por ejecutivo</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            Usecap Cloud - CRM v1.0
+        </div>
+    </div>
+</body>
+
+</html>

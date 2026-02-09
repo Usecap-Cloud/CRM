@@ -72,3 +72,40 @@ class DashboardStatsView(APIView):
             "contratos_cerrar": Contrato.objects.filter(estado='Por Cerrar').count(),
         }
         return Response(stats)
+
+def dashboard_view(request):
+    from django.shortcuts import render
+    return render(request, 'dashboard.html')
+
+def home_view(request):
+    from django.shortcuts import render
+    return render(request, 'home.html')
+
+class PortfolioAPIView(APIView):
+    def get(self, request):
+        ejecutivos = Ejecutivo.objects.all()
+        data = []
+        for ej in ejecutivos:
+            clientes = Cliente.objects.filter(ejecutivo=ej)
+            data.append({
+                'ejecutivo_id': ej.id,
+                'ejecutivo_nombre': ej.nombre,
+                'ejecutivo_email': ej.email,
+                'total_clientes': clientes.count(),
+                'clientes': [
+                    {
+                        'id': c.id,
+                        'rut': c.rut,
+                        'razon_social': c.razon_social,
+                        'estado': c.estado
+                    } for c in clientes
+                ]
+            })
+        return Response(data)
+
+def portfolio_view(request):
+    from django.shortcuts import render
+    return render(request, 'portfolio.html')
+
+
+

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartera de Clientes - CRM Usecap</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-link {
+            color: #00d9ff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #00d9ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #00d9ff;
+            color: #1a1a2e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+
+        .executive-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .executive-header {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .executive-header:hover {
+            background: rgba(0, 217, 255, 0.2);
+        }
+
+        .executive-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .executive-info p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .client-count {
+            background: #00d9ff;
+            color: #1a1a2e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .clients-list {
+            padding: 0 20px 20px 20px;
+            display: none;
+        }
+
+        .clients-list.open {
+            display: block;
+        }
+
+        .client-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+        }
+
+        .client-row:last-child {
+            border-bottom: none;
+        }
+
+        .client-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .client-rut {
+            color: #888;
+            font-family: monospace;
+        }
+
+        .client-name {
+            font-weight: 500;
+        }
+
+        .client-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .status-badge.activo {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge.inactivo {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .no-clients {
+            color: #666;
+            padding: 15px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .summary-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .summary-card .label {
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Cartera de Clientes por Ejecutivo</h1>
+        <a href="/" class="back-link">Volver al Inicio</a>
+    </div>
+
+    <div id="loading" class="loading">Cargando cartera...</div>
+
+    <div id="content" style="display: none;">
+        <div class="summary" id="summary"></div>
+        <div id="executives-container"></div>
+    </div>
+
+    <script>
+        const API_URL = '/api/portfolio-data/';
+
+        async function loadPortfolio() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error al cargar datos');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                // Summary
+                const totalEjecutivos = data.length;
+                const totalClientes = data.reduce((sum, ej) => sum + ej.total_clientes, 0);
+                document.getElementById('summary').innerHTML = `
+                    <div class="summary-card">
+                        <div class="number">${totalEjecutivos}</div>
+                        <div class="label">Ejecutivos</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="number">${totalClientes}</div>
+                        <div class="label">Clientes Totales</div>
+                    </div>
+                `;
+
+                // Executive cards
+                const container = document.getElementById('executives-container');
+                container.innerHTML = data.map((ej, index) => `
+                    <div class="executive-card">
+                        <div class="executive-header" onclick="toggleClients(${index})">
+                            <div class="executive-info">
+                                <h3>${ej.ejecutivo_nombre}</h3>
+                                <p>${ej.ejecutivo_email || 'Sin email'}</p>
+                            </div>
+                            <div class="client-count">${ej.total_clientes} clientes</div>
+                        </div>
+                        <div class="clients-list" id="clients-${index}">
+                            ${ej.clientes.length > 0 ? ej.clientes.map(c => `
+                                <div class="client-row">
+                                    <span class="client-rut">${c.rut}</span>
+                                    <span class="client-name">${c.razon_social}</span>
+                                    <span class="client-status">
+                                        <span class="status-badge ${c.estado.toLowerCase()}">${c.estado}</span>
+                                    </span>
+                                </div>
+                            `).join('') : '<div class="no-clients">Sin clientes asignados</div>'}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                document.getElementById('loading').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function toggleClients(index) {
+            const el = document.getElementById('clients-' + index);
+            el.classList.toggle('open');
+        }
+
+        loadPortfolio();
+    </script>
+</body>
+
+</html>

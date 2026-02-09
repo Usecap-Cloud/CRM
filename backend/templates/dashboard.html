@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Dashboard - Usecap</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            color: #888;
+            margin-top: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.2);
+        }
+        .stat-card .number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .stat-card.empresas .number { color: #00d9ff; }
+        .stat-card.cursos .number { color: #00ff88; }
+        .stat-card.contratos .number { color: #ff6b6b; }
+        .stat-card .label {
+            font-size: 1.1rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        .error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CRM Dashboard</h1>
+        <p>Panel de Control - Usecap Cloud</p>
+    </div>
+
+    <div id="loading" class="loading">Cargando datos...</div>
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="content" style="display: none;">
+        <div class="stats-grid">
+            <div class="stat-card empresas">
+                <div class="number" id="empresas-count">0</div>
+                <div class="label">Empresas Activas</div>
+            </div>
+            <div class="stat-card cursos">
+                <div class="number" id="cursos-count">0</div>
+                <div class="label">Cursos en Proceso</div>
+            </div>
+            <div class="stat-card contratos">
+                <div class="number" id="contratos-count">0</div>
+                <div class="label">Contratos por Cerrar</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>Resumen General</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Distribucion</h3>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/dashboard-stats/';
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error al cargar datos');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                // Update numbers with animation
+                animateNumber('empresas-count', data.empresas_activas || 0);
+                animateNumber('cursos-count', data.cursos_proceso || 0);
+                animateNumber('contratos-count', data.contratos_cerrar || 0);
+
+                // Create charts
+                createBarChart(data);
+                createDoughnutChart(data);
+
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function animateNumber(elementId, target) {
+            const element = document.getElementById(elementId);
+            let current = 0;
+            const increment = Math.ceil(target / 30);
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = current;
+            }, 30);
+        }
+
+        function createBarChart(data) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Empresas', 'Cursos', 'Contratos'],
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: [
+                            data.empresas_activas || 0,
+                            data.cursos_proceso || 0,
+                            data.contratos_cerrar || 0
+                        ],
+                        backgroundColor: [
+                            'rgba(0, 217, 255, 0.7)',
+                            'rgba(0, 255, 136, 0.7)',
+                            'rgba(255, 107, 107, 0.7)'
+                        ],
+                        borderColor: [
+                            '#00d9ff',
+                            '#00ff88',
+                            '#ff6b6b'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#888' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#888' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDoughnutChart(data) {
+            const ctx = document.getElementById('doughnutChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Empresas', 'Cursos', 'Contratos'],
+                    datasets: [{
+                        data: [
+                            data.empresas_activas || 0,
+                            data.cursos_proceso || 0,
+                            data.contratos_cerrar || 0
+                        ],
+                        backgroundColor: [
+                            '#00d9ff',
+                            '#00ff88',
+                            '#ff6b6b'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#888', padding: 20 }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // Load on page ready
+        loadDashboard();
+    </script>
+</body>
+</html>

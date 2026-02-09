@@ -48,10 +48,13 @@ class Rol(models.Model):
         return self.nombre
 
 
+from django.contrib.auth.models import User
+
 # =========================
 # Tabla Ejecutivos
 # =========================
 class Ejecutivo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
