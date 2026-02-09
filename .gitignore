@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+
+# Entorno virtual
+venv/
+env/
+.venv/
+
+# Config local
+.env
+.env.local
+.env.example
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Media
+media/
+staticfiles/

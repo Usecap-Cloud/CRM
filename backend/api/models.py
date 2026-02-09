@@ -1,0 +1,295 @@
+# api/models.py
+
+from django.db import models
+from django.core.exceptions import ValidationError
+import re
+
+def validate_rut(value):
+    """
+    Valida un RUT chileno.
+    Formato esperado: 12345678-9 (sin puntos, con guion)
+    """
+    rut = value.replace(".", "").upper()
+    if not re.match(r"^\d{7,8}-[0-9K]$", rut):
+        raise ValidationError("Formato de RUT inválido. Use 12345678-9")
+    
+    cuerpo, dv = rut.split("-")
+    suma = 0
+    multiplo = 2
+    
+    for c in reversed(cuerpo):
+        suma += int(c) * multiplo
+        multiplo += 1
+        if multiplo == 8:
+            multiplo = 2
+            
+    dv_esperado = 11 - (suma % 11)
+    if dv_esperado == 11:
+        dv_calc = "0"
+    elif dv_esperado == 10:
+        dv_calc = "K"
+    else:
+        dv_calc = str(dv_esperado)
+        
+    if dv_calc != dv:
+        raise ValidationError("RUT inválido.")
+    return value
+
+# =========================
+# Tabla Roles
+# =========================
+class Rol(models.Model):
+    nombre = models.CharField(max_length=50)
+    estado = models.CharField(max_length=10)
+    descripcion = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Ejecutivos
+# =========================
+class Ejecutivo(models.Model):
+    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    estado = models.CharField(max_length=10)
+    area_departamento = models.CharField(max_length=50, blank=True, null=True)
+    region = models.CharField(max_length=50, blank=True, null=True)
+    comuna = models.CharField(max_length=50, blank=True, null=True)
+    especialidad_tipo_clientes = models.CharField(max_length=50, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Clientes
+# =========================
+
+class Cliente(models.Model):
+    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    razon_social = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    estado = models.CharField(max_length=10)
+    direccion = models.CharField(max_length=150, blank=True, null=True)
+    region = models.CharField(max_length=50, blank=True, null=True)
+    comuna = models.CharField(max_length=50, blank=True, null=True)
+    sector_industria = models.CharField(max_length=50, blank=True, null=True)
+    origen_referencia = models.CharField(max_length=50, blank=True, null=True)
+    fecha_creacion = models.DateField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    # Relaciones
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
+    cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return self.razon_social
+
+
+# =========================
+# Tabla Coordinadores
+# =========================
+class Coordinador(models.Model):
+    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    cargo = models.CharField(max_length=50, blank=True, null=True)
+    fecha_cumpleanos = models.DateField(blank=True, null=True)
+    estado = models.CharField(max_length=10)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    # Relaciones
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Servicios
+# =========================
+class Servicio(models.Model):
+    nombre = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=50, blank=True, null=True)
+    descripcion = models.TextField(blank=True, null=True)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
+    rubro = models.CharField(max_length=50, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Proveedores
+# =========================
+
+class Proveedor(models.Model):
+    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    nombre = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=50, blank=True, null=True)
+    estado = models.CharField(max_length=10)
+    contacto = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True, unique=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    direccion = models.CharField(max_length=150, blank=True, null=True)
+    region = models.CharField(max_length=50, blank=True, null=True)
+    comuna = models.CharField(max_length=50, blank=True, null=True)
+    rubro = models.CharField(max_length=50, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Cursos
+# =========================
+class Curso(models.Model):
+    codigo = models.CharField(max_length=50, unique=True)
+    nombre = models.CharField(max_length=100)
+    categoria = models.CharField(max_length=50, blank=True, null=True)
+    estado = models.CharField(max_length=20)
+    codigo_sence = models.CharField(max_length=50, blank=True, null=True)
+    detalle = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+# =========================
+# Tabla Contratos
+# =========================
+class Contrato(models.Model):
+    tipo_registro = models.CharField(max_length=20)
+    empresa = models.CharField(max_length=100)
+    fecha_recepcion = models.DateField()
+    fecha_emision = models.DateField()
+    estado = models.CharField(max_length=20)
+    detalle = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    # Relaciones
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE, related_name="contratos_ejecutivo")
+    coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return f"Contrato {self.id} - {self.empresa}"
+
+
+# =========================
+# Tabla Contratos_Cursos
+# =========================
+class ContratoCurso(models.Model):
+    tipo_curso = models.CharField(max_length=30)
+    fecha_contrato = models.DateField(blank=True, null=True)
+    fecha_inicio_curso = models.DateField(blank=True, null=True)
+    fecha_fin_curso = models.DateField(blank=True, null=True)
+    duracion_horas = models.IntegerField(blank=True, null=True)
+    relator = models.CharField(max_length=100, blank=True, null=True)
+    modalidad = models.CharField(max_length=20, blank=True, null=True)
+    acceso_contenido = models.CharField(max_length=100, blank=True, null=True)
+    servicios_asociados = models.CharField(max_length=150, blank=True, null=True)
+    numero_participantes = models.IntegerField(blank=True, null=True)
+    numero_grupos = models.IntegerField(blank=True, null=True)
+    costo = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    orden_compra = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    numero_factura = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    rus = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    # Relaciones
+    contrato = models.ForeignKey(Contrato, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+
+
+
+    def __str__(self):
+        return f"{self.tipo_curso} - Contrato {self.contrato.id}"
+
+
+# =========================
+# Tabla Contratos_Servicios
+# =========================
+class ContratoServicio(models.Model):
+    cantidad = models.IntegerField()
+    precio_unidad = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    detalle = models.TextField(blank=True, null=True)
+    duracion_horas = models.IntegerField(blank=True, null=True)
+    costo_negociado = models.DecimalField(max_digits=12, decimal_places=2)
+    observaciones = models.TextField(blank=True, null=True)
+
+    # fechas y horas
+    fecha_inicio = models.DateField(blank=True, null=True)
+    hora_inicio = models.TimeField(blank=True, null=True)
+    fecha_fin = models.DateField(blank=True, null=True)
+    hora_fin = models.TimeField(blank=True, null=True)
+
+    # Relaciones
+    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
+    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Servicio {self.servicio} en Contrato {self.contrato_id}"
+
+
+# =========================
+# Tabla Contratos_Proveedores
+# =========================
+class ContratoProveedor(models.Model):
+    cantidad = models.IntegerField(blank=True, null=True)              # cantidad de servicios o unidades contratadas
+    precio_unitario = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)  
+    costo_negociado = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)  
+    detalle = models.TextField(blank=True, null=True)                  # detalle del acuerdo
+    observaciones = models.TextField(blank=True, null=True)            # notas adicionales
+
+    # Fechas de vigencia del contrato con el proveedor
+    fecha_inicio = models.DateField(blank=True, null=True)
+    fecha_fin = models.DateField(blank=True, null=True)
+
+    # Relaciones
+    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
+    proveedor = models.ForeignKey("Proveedor", on_delete=models.CASCADE)
+    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE) # qué servicio aporta el proveedor
+
+    def __str__(self):
+        return f"Contrato {self.contrato.id} - Proveedor {self.proveedor.nombre} - Servicio {self.servicio.nombre}"
+
+
+# =========================
+# Tabla Seguimiento
+# =========================
+class Seguimiento(models.Model):
+    tipo_seguimiento = models.CharField(max_length=50)
+    requerimiento = models.TextField(blank=True, null=True)
+    fecha = models.DateField()
+    respuesta = models.TextField(blank=True, null=True)
+    fecha_respuesta = models.DateField(blank=True, null=True)
+    estado = models.CharField(max_length=20)
+    cerrado = models.BooleanField(default=False)
+    fecha_proxima_accion = models.DateField(blank=True, null=True)
+    detalle = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    # Relaciones
+    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
+    coordinador = models.ForeignKey("Coordinador", on_delete=models.CASCADE)
+    ejecutivo = models.ForeignKey("Ejecutivo", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Seguimiento {self.id} - Contrato {self.contrato_id}"
