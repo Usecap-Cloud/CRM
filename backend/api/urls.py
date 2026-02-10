@@ -35,6 +35,7 @@ urlpatterns = [
     path('portfolio-data/', PortfolioAPIView.as_view(), name='portfolio-data'),
     path('portfolio/', portfolio_view, name='portfolio'),
     path('estadisticas-page/', estadisticas_view, name='estadisticas'),
+    path('estadisticas/', estadisticas_view, name='estadisticas-alias'),
     path('clientes-page/', clientes_view, name='clientes-page'),
     path('cursos-page/', cursos_view, name='cursos-page'),
     path('contratos-page/', contratos_view, name='contratos-page'),
