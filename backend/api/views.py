@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.parsers import MultiPartParser
+import pandas as pd
 from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
-    ContratoServicio, ContratoProveedor,Seguimiento
+    ContratoServicio, ContratoProveedor,Seguimiento, ImportHistory
 )
 from .serializers import (
     RolSerializer, EjecutivoSerializer, ClienteSerializer, CoordinadorSerializer,
@@ -127,6 +129,184 @@ class PortfolioAPIView(APIView):
             })
         return Response(data)
 
+class ImportarClientesExcelView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('file')
+        if not file_obj:
+            return Response({"error": "No se subio ningun archivo"}, status=400)
+        
+        try:
+            df = pd.read_excel(file_obj)
+            # Normalize column names to lowercase and strip whitespace
+            df.columns = [str(col).lower().strip() for col in df.columns]
+            
+            # Get a default executive
+            default_ejecutivo = Ejecutivo.objects.first()
+            if not default_ejecutivo:
+                return Response({"error": "No hay ejecutivos registrados en el sistema para asignar clientes."}, status=400)
+
+            created_count = 0
+            errors = []
+            
+            for index, row in df.iterrows():
+                try:
+                    # Look for variations of names if possible
+                    rut = str(row.get('rut', '')).strip()
+                    razon_social = str(row.get('razon_social', '')).strip()
+                    nombre = str(row.get('nombre', razon_social)).strip() # Use razon_social as default nombre
+                    email = str(row.get('email', '')).strip()
+                    estado = str(row.get('estado', 'activo')).strip().lower()
+                    
+                    if not rut or rut == 'nan' or not razon_social or razon_social == 'nan':
+                        continue # Skip empty rows
+                    
+                    # Generate a dummy email if empty, as it's required and unique
+                    if not email or email == 'nan':
+                        email = f"import_{rut.replace('.','').replace('-','')}@usecap.cl"
+                    
+                    if Cliente.objects.filter(rut=rut).exists():
+                        errors.append(f"Fila {index + 2}: Cliente con RUT {rut} ya existe")
+                        continue
+                    
+                    if Cliente.objects.filter(email=email).exists():
+                         # If email exists but RUT is different, we must change email or skip
+                        email = f"import_{index}_{rut.replace('.','').replace('-','')}@usecap.cl"
+                        
+                    Cliente.objects.create(
+                        rut=rut,
+                        razon_social=razon_social,
+                        nombre=nombre,
+                        email=email,
+                        estado=estado,
+                        ejecutivo=default_ejecutivo
+                    )
+                    created_count += 1
+                except Exception as e:
+                    errors.append(f"Fila {index + 2}: {str(e)}")
+            
+            return Response({
+                "message": f"Se crearon {created_count} clientes exitosamente",
+                "errors": errors
+            })
+            
+        except Exception as e:
+            return Response({"error": f"Error al procesar el archivo: {str(e)}"}, status=500)
+
+class AnalyzeHeadersView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('file')
+        if not file_obj:
+            return Response({"error": "No se subio ningun archivo"}, status=400)
+        
+        try:
+            # Read first row only for speed
+            df = pd.read_excel(file_obj, nrows=0)
+            headers = [str(col) for col in df.columns]
+            return Response({"headers": headers})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class ProcessMappedImportView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('file')
+        mapping_str = request.data.get('mapping')
+        
+        if not file_obj or not mapping_str:
+            return Response({"error": "Falta el archivo o el mapeo"}, status=400)
+        
+        try:
+            import json
+            mapping = json.loads(mapping_str)
+            df = pd.read_excel(file_obj)
+            
+            # Map columns
+            # matching: { "rut": "RUT_Empresa", "razon_social": "Nombre_Empresa", ... }
+            
+            default_ejecutivo = Ejecutivo.objects.first()
+            if not default_ejecutivo:
+                return Response({"error": "No hay ejecutivos registrados"}, status=400)
+
+            created_count = 0
+            errors = []
+            
+            for index, row in df.iterrows():
+                try:
+                    data = {}
+                    # Required fields and their mapping
+                    rut_col = mapping.get('rut')
+                    razon_social_col = mapping.get('razon_social')
+                    
+                    if not rut_col or not razon_social_col:
+                        continue
+                        
+                    rut = str(row.get(rut_col, '')).strip()
+                    razon_social = str(row.get(razon_social_col, '')).strip()
+                    
+                    if not rut or rut == 'nan' or not razon_social or razon_social == 'nan':
+                        continue
+                        
+                    # Optional fields
+                    email_col = mapping.get('email')
+                    nombre_col = mapping.get('nombre')
+                    estado_col = mapping.get('estado')
+                    
+                    email = str(row.get(email_col, '')) if email_col else ""
+                    nombre = str(row.get(nombre_col, razon_social)) if nombre_col else razon_social
+                    estado = str(row.get(estado_col, 'activo')).lower() if estado_col else "activo"
+                    
+                    if not email or email == 'nan':
+                        email = f"import_{rut.replace('.','').replace('-','')}@usecap.cl"
+                    
+                    if Cliente.objects.filter(rut=rut).exists():
+                        errors.append(f"Fila {index + 2}: duplicado RUT {rut}")
+                        continue
+                    
+                    if Cliente.objects.filter(email=email).exists():
+                        email = f"import_{index}_{rut.replace('.','').replace('-','')}@usecap.cl"
+
+                    Cliente.objects.create(
+                        rut=rut,
+                        razon_social=razon_social,
+                        nombre=nombre,
+                        email=email,
+                        estado=estado,
+                        ejecutivo=default_ejecutivo
+                    )
+                    created_count += 1
+                except Exception as e:
+                    errors.append(f"Fila {index + 2}: {str(e)}")
+            
+            # Save to history
+            ImportHistory.objects.create(
+                nombre_archivo=file_obj.name,
+                filas_processed=created_count,
+                estado='exito' if created_count > 0 else 'error',
+                mensaje_error="; ".join(errors[:5]) if errors else None
+            )
+            
+            return Response({
+                "message": f"Se procesaron {created_count} clientes",
+                "errors": errors
+            })
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class ImportHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    from .serializers import ImportHistorySerializer
+    queryset = ImportHistory.objects.all().order_by('-fecha')
+    serializer_class = ImportHistorySerializer
+
+def importar_view(request):
+    from django.shortcuts import render
+    return render(request, 'importar.html')
+
 def portfolio_view(request):
     from django.shortcuts import render
     return render(request, 'portfolio.html')
@@ -146,3 +326,7 @@ def cursos_view(request):
 def contratos_view(request):
     from django.shortcuts import render
     return render(request, 'contratos.html')
+
+def proveedores_view(request):
+    from django.shortcuts import render
+    return render(request, 'proveedores.html')

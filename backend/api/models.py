@@ -296,3 +296,16 @@ class Seguimiento(models.Model):
 
     def __str__(self):
         return f"Seguimiento {self.id} - Contrato {self.contrato_id}"
+
+# =========================
+# Historial de Importaciones
+# =========================
+class ImportHistory(models.Model):
+    fecha = models.DateTimeField(auto_now_add=True)
+    nombre_archivo = models.CharField(max_length=255)
+    filas_procesadas = models.IntegerField(default=0)
+    estado = models.CharField(max_length=20) # 'exito', 'importando', 'error'
+    mensaje_error = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.nombre_archivo} - {self.fecha.strftime('%Y-%m-%d %H:%M')}"

@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Datos - USECAP CRM{% endblock %}
+{% block nav_importar %}active{% endblock %}
+
+{% block extra_styles %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Direct Injection Premium Styles for Importar Page */
+    .import-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .import-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+    }
+
+    .drop-zone {
+        border: 2px dashed rgba(30, 144, 255, 0.3);
+        border-radius: 16px;
+        padding: 50px 20px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: rgba(30, 144, 255, 0.02);
+        margin-top: 15px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+        border-color: #1e90ff;
+        background: rgba(30, 144, 255, 0.08);
+    }
+
+    .drop-zone .icon {
+        font-size: 3rem;
+        color: #1e90ff;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .mapping-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .mapping-item {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mapping-item select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 24px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1e90ff, #00bfff) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+    }
+
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-exito {
+        background: rgba(0, 255, 136, 0.15);
+        color: #00ff88;
+    }
+
+    .status-error {
+        background: rgba(255, 107, 107, 0.15);
+        color: #ff6b6b;
+    }
+
+    #mapping-section {
+        display: none;
+    }
+</style>
+
+<div class="page-header">
+    <div>
+        <small>HERRAMIENTAS</small>
+        <h1>Importar Base de Datos</h1>
+    </div>
+</div>
+
+<div class="import-container">
+    <div class="left-col" style="display: flex; flex-direction: column; gap: 30px;">
+        <div class="import-card" id="upload-section">
+            <h3 style="margin-bottom: 10px;">Carga de Archivos</h3>
+            <p style="color: #888; margin-bottom: 20px; font-size: 0.9rem;">Sube las bases de datos de tus alumnos o
+                prospectos.</p>
+
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <span class="icon">&#x2601;</span>
+                <h4>Arrastra tu archivo aqui</h4>
+                <p style="color: #666; font-size: 0.8rem; margin: 10px 0 20px;">Soporta formatos .xlsx y .csv (Max.
+                    10MB)</p>
+                <button class="btn btn-primary" style="width: auto;">Explorar archivos</button>
+            </div>
+            <input type="file" id="file-input" style="display: none;" accept=".xlsx, .xls, .csv"
+                onchange="handleFileSelect(this)">
+        </div>
+
+        <div class="import-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3>Importaciones Recientes</h3>
+                <a href="#" style="color: #1e90ff; font-size: 0.8rem; text-decoration: none; font-weight: 600;">VER
+                    TODO</a>
+            </div>
+            <div id="history-list">
+                <p style="color: #555;">Cargando historial...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <div class="import-card" id="mapping-section">
+            <h3 style="margin-bottom: 10px;">Mapeo de Datos</h3>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Asocia los encabezados de tu archivo con los
+                campos del CRM.</p>
+
+            <div class="mapping-list" id="mapping-container">
+                <!-- Mapping items generated by JS -->
+            </div>
+
+            <button class="btn btn-primary" id="btn-import-confirm" onclick="executeImport()" style="margin-top: 25px;">
+                <span>&#x1F4E5;</span> Importar Datos
+            </button>
+        </div>
+
+        <div class="import-card" id="empty-mapping"
+            style="height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; color: #444; min-height: 400px;">
+            <div>
+                <span style="font-size: 4rem; display: block; margin-bottom: 20px; opacity: 0.3;">&#x1F4CB;</span>
+                <p style="font-size: 1.1rem;">Sube un archivo para comenzar<br><small style="opacity: 0.5;">Iniciara el
+                        mapeo de columnas automaticamente</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedFile = null;
+    let excelHeaders = [];
+    const crmFields = [
+        { id: 'rut', label: 'RUT Empresa', required: true },
+        { id: 'razon_social', label: 'Razon Social', required: true },
+        { id: 'nombre', label: 'Nombre Contacto', required: false },
+        { id: 'email', label: 'Email Principal', required: false },
+        { id: 'estado', label: 'Estado', required: false }
+    ];
+
+    const dropZone = document.getElementById('drop-zone');
+    const getCookie = (name) => {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    };
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
+    ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', e => { const files = e.dataTransfer.files; if (files.length) handleFileSelect({ files }); });
+
+    async function handleFileSelect(input) {
+        if (!input.files.length) return;
+        selectedFile = input.files[0];
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        try {
+            const resp = await fetch('/api/importar-analizar/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData
+            });
+
+            if (!resp.ok) {
+                const errData = await resp.json().catch(() => ({}));
+                alert(`Error: ${errData.error || 'No se pudo analizar el archivo'} (Status: ${resp.status})`);
+                return;
+            }
+
+            const data = await resp.json();
+            if (data.headers) {
+                excelHeaders = data.headers;
+                showMapping(data.headers);
+            } else { alert('No se encontraron encabezados en el archivo'); }
+        } catch (e) {
+            console.error('Analizar error:', e);
+            alert('Error de conexión: No se pudo contactar con el servidor.');
+        }
+    }
+
+    function showMapping(headers) {
+        document.getElementById('empty-mapping').style.display = 'none';
+        document.getElementById('mapping-section').style.display = 'block';
+        const container = document.getElementById('mapping-container');
+        container.innerHTML = crmFields.map(field => `
+            <div class="mapping-item">
+                <div style="font-size: 0.85rem;">
+                    <strong style="color: #fff;">${field.label}</strong>
+                    ${field.required ? '<span style="color: #ff6b6b">*</span>' : ''}
+                </div>
+                <div><span style="color: #1e90ff;">&#x21C4;</span></div>
+                <select data-field="${field.id}" class="mapping-select">
+                    <option value="">Ignorar campo</option>
+                    ${headers.map(h => `<option value="${h}" ${isSimilar(h, field.id) ? 'selected' : ''}>${h}</option>`).join('')}
+                </select>
+            </div>
+        `).join('');
+    }
+
+    function isSimilar(header, fieldId) {
+        const h = header.toLowerCase().replace(/[^a-z]/g, '');
+        const f = fieldId.toLowerCase().replace(/[^a-z]/g, '');
+        return h.includes(f) || f.includes(h);
+    }
+
+    async function executeImport() {
+        const mapping = {};
+        let missingRequired = false;
+        document.querySelectorAll('.mapping-select').forEach(sel => {
+            const field = sel.dataset.field;
+            const value = sel.value;
+            if (value) mapping[field] = value;
+            const config = crmFields.find(f => f.id === field);
+            if (config.required && !value) missingRequired = true;
+        });
+        if (missingRequired) { alert('Mapee los campos obligatorios: RUT y Razon Social'); return; }
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('mapping', JSON.stringify(mapping));
+        const btn = document.getElementById('btn-import-confirm');
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+        try {
+            const resp = await fetch('/api/importar-procesar/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData
+            });
+
+            if (!resp.ok) {
+                const errData = await resp.json().catch(() => ({}));
+                throw new Error(errData.error || `Error ${resp.status}`);
+            }
+
+            const result = await resp.json();
+            alert(result.message);
+            loadHistory();
+            location.reload();
+        } catch (e) {
+            console.error('Procesar error:', e);
+            alert('Error en la importación: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Importar Datos';
+        }
+    }
+
+    async function loadHistory() {
+        try {
+            const resp = await fetch('/api/import-history/');
+            const data = await resp.json();
+            const container = document.getElementById('history-list');
+            if (data.results && data.results.length > 0) {
+                container.innerHTML = data.results.map(h => `
+                    <div class="history-item">
+                        <div>
+                            <div style="font-size: 0.9rem; font-weight: 600; color: #fff;">${h.nombre_archivo}</div>
+                            <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">${h.filas_processed} filas • ${new Date(h.fecha).toLocaleString()}</div>
+                        </div>
+                        <span class="status-badge status-${h.status || 'exito'}">${(h.estado || 'Exito').toUpperCase()}</span>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="color: #444; font-size: 0.85rem; padding: 20px 0;">No hay importaciones previas</p>';
+            }
+        } catch (e) { console.error('Error loading history'); }
+    }
+
+    loadHistory();
+</script>
+{% endblock %}
