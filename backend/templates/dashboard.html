@@ -1,577 +1,397 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>USECAP CRM - Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}USECAP CRM - Dashboard{% endblock %}
+{% block nav_home %}active{% endblock %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
-            color: #fff;
-            display: flex;
-            min-height: 100vh;
-        }
+{% block extra_styles %}
+<style>
+    .header-title small {
+        color: #666;
+        font-weight: normal;
+    }
 
-        .sidebar {
-            width: 220px;
-            background: #0f0f1f;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            position: fixed;
-            height: 100vh;
-        }
+    .header-title h1 {
+        font-size: 1.8rem;
+        margin-top: 5px;
+    }
 
-        .sidebar-logo {
-            padding: 0 20px 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
 
-        .sidebar-logo span {
-            color: #a855f7;
-        }
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+        position: relative;
+    }
 
-        .nav-menu {
-            flex: 1;
-        }
+    .stat-card .icon-box {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
 
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            color: #666;
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-        }
+    .stat-card.empresas .icon-box {
+        background: rgba(0, 217, 255, 0.15);
+    }
 
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(168, 85, 247, 0.1);
-            color: #fff;
-            border-left-color: #a855f7;
-        }
+    .stat-card.cursos .icon-box {
+        background: rgba(0, 255, 136, 0.15);
+    }
 
-        .nav-item .icon {
-            font-size: 1.2rem;
-        }
+    .stat-card.contratos .icon-box {
+        background: rgba(255, 159, 67, 0.15);
+    }
 
-        .user-profile {
-            padding: 15px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .stat-card .label {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+    }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #a855f7, #00d9ff);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
+    .stat-card .number {
+        font-size: 2.2rem;
+        font-weight: bold;
+    }
 
-        .user-info .name {
-            font-size: 0.9rem;
-        }
+    .stat-card .badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
 
-        .user-info .role {
-            font-size: 0.75rem;
-            color: #666;
-        }
+    .badge.up {
+        background: rgba(0, 255, 136, 0.2);
+        color: #00ff88;
+    }
 
-        .main-content {
-            flex: 1;
-            margin-left: 220px;
-            padding: 25px;
-        }
+    .badge.progress {
+        background: rgba(0, 217, 255, 0.2);
+        color: #00d9ff;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
+    .badge.critical {
+        background: rgba(255, 107, 107, 0.2);
+        color: #ff6b6b;
+    }
 
-        .header-title small {
-            color: #666;
-            font-weight: normal;
-        }
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
 
-        .header-title h1 {
-            font-size: 1.8rem;
-            margin-top: 5px;
-        }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
 
-        .btn-new {
-            background: linear-gradient(90deg, #a855f7, #7c3aed);
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: transform 0.3s;
-            text-decoration: none;
-        }
+    .card-header h3 {
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .btn-new:hover {
-            transform: translateY(-2px);
-        }
+    .card-header a {
+        color: #a855f7;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
-            position: relative;
-        }
+    .activity-item:last-child {
+        border-bottom: none;
+    }
 
-        .stat-card .icon-box {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-        }
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
 
-        .stat-card.empresas .icon-box {
-            background: rgba(0, 217, 255, 0.15);
-        }
+    .activity-icon.seguimiento {
+        background: rgba(0, 217, 255, 0.15);
+    }
 
-        .stat-card.cursos .icon-box {
-            background: rgba(0, 255, 136, 0.15);
-        }
+    .activity-icon.contrato {
+        background: rgba(0, 255, 136, 0.15);
+    }
 
-        .stat-card.contratos .icon-box {
-            background: rgba(255, 159, 67, 0.15);
-        }
+    .activity-icon.solicitud {
+        background: rgba(255, 159, 67, 0.15);
+    }
 
-        .stat-card .label {
-            color: #888;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
-        }
+    .activity-info {
+        flex: 1;
+    }
 
-        .stat-card .number {
-            font-size: 2.2rem;
-            font-weight: bold;
-        }
+    .activity-info .title {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
 
-        .stat-card .badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
+    .activity-info .subtitle {
+        font-size: 0.75rem;
+        color: #666;
+    }
 
-        .badge.up {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-        }
+    .activity-meta {
+        text-align: right;
+    }
 
-        .badge.progress {
-            background: rgba(0, 217, 255, 0.2);
-            color: #00d9ff;
-        }
+    .activity-meta .time {
+        font-size: 0.75rem;
+        color: #666;
+    }
 
-        .badge.critical {
-            background: rgba(255, 107, 107, 0.2);
-            color: #ff6b6b;
-        }
+    .activity-meta .status {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-top: 5px;
+        display: inline-block;
+    }
 
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
+    .status.ejecutada {
+        background: rgba(0, 217, 255, 0.2);
+        color: #00d9ff;
+    }
 
-        .card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
-        }
+    .status.completado {
+        background: rgba(0, 255, 136, 0.2);
+        color: #00ff88;
+    }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+    .status.pendiente {
+        background: rgba(255, 159, 67, 0.2);
+        color: #ff9f43;
+    }
 
-        .card-header h3 {
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .curso-item {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-        .card-header a {
-            color: #a855f7;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
+    .curso-item:last-child {
+        border-bottom: none;
+    }
 
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+    .curso-item .name {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
 
-        .activity-item:last-child {
-            border-bottom: none;
-        }
+    .curso-item .date {
+        font-size: 0.75rem;
+        color: #666;
+    }
 
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
+    .metas-card {
+        margin-top: 20px;
+    }
 
-        .activity-icon.seguimiento {
-            background: rgba(0, 217, 255, 0.15);
-        }
+    .metas-card .meta-label {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 10px;
+    }
 
-        .activity-icon.contrato {
-            background: rgba(0, 255, 136, 0.15);
-        }
+    .metas-card .progress-bar {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
 
-        .activity-icon.solicitud {
-            background: rgba(255, 159, 67, 0.15);
-        }
+    .metas-card .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #a855f7, #00d9ff);
+        border-radius: 4px;
+    }
 
-        .activity-info {
-            flex: 1;
-        }
+    .metas-card .meta-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #888;
+    }
 
-        .activity-info .title {
-            font-size: 0.9rem;
-            margin-bottom: 3px;
-        }
+    .loading-dashboard {
+        text-align: center;
+        padding: 30px;
+        color: #666;
+    }
+</style>
+{% endblock %}
 
-        .activity-info .subtitle {
-            font-size: 0.75rem;
-            color: #666;
-        }
+{% block content %}
+<div class="page-header">
+    <div class="header-title">
+        <small>DASHBOARD GLOBAL</small>
+        <h1>USECAP CRM</h1>
+    </div>
+</div>
 
-        .activity-meta {
-            text-align: right;
-        }
+<div id="loading-dashboard" class="loading-dashboard">Cargando datos del dashboard...</div>
 
-        .activity-meta .time {
-            font-size: 0.75rem;
-            color: #666;
-        }
-
-        .activity-meta .status {
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        .status.ejecutada {
-            background: rgba(0, 217, 255, 0.2);
-            color: #00d9ff;
-        }
-
-        .status.completado {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-        }
-
-        .status.pendiente {
-            background: rgba(255, 159, 67, 0.2);
-            color: #ff9f43;
-        }
-
-        .curso-item {
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .curso-item:last-child {
-            border-bottom: none;
-        }
-
-        .curso-item .name {
-            font-size: 0.9rem;
-            margin-bottom: 3px;
-        }
-
-        .curso-item .date {
-            font-size: 0.75rem;
-            color: #666;
-        }
-
-        .metas-card {
-            margin-top: 20px;
-        }
-
-        .metas-card .meta-label {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 10px;
-        }
-
-        .metas-card .progress-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .metas-card .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #a855f7, #00d9ff);
-            border-radius: 4px;
-        }
-
-        .metas-card .meta-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #666;
-        }
-    </style>
-</head>
-
-<body>
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <span>&#x1F4CA;</span> USECAP<span>CRM</span>
+<div id="content-dashboard" style="display: none;">
+    <div class="stats-grid">
+        <div class="stat-card empresas">
+            <span class="badge up">+12%</span>
+            <div class="icon-box">&#x1F3E2;</div>
+            <div class="label">Empresas Activas</div>
+            <div class="number" id="empresas-count">0</div>
         </div>
-        <nav class="nav-menu">
-            <a href="/" class="nav-item active">
-                <span class="icon">&#x1F3E0;</span> Inicio
-            </a>
-            <a href="/api/clientes-page/" class="nav-item">
-                <span class="icon">&#x1F465;</span> Clientes
-            </a>
-            <a href="/api/cursos-page/" class="nav-item">
-                <span class="icon">&#x1F4DA;</span> Cursos
-            </a>
-            <a href="/api/contratos-page/" class="nav-item">
-                <span class="icon">&#x1F4DD;</span> Contratos
-            </a>
-            <a href="/api/proveedores-page/" class="nav-item">
-                <span class="icon">&#x1F69A;</span> Proveedores
-            </a>
-            <a href="/api/estadisticas/" class="nav-item">
-                <span class="icon">&#x1F4CA;</span> Estadisticas
-            </a>
-            <a href="/api/portfolio/" class="nav-item">
-                <span class="icon">&#x1F4BC;</span> Cartera
-            </a>
-        </nav>
-        <div class="user-profile">
-            <div class="user-avatar">AD</div>
-            <div class="user-info">
-                <div class="name">Admin</div>
-                <div class="role">Administrador</div>
-            </div>
-            <a href="/logout/" style="color: #666; margin-left: auto;">&#x1F6AA;</a>
+        <div class="stat-card cursos">
+            <span class="badge progress">En curso</span>
+            <div class="icon-box">&#x1F4DA;</div>
+            <div class="label">Cursos en Proceso</div>
+            <div class="number" id="cursos-count">0</div>
         </div>
-    </aside>
-
-    <main class="main-content">
-        <div class="header">
-            <div class="header-title">
-                <small>DASHBOARD GLOBAL</small>
-                <h1>USECAP CRM</h1>
-            </div>
+        <div class="stat-card contratos">
+            <span class="badge critical">Critico</span>
+            <div class="icon-box">&#x1F4DD;</div>
+            <div class="label">Contratos por Cerrar</div>
+            <div class="number" id="contratos-count">0</div>
         </div>
+    </div>
 
-        <div id="loading" class="loading">Cargando datos...</div>
-
-        <div id="content" style="display: none;">
-            <div class="stats-grid">
-                <div class="stat-card empresas">
-                    <span class="badge up">+12%</span>
-                    <div class="icon-box">&#x1F3E2;</div>
-                    <div class="label">Empresas Activas</div>
-                    <div class="number" id="empresas-count">0</div>
-                </div>
-                <div class="stat-card cursos">
-                    <span class="badge progress">En curso</span>
-                    <div class="icon-box">&#x1F4DA;</div>
-                    <div class="label">Cursos en Proceso</div>
-                    <div class="number" id="cursos-count">0</div>
-                </div>
-                <div class="stat-card contratos">
-                    <span class="badge critical">Critico</span>
-                    <div class="icon-box">&#x1F4DD;</div>
-                    <div class="label">Contratos por Cerrar</div>
-                    <div class="number" id="contratos-count">0</div>
-                </div>
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3>&#x26A1; Actividad Reciente</h3>
+                <a href="/admin/">Ver todo</a>
             </div>
-
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>&#x26A1; Actividad Reciente</h3>
-                        <a href="/admin/">Ver todo</a>
+            <div id="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon seguimiento">&#x1F4DE;</div>
+                    <div class="activity-info">
+                        <div class="title">Seguimiento: Constructora Nahuen</div>
+                        <div class="subtitle">Llamada de confirmacion para curso SENCE</div>
                     </div>
-                    <div id="activity-list">
-                        <div class="activity-item">
-                            <div class="activity-icon seguimiento">&#x1F4DE;</div>
-                            <div class="activity-info">
-                                <div class="title">Seguimiento: Constructora Nahuen</div>
-                                <div class="subtitle">Llamada de confirmacion para curso SENCE</div>
-                            </div>
-                            <div class="activity-meta">
-                                <div class="time">Hace 15 min</div>
-                                <div class="status ejecutada">EJECUTADA</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon contrato">&#x2705;</div>
-                            <div class="activity-info">
-                                <div class="title">Contrato Generado: Minera Los Pelambres</div>
-                                <div class="subtitle">Firma electronica pendiente de validacion</div>
-                            </div>
-                            <div class="activity-meta">
-                                <div class="time">Hace 2 horas</div>
-                                <div class="status completado">COMPLETADO</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon solicitud">&#x1F4E9;</div>
-                            <div class="activity-info">
-                                <div class="title">Nueva Solicitud: Cotizacion Capacitacion</div>
-                                <div class="subtitle">Cliente: Inmobiliaria Altura</div>
-                            </div>
-                            <div class="activity-meta">
-                                <div class="time">Hoy, 09:12</div>
-                                <div class="status pendiente">PENDIENTE</div>
-                            </div>
-                        </div>
+                    <div class="activity-meta">
+                        <div class="time">Hace 15 min</div>
+                        <div class="status ejecutada">EJECUTADA</div>
                     </div>
                 </div>
-
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>&#x1F4C5; Proximos Cursos</h3>
-                        </div>
-                        <div class="curso-item">
-                            <div class="name">Manejo de Izaje Critico</div>
-                            <div class="date">24 Nov - 09:00 AM</div>
-                        </div>
-                        <div class="curso-item">
-                            <div class="name">Primeros Auxilios Avanzado</div>
-                            <div class="date">28 Nov - 14:30 PM</div>
-                        </div>
-                        <a href="/api/cursos-page/"
-                            style="color: #a855f7; font-size: 0.85rem; display: block; margin-top: 10px;">Ver Calendario
-                            Completo</a>
+                <!-- ... other items ... -->
+                <div class="activity-item">
+                    <div class="activity-icon contrato">&#x2705;</div>
+                    <div class="activity-info">
+                        <div class="title">Contrato Generado: Minera Los Pelambres</div>
+                        <div class="subtitle">Firma electronica pendiente de validacion</div>
                     </div>
-
-                    <div class="card metas-card">
-                        <div class="card-header">
-                            <h3>Resumen de Metas</h3>
-                        </div>
-                        <div class="meta-label">Meta mensual de facturacion</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
-                        </div>
-                        <div class="meta-stats">
-                            <span id="meta-percent">0% completado</span>
-                            <span id="meta-amount">$0 / $15M</span>
-                        </div>
+                    <div class="activity-meta">
+                        <div class="time">Hace 2 horas</div>
+                        <div class="status completado">COMPLETADO</div>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
 
-    <script>
-        async function loadDashboard() {
-            try {
-                const response = await fetch('/api/dashboard-stats/');
-                const data = await response.json();
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>&#x1F4C5; Proximos Cursos</h3>
+                </div>
+                <div class="curso-item">
+                    <div class="name">Manejo de Izaje Critico</div>
+                    <div class="date">24 Nov - 09:00 AM</div>
+                </div>
+                <div class="curso-item">
+                    <div class="name">Primeros Auxilios Avanzado</div>
+                    <div class="date">28 Nov - 14:30 PM</div>
+                </div>
+                <a href="/api/cursos-page/"
+                    style="color: #a855f7; font-size: 0.85rem; display: block; margin-top: 10px;">Ver Calendario
+                    Completo</a>
+            </div>
 
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+            <div class="card metas-card">
+                <div class="card-header">
+                    <h3>Resumen de Metas</h3>
+                </div>
+                <div class="meta-label">Meta mensual de facturacion</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
+                </div>
+                <div class="meta-stats">
+                    <span id="meta-percent">0% completado</span>
+                    <span id="meta-amount">$0 / $15M</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-                animateNumber('empresas-count', data.empresas_activas || 0);
-                animateNumber('cursos-count', data.cursos_proceso || 0);
-                animateNumber('contratos-count', data.contratos_cerrar || 0);
+{% block scripts %}
+<script>
+    async function loadDashboard() {
+        try {
+            const response = await fetch('/api/dashboard-stats/');
+            const data = await response.json();
 
-                // Simular progreso de metas
-                const percent = Math.min(72, (data.empresas_activas || 0) * 3 + 50);
-                document.getElementById('meta-progress').style.width = percent + '%';
-                document.getElementById('meta-percent').textContent = percent + '% completado';
-                document.getElementById('meta-amount').textContent = '$' + (percent * 0.15).toFixed(1) + 'M / $15M';
+            document.getElementById('loading-dashboard').style.display = 'none';
+            document.getElementById('content-dashboard').style.display = 'block';
 
-            } catch (error) {
-                document.getElementById('loading').textContent = 'Error cargando datos';
+            animateNumber('empresas-count', data.empresas_activas || 0);
+            animateNumber('cursos-count', data.cursos_proceso || 0);
+            animateNumber('contratos-count', data.contratos_cerrar || 0);
+
+            const percent = Math.min(72, (data.empresas_activas || 0) * 3 + 50);
+            document.getElementById('meta-progress').style.width = percent + '%';
+            document.getElementById('meta-percent').textContent = percent + '% completado';
+            document.getElementById('meta-amount').textContent = '$' + (percent * 0.15).toFixed(1) + 'M / $15M';
+
+        } catch (error) {
+            document.getElementById('loading-dashboard').textContent = 'Error cargando datos';
+        }
+    }
+
+    function animateNumber(id, target) {
+        const el = document.getElementById(id);
+        let current = 0;
+        const step = Math.ceil(target / 25) || 1;
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
             }
-        }
+            el.textContent = current;
+        }, 30);
+    }
 
-        function animateNumber(id, target) {
-            const el = document.getElementById(id);
-            let current = 0;
-            const step = Math.ceil(target / 25);
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= target) {
-                    current = target;
-                    clearInterval(timer);
-                }
-                el.textContent = current;
-            }, 30);
-        }
-
-        loadDashboard();
-    </script>
-</body>
-
-</html>
+    loadDashboard();
+</script>
+{% endblock %}
