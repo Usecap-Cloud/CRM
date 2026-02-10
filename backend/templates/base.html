@@ -113,6 +113,24 @@
             color: #666;
         }
 
+        .logout-btn {
+            margin-left: auto;
+            color: #ff6b6b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
             {
             % block extra_styles %
         }
@@ -150,6 +168,9 @@
             <a href="/api/estadisticas-page/" class="nav-item {% block nav_estadisticas %}{% endblock %}">
                 <span class="icon">&#x1F4C8;</span> Estadísticas
             </a>
+            <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
+                <span class="icon">&#x1F4BC;</span> Cartera
+            </a>
         </nav>
         <div class="user-profile">
             <div class="user-avatar">A</div>
@@ -157,7 +178,10 @@
                 <div class="name">Admin</div>
                 <div class="role">Administrador</div>
             </div>
-            <a href="/logout/" style="margin-left: auto; color: #ff6b6b; text-decoration: none;">&#x1F6AA;</a>
+            <a href="/logout/" class="logout-btn" title="Cerrar Sesión">
+                <span>Salir</span>
+                <span>&#x1F6AA;</span>
+            </a>
         </div>
     </aside>
 
