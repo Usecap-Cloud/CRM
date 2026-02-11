@@ -22,6 +22,5 @@ RUN python manage.py collectstatic --noinput 2>/dev/null || true
 # Expose the port (Zeabur assigns $PORT dynamically)
 EXPOSE 8080
 
-# Startup script: run migrations then start gunicorn
-# Uses $PORT from Zeabur, falling back to 8080
-CMD sh -c "python manage.py migrate --noinput && gunicorn crm_usecap.wsgi:application --bind 0.0.0.0:${PORT:-8080} --workers 2"
+# Startup: run migrations, create admin user if needed, then start gunicorn
+CMD sh -c "python manage.py migrate --noinput && python create_superuser_script.py && gunicorn crm_usecap.wsgi:application --bind 0.0.0.0:${PORT:-8080} --workers 2"
