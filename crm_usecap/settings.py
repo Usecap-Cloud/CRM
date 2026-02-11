@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
-import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -78,25 +77,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'crm_usecap.wsgi.application'
 
 # Database
+# Detect Zeabur MySQL variables (supports multiple naming conventions)
+_db_host = (os.getenv('MYSQL_HOST') or os.getenv('MYSQLHOST')
+            or os.getenv('DB_HOST') or 'localhost')
+_db_port = (os.getenv('MYSQL_PORT') or os.getenv('MYSQLPORT')
+            or os.getenv('DB_PORT') or '3306')
+_db_name = (os.getenv('MYSQL_DATABASE') or os.getenv('MYSQL_DABATASE')
+            or os.getenv('MYSQLDATABASE') or os.getenv('DB_NAME') or 'crm_usecap')
+_db_user = (os.getenv('MYSQL_USERNAME') or os.getenv('MYSQL_USER')
+            or os.getenv('MYSQLUSER') or os.getenv('DB_USER') or 'crm_user')
+_db_pass = (os.getenv('MYSQL_PASSWORD') or os.getenv('MYSQLPASSWORD')
+            or os.getenv('DB_PASSWORD') or '')
 
-# Database configuration
-# Prioritize DATABASE_URL (standard for many PaaS), then Zeabur variables, then local fallbacks
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"mysql://{os.getenv('DB_USER', 'crm_user')}:{os.getenv('DB_PASSWORD', 'tu_password_segura')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'crm_usecap')}",
-        conn_max_age=600,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': _db_name,
+        'USER': _db_user,
+        'PASSWORD': _db_pass,
+        'HOST': _db_host,
+        'PORT': _db_port,
+    }
 }
-
-# Override with Zeabur specific variables if they exist but DATABASE_URL doesn't
-if not os.getenv('DATABASE_URL') and os.getenv('MYSQLHOST'):
-    DATABASES['default'].update({
-        'NAME': os.getenv('MYSQLDATABASE'),
-        'USER': os.getenv('MYSQLUSER'),
-        'PASSWORD': os.getenv('MYSQLPASSWORD'),
-        'HOST': os.getenv('MYSQLHOST'),
-        'PORT': os.getenv('MYSQLPORT'),
-    })
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
