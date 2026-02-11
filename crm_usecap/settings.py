@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+import dj_database_url
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -78,16 +79,24 @@ WSGI_APPLICATION = 'crm_usecap.wsgi.application'
 
 # Database
 
+# Database configuration
+# Prioritize DATABASE_URL (standard for many PaaS), then Zeabur variables, then local fallbacks
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQLDATABASE', os.getenv('DB_NAME', 'crm_usecap')),
-        'USER': os.getenv('MYSQLUSER', os.getenv('DB_USER', 'crm_user')),
-        'PASSWORD': os.getenv('MYSQLPASSWORD', os.getenv('DB_PASSWORD', 'tu_password_segura')),
-        'HOST': os.getenv('MYSQLHOST', os.getenv('DB_HOST', 'localhost')),
-        'PORT': os.getenv('MYSQLPORT', os.getenv('DB_PORT', '3306')),
-    }
+    'default': dj_database_url.config(
+        default=f"mysql://{os.getenv('DB_USER', 'crm_user')}:{os.getenv('DB_PASSWORD', 'tu_password_segura')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'crm_usecap')}",
+        conn_max_age=600,
+    )
 }
+
+# Override with Zeabur specific variables if they exist but DATABASE_URL doesn't
+if not os.getenv('DATABASE_URL') and os.getenv('MYSQLHOST'):
+    DATABASES['default'].update({
+        'NAME': os.getenv('MYSQLDATABASE'),
+        'USER': os.getenv('MYSQLUSER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD'),
+        'HOST': os.getenv('MYSQLHOST'),
+        'PORT': os.getenv('MYSQLPORT'),
+    })
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

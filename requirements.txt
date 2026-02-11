@@ -8,3 +8,4 @@ pandas
 openpyxl
 gunicorn
 whitenoise
+dj-database-url
