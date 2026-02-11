@@ -20,8 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
-SECRET_KEY = os.getenv('SECRET_KEY', '')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-me-in-production-hz3mfds')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'crm.usecap.cl,localhost,127.0.0.1').split(',')
 
 # Security settings for production
