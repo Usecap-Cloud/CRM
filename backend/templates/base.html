@@ -58,9 +58,9 @@
 
         .nav-item:hover,
         .nav-item.active {
-            background: rgba(168, 85, 247, 0.1);
+            background: rgba(30, 144, 255, 0.1);
             color: #fff;
-            border-left-color: #a855f7;
+            border-left-color: #1e90ff;
         }
 
         .main-content {
@@ -71,7 +71,80 @@
         }
 
         .page-header {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+        }
+
+        .page-header small {
+            display: none !important;
+        }
+
+        .header-title {
+            text-align: center;
+            width: 100%;
+        }
+
+        .page-actions {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Global Pill Button Styles */
+        .pill-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            padding: 4px;
+            width: fit-content;
+        }
+
+        .pill-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 8px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .pill-btn:hover,
+        .pill-btn.active,
+        .pill-btn.primary {
+            background: #1e90ff;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+        }
+
+        .pill-btn.secondary {
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+        }
+
+        .pill-btn.secondary:hover,
+        .pill-btn.secondary.active {
+            background: #1e90ff;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+            opacity: 1;
+        }
+
+        /* Global Form Select Fixes */
+        select option {
+            background: #0f0f1f;
+            color: #fff;
         }
 
         .card {
@@ -94,7 +167,7 @@
         .user-avatar {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #a855f7, #00d9ff);
+            background: linear-gradient(135deg, #1e90ff, #00d9ff);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -130,21 +203,14 @@
         .logout-btn:hover {
             background: rgba(255, 107, 107, 0.1);
         }
-
-            {
-            % block extra_styles %
-        }
-
-            {
-            % endblock %
-        }
     </style>
+    {% block extra_styles %}{% endblock %}
 </head>
 
 <body>
     <aside class="sidebar">
         <div class="sidebar-logo">
-            <span style="color: #a855f7;">&#x1F4CA;</span> USECAP <span>CRM</span>
+            <span style="color: #1e90ff;">&#x1F4CA;</span> USECAP <span>CRM</span>
         </div>
         <nav class="nav-menu">
             <a href="/" class="nav-item {% block nav_home %}{% endblock %}">
@@ -152,6 +218,9 @@
             </a>
             <a href="/api/clientes-page/" class="nav-item {% block nav_clientes %}{% endblock %}">
                 <span class="icon">&#x1F465;</span> Clientes
+            </a>
+            <a href="/api/ejecutivos-page/" class="nav-item {% block nav_ejecutivos %}{% endblock %}">
+                <span class="icon">&#x1F4BC;</span> Ejecutivos
             </a>
             <a href="/api/cursos-page/" class="nav-item {% block nav_cursos %}{% endblock %}">
                 <span class="icon">&#x1F4D6;</span> Cursos
@@ -170,6 +239,9 @@
             </a>
             <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
                 <span class="icon">&#x1F4BC;</span> Cartera
+            </a>
+            <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
+                <span class="icon">&#x1F4C5;</span> Seguimiento
             </a>
         </nav>
         <div class="user-profile">

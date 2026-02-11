@@ -12,11 +12,13 @@ class RolSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EjecutivoSerializer(serializers.ModelSerializer):
+    rol_nombre = serializers.ReadOnlyField(source='rol.nombre')
     class Meta:
         model = Ejecutivo
         fields = '__all__'
 
 class ClienteSerializer(serializers.ModelSerializer):
+    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
     class Meta:
         model = Cliente
         fields = '__all__'
@@ -54,6 +56,8 @@ class ContratoServicioSerializer(serializers.ModelSerializer):
 class ContratoSerializer(serializers.ModelSerializer):
     cursos_asociados = ContratoCursoSerializer(many=True, required=False, write_only=True)
     servicios_asociados = ContratoServicioSerializer(many=True, required=False, write_only=True)
+    empresa_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
+    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
 
     class Meta:
         model = Contrato
@@ -80,6 +84,10 @@ class ContratoProveedorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SeguimientoSerializer(serializers.ModelSerializer):
+    empresa_nombre = serializers.ReadOnlyField(source='contrato.cliente.razon_social')
+    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
+    coordinador_nombre = serializers.ReadOnlyField(source='coordinador.nombre')
+
     class Meta:
         model = Seguimiento
         fields = '__all__'

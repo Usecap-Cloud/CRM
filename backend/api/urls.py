@@ -24,12 +24,13 @@ router.register(r'import-history', ImportHistoryViewSet)
 from .views import (
     DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view, 
     estadisticas_view, clientes_view, cursos_view, contratos_view, proveedores_view, 
-    importar_view, AnalyzeHeadersView, ProcessMappedImportView, ImportarClientesExcelView
+    importar_view, AnalyzeHeadersView, ProcessMappedImportView, UniversalImportView,
+    ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view
 )
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('importar-clientes-excel/', ImportarClientesExcelView.as_view(), name='importar-excel-shortcut'),
+    path('importar-universal/', UniversalImportView.as_view(), name='importar-universal'),
     path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('portfolio-data/', PortfolioAPIView.as_view(), name='portfolio-data'),
@@ -40,7 +41,10 @@ urlpatterns = [
     path('cursos-page/', cursos_view, name='cursos-page'),
     path('contratos-page/', contratos_view, name='contratos-page'),
     path('proveedores-page/', proveedores_view, name='proveedores-page'),
+    path('seguimiento-page/', seguimiento_view, name='seguimiento-page'),
     path('importar-page/', importar_view, name='importar-page'),
+    path('ejecutivos-page/', ejecutivos_view, name='ejecutivos-page'),
+    path('ejecutivos-create/', CreateEjecutivoAPIView.as_view(), name='ejecutivos-create'),
     path('importar-analizar/', AnalyzeHeadersView.as_view(), name='importar-analizar'),
     path('importar-procesar/', ProcessMappedImportView.as_view(), name='importar-procesar'),
 ]

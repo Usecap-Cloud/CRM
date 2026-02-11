@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Seguimiento - USECAP CRM{% endblock %}
+{% block nav_seguimiento %}active{% endblock %}
+
+{% block extra_styles %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js'></script>
+
+<style>
+    .seguimiento-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+        height: calc(100vh - 120px);
+    }
+
+    #calendar-card {
+        padding: 0;
+        height: 100%;
+        /* No background or border as requested */
+    }
+
+    .fc {
+        color: #fff;
+    }
+
+    .fc-toolbar-title {
+        color: #1e90ff !important;
+        font-size: 1.2rem !important;
+        text-transform: capitalize;
+    }
+
+    /* pill-style buttons */
+    .fc-button {
+        border-radius: 20px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        text-transform: capitalize !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .fc-button-primary {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #888 !important;
+    }
+
+    .fc-button-primary:hover,
+    .fc-button-primary.fc-button-active {
+        background-color: #1e90ff !important;
+        border-color: #1e90ff !important;
+        color: #fff !important;
+        box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3) !important;
+    }
+
+    .fc-daygrid-day:hover {
+        background: rgba(30, 144, 255, 0.05);
+    }
+
+    #alerts-panel {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .panel-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ff9f43;
+    }
+
+    .alert-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 4px solid #ff9f43;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+    }
+
+    .alert-card.urgent {
+        border-left-color: #ff6b6b;
+    }
+
+    .alert-card.closure {
+        border-left-color: #00ff88;
+    }
+
+    .alert-date {
+        color: #888;
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+    }
+
+    .alert-desc {
+        font-weight: 500;
+        color: #fff;
+    }
+
+    .alert-link {
+        color: #1e90ff;
+        text-decoration: none;
+        font-size: 0.75rem;
+        margin-top: 6px;
+        display: inline-block;
+    }
+
+    /* More prominent grid borders */
+    .fc-theme-standard td,
+    .fc-theme-standard th,
+    .fc-scrollgrid {
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .fc-day-today {
+        background: rgba(30, 144, 255, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="seguimiento-container">
+    <!-- Wrap calendar and its title to center them together -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="page-header" style="text-align: center; margin-bottom: 0;">
+            <div class="header-title">
+                <h1 style="display: block; width: 100%;">Centro de Seguimiento</h1>
+            </div>
+        </div>
+
+        <div id="calendar-card">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <div id="alerts-panel" style="margin-top: 65px;">
+        <div class="panel-title">
+            <span>&#x26A0;</span> Alertas Próximas
+        </div>
+        <div id="alerts-list">
+            <div style="color: #666; text-align: center; padding: 20px;">Cargando alertas...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const calendarEl = document.getElementById('calendar');
+
+        // 1. Load Data
+        const [seguimientos, contratos] = await Promise.all([
+            fetch('/api/seguimientos/').then(r => r.json()),
+            fetch('/api/contratos/').then(r => r.json())
+        ]);
+
+        // 2. Prepare Calendar Events
+        const events = [];
+
+        // Add Seguimientos (actions)
+        seguimientos.forEach(s => {
+            events.push({
+                title: 'Acción: ' + s.tipo_seguimiento,
+                start: s.fecha,
+                color: s.cerrado ? '#444' : '#1e90ff',
+                extendedProps: { type: 'seguimiento', id: s.id }
+            });
+            if (s.fecha_proxima_accion) {
+                events.push({
+                    title: 'Prox Acción: ' + s.tipo_seguimiento,
+                    start: s.fecha_proxima_accion,
+                    color: '#ff9f43',
+                    extendedProps: { type: 'proxima', id: s.id }
+                });
+            }
+        });
+
+        // Add Contract closures/receptions
+        contratos.forEach(c => {
+            if (c.fecha_emision) {
+                events.push({
+                    title: 'Emisión Contrato: ' + c.empresa_nombre,
+                    start: c.fecha_emision,
+                    color: '#00ff88',
+                    extendedProps: { type: 'contrato_emision', id: c.id }
+                });
+            }
+        });
+        // 3. Initialize Calendar
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'es',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            titleFormat: { year: 'numeric', month: 'long' },
+            themeSystem: 'standard',
+            events: events,
+            eventClick: function (info) {
+                console.log('Event Clicked:', info.event.extendedProps);
+            }
+        });
+        calendar.render();
+
+        // Fix title: capitalization and remove 'de' (e.g., 'febrero de 2026' -> 'Febrero 2026')
+        const fixTitle = () => {
+            const titleEl = document.querySelector('.fc-toolbar-title');
+            if (titleEl) {
+                let text = titleEl.textContent.trim();
+                text = text.replace(/\bde\s+/i, '');
+                text = text.charAt(0).toUpperCase() + text.slice(1);
+                titleEl.textContent = text;
+            }
+        };
+        fixTitle();
+        calendar.on('datesSet', fixTitle);
+
+        // 4. Populate Alerts
+        const alertsList = document.getElementById('alerts-list');
+        alertsList.innerHTML = '';
+
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+
+        const imminentActions = seguimientos.filter(s => {
+            const d = new Date(s.fecha_proxima_accion);
+            return !s.cerrado && s.fecha_proxima_accion && d >= today && d <= nextWeek;
+        });
+
+        const imminentClosures = contratos.filter(c => {
+            return c.estado === 'Por Cerrar';
+        });
+
+        if (imminentActions.length === 0 && imminentClosures.length === 0) {
+            alertsList.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No hay alertas pendientes para los próximos 7 días</div>';
+        }
+
+        imminentActions.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'alert-card urgent';
+            card.innerHTML = `
+                <div class="alert-date">Próxima acción: ${s.fecha_proxima_accion}</div>
+                <div class="alert-desc">${s.tipo_seguimiento} - Contrato #${s.contrato}</div>
+                <a href="/api/contratos-page/" class="alert-link">Ver Contrato</a>
+            `;
+            alertsList.appendChild(card);
+        });
+
+        imminentClosures.forEach(c => {
+            const card = document.createElement('div');
+            card.className = 'alert-card closure';
+            card.innerHTML = `
+                <div class="alert-date">Estado: Por Cerrar</div>
+                <div class="alert-desc">Urgente: ${c.empresa_nombre}</div>
+                <a href="/api/contratos-page/" class="alert-link">Gestionar Cierre</a>
+            `;
+            alertsList.appendChild(card);
+        });
+    });
+</script>
+{% endblock %}

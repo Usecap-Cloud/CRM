@@ -5,250 +5,153 @@
 
 {% block extra_styles %}
 <style>
+    /* Premium Dashboard Styles */
     .header-title small {
-        color: #666;
-        font-weight: normal;
+        color: #888;
+        font-weight: 600;
+        letter-spacing: 1px;
     }
 
     .header-title h1 {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
         margin-top: 5px;
+        font-weight: 800;
+        color: #fff;
     }
 
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-bottom: 25px;
+        gap: 24px;
+        margin-bottom: 30px;
     }
 
     .stat-card {
-        background: rgba(255, 255, 255, 0.03);
+        background: linear-gradient(135deg, rgba(30, 58, 95, 0.4) 0%, rgba(15, 39, 68, 0.4) 100%);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 20px;
+        border-radius: 24px;
+        padding: 24px;
         position: relative;
+        backdrop-filter: blur(12px);
+        transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(30, 144, 255, 0.3);
     }
 
     .stat-card .icon-box {
-        width: 45px;
-        height: 45px;
-        border-radius: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 15px;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
     }
 
     .stat-card.empresas .icon-box {
         background: rgba(0, 217, 255, 0.15);
+        color: #00d9ff;
     }
 
     .stat-card.cursos .icon-box {
         background: rgba(0, 255, 136, 0.15);
+        color: #00ff88;
     }
 
     .stat-card.contratos .icon-box {
         background: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
     }
 
     .stat-card .label {
-        color: #888;
-        font-size: 0.85rem;
-        margin-bottom: 5px;
+        color: #aaa;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .stat-card .number {
-        font-size: 2.2rem;
-        font-weight: bold;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
     }
 
     .stat-card .badge {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.7rem;
-        font-weight: 500;
-    }
-
-    .badge.up {
-        background: rgba(0, 255, 136, 0.2);
-        color: #00ff88;
-    }
-
-    .badge.progress {
-        background: rgba(0, 217, 255, 0.2);
-        color: #00d9ff;
-    }
-
-    .badge.critical {
-        background: rgba(255, 107, 107, 0.2);
-        color: #ff6b6b;
+        top: 20px;
+        right: 20px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
     }
 
     .content-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 20px;
+        gap: 24px;
+    }
+
+    .card-dashboard {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 24px;
+        backdrop-filter: blur(8px);
     }
 
     .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .card-header h3 {
-        font-size: 1rem;
+        font-size: 1.1rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 10px;
-    }
-
-    .card-header a {
-        color: #a855f7;
-        text-decoration: none;
-        font-size: 0.85rem;
+        gap: 12px;
     }
 
     .activity-item {
         display: flex;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-        font-size: 1.1rem;
-    }
-
-    .activity-icon.seguimiento {
-        background: rgba(0, 217, 255, 0.15);
-    }
-
-    .activity-icon.contrato {
-        background: rgba(0, 255, 136, 0.15);
-    }
-
-    .activity-icon.solicitud {
-        background: rgba(255, 159, 67, 0.15);
-    }
-
-    .activity-info {
-        flex: 1;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     }
 
     .activity-info .title {
-        font-size: 0.9rem;
-        margin-bottom: 3px;
+        font-weight: 600;
+        font-size: 0.95rem;
     }
 
     .activity-info .subtitle {
-        font-size: 0.75rem;
-        color: #666;
-    }
-
-    .activity-meta {
-        text-align: right;
-    }
-
-    .activity-meta .time {
-        font-size: 0.75rem;
-        color: #666;
-    }
-
-    .activity-meta .status {
-        font-size: 0.7rem;
-        padding: 3px 8px;
-        border-radius: 10px;
-        margin-top: 5px;
-        display: inline-block;
-    }
-
-    .status.ejecutada {
-        background: rgba(0, 217, 255, 0.2);
-        color: #00d9ff;
-    }
-
-    .status.completado {
-        background: rgba(0, 255, 136, 0.2);
-        color: #00ff88;
-    }
-
-    .status.pendiente {
-        background: rgba(255, 159, 67, 0.2);
-        color: #ff9f43;
-    }
-
-    .curso-item {
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .curso-item:last-child {
-        border-bottom: none;
-    }
-
-    .curso-item .name {
-        font-size: 0.9rem;
-        margin-bottom: 3px;
-    }
-
-    .curso-item .date {
-        font-size: 0.75rem;
-        color: #666;
-    }
-
-    .metas-card {
-        margin-top: 20px;
-    }
-
-    .metas-card .meta-label {
-        font-size: 0.85rem;
         color: #888;
-        margin-bottom: 10px;
+        font-size: 0.8rem;
     }
 
     .metas-card .progress-bar {
-        height: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 8px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        margin: 15px 0;
     }
 
     .metas-card .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #a855f7, #00d9ff);
-        border-radius: 4px;
-    }
-
-    .metas-card .meta-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: #888;
-    }
-
-    .loading-dashboard {
-        text-align: center;
-        padding: 30px;
-        color: #666;
+        background: linear-gradient(90deg, #1e90ff, #00ff88);
+        border-radius: 10px;
+        transition: width 1s ease-out;
     }
 </style>
 {% endblock %}
@@ -256,12 +159,12 @@
 {% block content %}
 <div class="page-header">
     <div class="header-title">
-        <small>DASHBOARD GLOBAL</small>
         <h1>USECAP CRM</h1>
     </div>
+    <div class="page-actions"></div>
 </div>
 
-<div id="loading-dashboard" class="loading-dashboard">Cargando datos del dashboard...</div>
+<div id="loading-dashboard" style="text-align: center; padding: 40px; color: #1e90ff;">Cargando...</div>
 
 <div id="content-dashboard" style="display: none;">
     <div class="stats-grid">
@@ -286,67 +189,73 @@
     </div>
 
     <div class="content-grid">
-        <div class="card">
+        <div class="card-dashboard">
             <div class="card-header">
                 <h3>&#x26A1; Actividad Reciente</h3>
-                <a href="/admin/">Ver todo</a>
+                <a href="/admin/" style="color: #1e90ff; font-size: 0.85rem; text-decoration: none;">Ver Historial</a>
             </div>
             <div id="activity-list">
                 <div class="activity-item">
-                    <div class="activity-icon seguimiento">&#x1F4DE;</div>
-                    <div class="activity-info">
-                        <div class="title">Seguimiento: Constructora Nahuen</div>
-                        <div class="subtitle">Llamada de confirmacion para curso SENCE</div>
+                    <div class="activity-icon seguimiento"
+                        style="background: rgba(0, 217, 255, 0.1); color: #00d9ff; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        &#x1F4DE;</div>
+                    <div class="activity-info" style="flex: 1;">
+                        <div class="title">Constructora Nahuen</div>
+                        <div class="subtitle">Llamada de confirmación programada</div>
                     </div>
-                    <div class="activity-meta">
-                        <div class="time">Hace 15 min</div>
-                        <div class="status ejecutada">EJECUTADA</div>
+                    <div class="activity-meta" style="text-align: right;">
+                        <div style="font-size: 0.75rem; color: #666;">Hace 15 min</div>
+                        <div
+                            style="font-size: 0.7rem; color: #00d9ff; font-weight: 700; background: rgba(0,217,255,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                            EN RUTA</div>
                     </div>
                 </div>
-                <!-- ... other items ... -->
                 <div class="activity-item">
-                    <div class="activity-icon contrato">&#x2705;</div>
-                    <div class="activity-info">
-                        <div class="title">Contrato Generado: Minera Los Pelambres</div>
-                        <div class="subtitle">Firma electronica pendiente de validacion</div>
+                    <div class="activity-icon contrato"
+                        style="background: rgba(0, 255, 136, 0.1); color: #00ff88; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        &#x2705;</div>
+                    <div class="activity-info" style="flex: 1;">
+                        <div class="title">Minera Los Pelambres</div>
+                        <div class="subtitle">Contrato validado correctamente</div>
                     </div>
-                    <div class="activity-meta">
-                        <div class="time">Hace 2 horas</div>
-                        <div class="status completado">COMPLETADO</div>
+                    <div class="activity-meta" style="text-align: right;">
+                        <div style="font-size: 0.75rem; color: #666;">Hace 2 horas</div>
+                        <div
+                            style="font-size: 0.7rem; color: #00ff88; font-weight: 700; background: rgba(0,255,136,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                            CERRADO</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div>
-            <div class="card">
+            <div class="card-dashboard" style="margin-bottom: 24px;">
                 <div class="card-header">
-                    <h3>&#x1F4C5; Proximos Cursos</h3>
+                    <h3>&#x1F4C5; Agenda</h3>
                 </div>
-                <div class="curso-item">
-                    <div class="name">Manejo de Izaje Critico</div>
-                    <div class="date">24 Nov - 09:00 AM</div>
+                <div style="padding: 10px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: 600; font-size: 0.9rem;">Izaje Crítico</div>
+                        <div style="color: #666; font-size: 0.75rem;">Mañana - 09:00 AM</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem;">Primeros Auxilios</div>
+                        <div style="color: #666; font-size: 0.75rem;">Jueves - 14:30 PM</div>
+                    </div>
                 </div>
-                <div class="curso-item">
-                    <div class="name">Primeros Auxilios Avanzado</div>
-                    <div class="date">28 Nov - 14:30 PM</div>
-                </div>
-                <a href="/api/cursos-page/"
-                    style="color: #a855f7; font-size: 0.85rem; display: block; margin-top: 10px;">Ver Calendario
-                    Completo</a>
             </div>
 
-            <div class="card metas-card">
+            <div class="card-dashboard metas-card">
                 <div class="card-header">
-                    <h3>Resumen de Metas</h3>
+                    <h3>Metas Mensuales</h3>
                 </div>
-                <div class="meta-label">Meta mensual de facturacion</div>
+                <div style="color: #888; font-size: 0.85rem;">Facturación Estimada</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
                 </div>
-                <div class="meta-stats">
-                    <span id="meta-percent">0% completado</span>
-                    <span id="meta-amount">$0 / $15M</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+                    <span id="meta-percent" style="color: #00ff88;">0%</span>
+                    <span id="meta-amount" style="color: #fff;">$0 / $15M</span>
                 </div>
             </div>
         </div>
@@ -368,28 +277,30 @@
             animateNumber('cursos-count', data.cursos_proceso || 0);
             animateNumber('contratos-count', data.contratos_cerrar || 0);
 
-            const percent = Math.min(72, (data.empresas_activas || 0) * 3 + 50);
-            document.getElementById('meta-progress').style.width = percent + '%';
-            document.getElementById('meta-percent').textContent = percent + '% completado';
-            document.getElementById('meta-amount').textContent = '$' + (percent * 0.15).toFixed(1) + 'M / $15M';
+            setTimeout(() => {
+                const percent = Math.min(72, (data.empresas_activas || 0) * 3 + 45);
+                document.getElementById('meta-progress').style.width = percent + '%';
+                document.getElementById('meta-percent').textContent = percent + '%';
+                document.getElementById('meta-amount').textContent = '$' + (percent * 0.15).toFixed(1) + 'M / $15M';
+            }, 300);
 
         } catch (error) {
-            document.getElementById('loading-dashboard').textContent = 'Error cargando datos';
+            document.getElementById('loading-dashboard').textContent = 'Error de conexión';
         }
     }
 
     function animateNumber(id, target) {
         const el = document.getElementById(id);
         let current = 0;
-        const step = Math.ceil(target / 25) || 1;
+        const step = Math.ceil(target / 30) || 1;
         const timer = setInterval(() => {
             current += step;
             if (current >= target) {
                 current = target;
                 clearInterval(timer);
             }
-            el.textContent = current;
-        }, 30);
+            el.textContent = current.toLocaleString();
+        }, 40);
     }
 
     loadDashboard();

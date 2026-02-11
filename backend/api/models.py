@@ -55,7 +55,7 @@ from django.contrib.auth.models import User
 # =========================
 class Ejecutivo(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    rut_ejecutivo = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -65,6 +65,8 @@ class Ejecutivo(models.Model):
     comuna = models.CharField(max_length=50, blank=True, null=True)
     especialidad_tipo_clientes = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+
+    # Relaciones
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -76,7 +78,7 @@ class Ejecutivo(models.Model):
 # =========================
 
 class Cliente(models.Model):
-    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    rut_empresa = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     razon_social = models.CharField(max_length=100)
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -102,7 +104,7 @@ class Cliente(models.Model):
 # Tabla Coordinadores
 # =========================
 class Coordinador(models.Model):
-    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    rut_coordinador = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -141,7 +143,7 @@ class Servicio(models.Model):
 # =========================
 
 class Proveedor(models.Model):
-    rut = models.CharField(max_length=12, unique=True, validators=[validate_rut])
+    rut_proveedor = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     tipo = models.CharField(max_length=50, blank=True, null=True)
     estado = models.CharField(max_length=10)
@@ -182,6 +184,8 @@ class Contrato(models.Model):
     empresa = models.CharField(max_length=100)
     fecha_recepcion = models.DateField()
     fecha_emision = models.DateField()
+    fecha_inicio = models.DateField(blank=True, null=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(max_length=20)
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)

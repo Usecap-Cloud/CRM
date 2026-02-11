@@ -4,11 +4,8 @@
 {% block nav_clientes %}active{% endblock %}
 
 {% block extra_styles %}
-{% endblock %}
-
-{% block content %}
 <style>
-    /* Direct Injection Premium Styles for Cartera Page */
+    /* Premium Portfolio Styles */
     .app-container-portfolio {
         max-width: 1000px;
         margin: 0 auto;
@@ -28,6 +25,12 @@
         padding: 24px;
         text-align: center;
         backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(30, 144, 255, 0.3);
     }
 
     .summary-card .number {
@@ -101,7 +104,7 @@
         display: grid;
         grid-template-columns: 120px 1fr 100px;
         padding: 12px 10px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         align-items: center;
     }
 
@@ -153,23 +156,25 @@
         font-style: italic;
     }
 
-    .loading {
+    .loading-portfolio {
         text-align: center;
         padding: 60px;
         color: #1e90ff;
         font-weight: 600;
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="page-header">
-    <div>
-        <small>GESTION COMERCIAL</small>
+    <div class="header-title">
         <h1>Cartera de Clientes por Ejecutivo</h1>
     </div>
+    <div class="page-actions"></div>
 </div>
 
 <div class="app-container-portfolio">
-    <div id="loading-portfolio" class="loading">Cargando base de datos de cartera...</div>
+    <div id="loading-portfolio" class="loading-portfolio">Cargando base de datos de cartera...</div>
 
     <div id="content-portfolio" style="display: none;">
         <div class="summary" id="summary-portfolio"></div>
@@ -189,33 +194,40 @@
             document.getElementById('loading-portfolio').style.display = 'none';
             document.getElementById('content-portfolio').style.display = 'block';
 
-            // Summary logic
             const totalEjecutivos = data.length;
-            const totalClientes = data.reduce((sum, ej) => sum + ej.total_clientes, 0);
+            const totalClientes = data.reduce((sum, ej) => sum + (ej.total_clientes || 0), 0);
+            const totalContratos = data.reduce((sum, ej) => sum + (ej.total_contratos || 0), 0);
+            const totalFirmados = data.reduce((sum, ej) => sum + (ej.contratos_firmados || 0), 0);
+
+            const successRate = totalContratos > 0 ? ((totalFirmados / totalContratos) * 100).toFixed(1) : "0.0";
 
             document.getElementById('summary-portfolio').innerHTML = `
-                <div class="summary-card">
-                    <div class="number">${totalEjecutivos}</div>
-                    <div class="label">Ejecutivos</div>
-                </div>
                 <div class="summary-card">
                     <div class="number">${totalClientes}</div>
                     <div class="label">Clientes Totales</div>
                 </div>
                 <div class="summary-card">
-                    <div class="number">${(totalClientes / totalEjecutivos).toFixed(1)}</div>
-                    <div class="label">Promedio/Ejecutivo</div>
+                    <div class="number">${totalContratos}</div>
+                    <div class="label">Contratos Totales</div>
+                </div>
+                <div class="summary-card">
+                    <div class="number" style="color: ${parseFloat(successRate) > 50 ? '#00ff88' : '#ff9f43'}">${successRate}%</div>
+                    <div class="label">Tasa de Éxito de Cierre</div>
                 </div>
             `;
 
-            // Executive list
             const container = document.getElementById('executives-container');
-            container.innerHTML = data.map((ej, index) => `
+            container.innerHTML = data.map((ej, index) => {
+                const ejRate = ej.total_contratos > 0 ? ((ej.contratos_firmados / ej.total_contratos) * 100).toFixed(0) : 0;
+                return `
                 <div class="executive-card">
                     <div class="executive-header" onclick="toggleClients(${index})">
                         <div class="executive-info">
                             <h3>${ej.ejecutivo_nombre}</h3>
                             <p>${ej.ejecutivo_email || 'Sin contacto email'}</p>
+                            <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">
+                                Contratos: ${ej.contratos_firmados}/${ej.total_contratos} (${ejRate}%)
+                            </div>
                         </div>
                         <div class="client-count">${ej.total_clientes} clientes</div>
                     </div>
@@ -231,7 +243,8 @@
                         `).join('') : '<div class="no-clients">No hay clientes asignados a este portafolio</div>'}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
         } catch (error) {
             document.getElementById('loading-portfolio').textContent = 'Error: ' + error.message;
@@ -241,9 +254,6 @@
 
     function toggleClients(index) {
         const el = document.getElementById('clients-' + index);
-        const isOpen = el.classList.contains('open');
-
-        // Close others if you want, but standard toggle for now
         el.classList.toggle('open');
     }
 

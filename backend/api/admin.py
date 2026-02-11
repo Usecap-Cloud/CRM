@@ -3,8 +3,8 @@ from .models import Rol, Ejecutivo, Cliente, Coordinador, Servicio, Proveedor, C
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('razon_social', 'rut', 'ejecutivo', 'estado')
-    search_fields = ('razon_social', 'rut')
+    list_display = ('razon_social', 'rut_empresa', 'ejecutivo', 'estado')
+    search_fields = ('razon_social', 'rut_empresa')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
