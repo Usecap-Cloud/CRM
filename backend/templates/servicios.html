@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+
+{% block title %}Servicios - USECAP CRM{% endblock %}
+{% block nav_servicios %}active{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Forced Premium Styles for Servicios Page */
+    .page-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .servicios-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .servicios-table th {
+        color: #888;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .servicios-table td {
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+
+    .status-badge.active {
+        background: rgba(0, 255, 136, 0.2);
+        color: #00ff88;
+    }
+
+    /* Form Page Styles */
+    #form-view {
+        display: none;
+        background: #0a0a1a;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    #form-view.active {
+        display: block;
+    }
+
+    .form-header {
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .form-header .back-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .form-body {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
+        padding: 40px;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-section-title {
+        font-size: 0.8rem;
+        color: #1e90ff;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .form-section-subtitle {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+        color: #aaa;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: #fff;
+        width: 100%;
+    }
+
+    .form-group input:focus {
+        border-color: #1e90ff;
+        outline: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- List View -->
+<div id="list-view">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Servicios</h1>
+        </div>
+        <div class="page-actions">
+            <div class="pill-nav">
+                <button class="pill-btn primary" onclick="showForm()" id="btn-nuevo"><span>&#x002B;</span> Nuevo
+                    Servicio</button>
+                <a href="/api/importar-page/" class="pill-btn" id="btn-importar"
+                    style="text-decoration: none;"><span>&#x1F4E5;</span> Importar Excel</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
+
+    <div class="card">
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Servicios...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
+            disponible</div>
+        <table class="servicios-table" id="servicios-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Rubro</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="servicios-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Form View -->
+<div class="form-page" id="form-view">
+    <div class="form-header">
+        <button class="back-btn" onclick="hideForm()">&#x2190;</button>
+        <h2 id="form-title">Nuevo Servicio</h2>
+    </div>
+    <div class="form-body">
+        <form id="service-form" onsubmit="saveService(event)">
+            <input type="hidden" name="id" id="servicios-id">
+            <div class="form-section">
+                <div class="form-section-title">NUEVA FICHA</div>
+                <div class="form-section-subtitle">Datos del Servicio</div>
+                <div class="form-section-desc" id="form-desc">Complete la informacion del servicio.
+                </div>
+            </div>
+
+            <div class="section-label"
+                style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: #fff; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                &#x1F4CB; Detalles</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre del Servicio</label>
+                    <input type="text" name="nombre" id="form-nombre" placeholder="Consultoría TI" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <input type="text" name="tipo" id="form-tipo" placeholder="Consultoría">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rubro</label>
+                    <input type="text" name="rubro" id="form-rubro" placeholder="Tecnología">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="descripcion" id="form-descripcion" rows="3"></textarea>
+                </div>
+            </div>
+
+            <!-- Botones adaptados -->
+            <div class="form-actions"
+                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05);">
+                <button type="button" class="pill-btn secondary" onclick="hideForm()">Cancelar</button>
+                <button type="submit" class="pill-btn primary" id="submit-btn">Guardar Servicio</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentServicios = [];
+
+    function showForm(data = null) {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('form-view').classList.add('active');
+        document.getElementById('btn-nuevo').classList.add('active');
+
+        if (data) {
+            document.getElementById('form-title').textContent = 'Editar Servicio';
+            document.getElementById('servicios-id').value = data.id;
+            document.getElementById('form-nombre').value = data.nombre;
+            document.getElementById('form-tipo').value = data.tipo || '';
+            document.getElementById('form-rubro').value = data.rubro || '';
+            document.getElementById('form-estado').value = data.estado;
+            document.getElementById('form-descripcion').value = data.descripcion || '';
+            document.getElementById('submit-btn').textContent = 'Actualizar Servicio';
+        } else {
+            document.getElementById('form-title').textContent = 'Registro de Servicio';
+            document.getElementById('servicios-id').value = '';
+            document.getElementById('service-form').reset();
+            document.getElementById('submit-btn').textContent = 'Guardar Servicio';
+        }
+    }
+
+    function hideForm() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('form-view').classList.remove('active');
+        document.getElementById('btn-nuevo').classList.remove('active');
+        document.getElementById('service-form').reset();
+    }
+
+    async function loadServicios() {
+        try {
+            const response = await fetch('/api/servicios/');
+            if (!response.ok) throw new Error('Error en la API');
+
+            const data = await response.json();
+
+            // Defensive check for null/undefined data
+            if (!data) {
+                throw new Error('No se recibieron datos validos');
+            }
+
+            // Handle pagination if present
+            currentServicios = Array.isArray(data) ? data : (data.results || []);
+
+            document.getElementById('loading').style.display = 'none';
+
+            if (currentServicios.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('servicios-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('servicios-table').style.display = 'table';
+                const tbody = document.getElementById('servicios-body');
+                tbody.innerHTML = currentServicios.map(servicio => {
+                    const clean = (val) => {
+                        if (!val || val === 'nan' || val === 'None') return '-';
+                        return val;
+                    };
+                    return `
+                    <tr>
+                        <td>${clean(servicio.nombre)}</td>
+                        <td>${clean(servicio.tipo)}</td>
+                        <td>${clean(servicio.rubro)}</td>
+                        <td><span class="status-badge ${servicio.estado === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span></td>
+                        <td>
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editService(${servicio.id})'>Editar</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading').textContent = 'Error cargando datos';
+        }
+    }
+
+    function editService(id) {
+        const service = currentServicios.find(s => s.id === id);
+        if (service) showForm(service);
+    }
+
+    async function saveService(e) {
+        e.preventDefault();
+        const form = e.target;
+        const id = document.getElementById('servicios-id').value;
+
+        const data = {
+            nombre: form.nombre.value,
+            tipo: form.tipo.value,
+            rubro: form.rubro.value,
+            estado: form.estado.value,
+            descripcion: form.descripcion.value
+        };
+
+        try {
+            const url = id ? `/api/servicios/${id}/` : '/api/servicios/';
+            const method = id ? 'PATCH' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                showAlert(id ? 'Servicio actualizado' : 'Servicio creado', 'success');
+                hideForm();
+                loadServicios();
+            } else {
+                showAlert('Error al guardar servicio', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showAlert('Error de conexion', 'error');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+        alert.style.background = type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(255,0,0,0.2)';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initial Load
+    document.addEventListener('DOMContentLoaded', loadServicios);
+</script>
+{% endblock %}

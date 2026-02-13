@@ -161,10 +161,12 @@
         </div>
     </div>
 
-    <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
+
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Cargando proveedores...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Proveedores...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
+            disponible</div>
         <table class="proveedores-table" id="proveedores-table" style="display: none;">
             <thead>
                 <tr>
@@ -193,7 +195,8 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>RUT Proveedor</label>
-                    <input type="text" name="rut" id="form-rut" placeholder="77.123.456-7" required>
+                    <input type="text" name="rut" id="form-rut" placeholder="77.123.456-7" required
+                        oninput="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
                     <label>Nombre del Proveedor</label>
@@ -214,14 +217,16 @@
 
             <div class="form-row">
                 <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 ...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
                     <label>Tipo de Servicio</label>
-                    <select name="tipo_servicio" id="form-tipo_servicio" required>
-                        <option value="">Seleccionar tipo...</option>
-                        <option value="Certificación">Certificación</option>
-                        <option value="Capacitación">Capacitación</option>
-                        <option value="Consultoría">Consultoría</option>
-                        <option value="Otros">Otros</option>
-                    </select>
+                    <input type="text" name="tipo" id="form-tipo" placeholder="Ej: Certificación, Consultoría..."
+                        required>
                 </div>
             </div>
 
@@ -250,7 +255,8 @@
             document.getElementById('form-nombre').value = data.nombre;
             document.getElementById('form-contacto').value = data.contacto;
             document.getElementById('form-email').value = data.email;
-            document.getElementById('form-tipo_servicio').value = data.tipo_servicio;
+            document.getElementById('form-telefono').value = data.telefono || '';
+            document.getElementById('form-tipo').value = data.tipo;
             document.getElementById('submit-btn').textContent = 'Actualizar Proveedor';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Proveedor';
@@ -272,20 +278,32 @@
             const response = await fetch('/api/proveedores/');
             currentProveedores = await response.json();
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('proveedores-table').style.display = 'table';
-            const tbody = document.getElementById('proveedores-body');
-            tbody.innerHTML = currentProveedores.map(p => `
-                <tr>
-                    <td>${p.rut_proveedor}</td>
-                    <td>${p.nombre}</td>
-                    <td>${p.contacto}</td>
-                    <td>${p.email}</td>
-                    <td><span class="status-badge active" style="background: rgba(30,144,255,0.15); color: #1e90ff; padding: 4px 10px; border-radius: 8px;">${p.tipo_servicio}</span></td>
-                    <td>
-                        <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editProveedor(${p.id})'>Editar</button>
-                    </td>
-                </tr>
-            `).join('');
+
+            if (currentProveedores.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('proveedores-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('proveedores-table').style.display = 'table';
+                const tbody = document.getElementById('proveedores-body');
+                tbody.innerHTML = currentProveedores.map(p => {
+                    const clean = (val) => {
+                        if (!val || val === 'nan' || val === 'None') return '-';
+                        return val;
+                    };
+                    return `
+                    <tr>
+                        <td>${clean(p.rut_proveedor)}</td>
+                        <td>${clean(p.nombre)}</td>
+                        <td>${clean(p.contacto)}</td>
+                        <td>${clean(p.email)}</td>
+                        <td><span class="status-badge active" style="background: rgba(30,144,255,0.15); color: #1e90ff; padding: 4px 10px; border-radius: 8px;">${clean(p.tipo)}</span></td>
+                        <td>
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editProveedor(${p.id})'>Editar</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
         } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
     }
 
@@ -298,12 +316,27 @@
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('proveedor-id').value;
+
+        const rut = form.rut.value;
+        const phone = form.telefono.value;
+
+        if (!validateRut(rut)) {
+            showAlert('RUT Proveedor inválido', 'error');
+            return;
+        }
+
+        if (!validatePhone(phone)) {
+            showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
+            return;
+        }
+
         const data = {
-            rut_proveedor: form.rut.value,
+            rut_proveedor: rut,
             nombre: form.nombre.value,
             contacto: form.contacto.value,
             email: form.email.value,
-            tipo_servicio: form.tipo_servicio.value,
+            telefono: phone,
+            tipo: form.tipo.value,
             estado: 'activo'
         };
         try {
@@ -317,21 +350,23 @@
                 },
                 body: JSON.stringify(data)
             });
+            const result = await response.json().catch(() => ({}));
+
             if (response.ok) {
                 showAlert(id ? 'Proveedor actualizado' : 'Proveedor creado', 'success');
                 hideForm();
                 loadProveedores();
-            } else { showAlert('Error al guardar proveedor', 'error'); }
-        } catch (error) { showAlert('Error de conexion', 'error'); }
+            } else {
+                let errorMsg = result.error || 'Error al guardar proveedor';
+                if (typeof result === 'object' && !result.error) {
+                    errorMsg = Object.values(result).flat().join(' ');
+                }
+                showAlert(errorMsg, 'error');
+            }
+        } catch (error) { showAlert('Error de conexión con el servidor', 'error'); }
     }
 
-    function showAlert(message, type) {
-        const alert = document.getElementById('alert');
-        alert.textContent = message;
-        alert.style.display = 'block';
-        alert.style.background = type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(255,0,0,0.2)';
-        setTimeout(() => { alert.style.display = 'none'; }, 5000);
-    }
+
 
     function getCookie(name) {
         let cookieValue = null;

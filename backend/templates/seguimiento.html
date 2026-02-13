@@ -146,7 +146,7 @@
             <span>&#x26A0;</span> Alertas Próximas
         </div>
         <div id="alerts-list">
-            <div style="color: #666; text-align: center; padding: 20px;">Cargando alertas...</div>
+            <div style="color: #888; text-align: center; padding: 20px;">No hay información disponible</div>
         </div>
     </div>
 </div>
@@ -212,18 +212,8 @@
         });
         calendar.render();
 
-        // Fix title: capitalization and remove 'de' (e.g., 'febrero de 2026' -> 'Febrero 2026')
-        const fixTitle = () => {
-            const titleEl = document.querySelector('.fc-toolbar-title');
-            if (titleEl) {
-                let text = titleEl.textContent.trim();
-                text = text.replace(/\bde\s+/i, '');
-                text = text.charAt(0).toUpperCase() + text.slice(1);
-                titleEl.textContent = text;
-            }
-        };
-        fixTitle();
-        calendar.on('datesSet', fixTitle);
+        // Title fix removed to prevent accumulation bug
+        // calendar.on('datesSet', fixTitle);
 
         // 4. Populate Alerts
         const alertsList = document.getElementById('alerts-list');

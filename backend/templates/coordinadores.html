@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-
-{% block title %}Ejecutivos - USECAP CRM{% endblock %}
-{% block nav_ejecutivos %}active{% endblock %}
-
+{% block title %}Coordinadores - USECAP CRM{% endblock %}
+{% block nav_coordinadores %}active{% endblock %}
 {% block extra_styles %}
 <style>
     .page-actions {
@@ -129,20 +127,18 @@
 <div id="list-view">
     <div class="page-header">
         <div class="header-title">
-            <h1>Ejecutivos</h1>
+            <h1>Coordinadores</h1>
         </div>
         <div class="page-actions">
             <div class="pill-nav">
                 <button class="pill-btn primary" onclick="showForm()" id="btn-nuevo"><span>&#x002B;</span> Nuevo
-                    Ejecutivo</button>
+                    Coordinador</button>
             </div>
         </div>
     </div>
 
-
-
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Ejecutivos...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Coordinadores...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
             disponible</div>
         <table class="data-table" id="data-table" style="display: none;">
@@ -152,8 +148,9 @@
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Teléfono</th>
+                    <th>Cargo</th>
+                    <th>Cliente</th>
                     <th>Estado</th>
-                    <th>Rol</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -166,57 +163,76 @@
 <div class="form-page" id="form-view">
     <div class="form-header">
         <button class="back-btn" onclick="hideForm()">&#x2190;</button>
-        <h2 id="form-title">Alta de Ejecutivo</h2>
+        <h2 id="form-title">Coordinadores</h2>
     </div>
     <div class="form-body">
-        <form id="exec-form" onsubmit="saveEjecutivo(event)">
+        <form id="coord-form" onsubmit="saveCoordinador(event)">
             <input type="hidden" name="is_edit" value="false">
+            <input type="hidden" name="id" id="form-id" value="">
             <div class="form-section">
-                <div class="form-section-subtitle">Datos del Ejecutivo</div>
-                <div class="form-section-desc" style="color: #888; margin-bottom: 30px;" id="form-desc">Se creará
-                    automáticamente un usuario de sistema basado en el email.</div>
+                <div class="form-section-subtitle">Datos del Coordinador</div>
+                <div class="form-section-desc" style="color: #888; margin-bottom: 30px;">Ingrese los datos del
+                    coordinador.</div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label>RUT</label>
-                    <input type="text" name="rut" id="form-rut" placeholder="12345678-9" required
+                    <input type="text" name="rut_coordinador" id="form-rut" placeholder="12345678-9" required
                         oninput="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
-                    <label>Nombre Completo</label>
+                    <label>Nombre</label>
                     <input type="text" name="nombre" id="form-nombre" placeholder="Juan Pérez" required>
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
-                    <label>mail</label>
+                    <label>Email</label>
                     <input type="email" name="email" id="form-email" placeholder="juan@usecap.cl" required>
                 </div>
                 <div class="form-group">
-                    <label>Rol</label>
-                    <select name="rol" id="rol-select" required>
-                        <option value="">Seleccionar rol...</option>
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" id="form-telefono" placeholder="+56912345678">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <input type="text" name="cargo" id="form-cargo" placeholder="Coordinador">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado" required>
+                        <option value="">Seleccionar estado</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
                     </select>
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
-                    <label>Área / Departamento</label>
-                    <input type="text" name="area" id="form-area" placeholder="Ventas">
+                    <label>Fecha de Cumpleaños</label>
+                    <input type="date" name="fecha_cumpleanos" id="form-fecha">
                 </div>
                 <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 ...">
+                    <label>Cliente Asociado</label>
+                    <select name="cliente" id="form-cliente" required>
+                        <option value="">Seleccionar cliente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" id="form-observaciones" placeholder="Notas adicionales"
+                        style="min-height: 100px;"></textarea>
                 </div>
             </div>
 
             <div class="form-actions"
                 style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05);">
                 <button type="button" class="pill-btn secondary" onclick="hideForm()">Cancelar</button>
-                <button type="submit" class="pill-btn primary" id="submit-btn">Crear Ejecutivo y Usuario</button>
+                <button type="submit" class="pill-btn primary" id="submit-btn">Crear Coordinador</button>
             </div>
         </form>
     </div>
@@ -225,76 +241,75 @@
 
 {% block scripts %}
 <script>
-    let currentEjecutivos = [];
-
+    let currentCoordinadores = [];
     function showForm(editData = null) {
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('form-view').classList.add('active');
         document.getElementById('btn-nuevo').classList.add('active');
-
         if (editData) {
-            document.getElementById('form-title').textContent = 'Editar Ejecutivo';
-            document.getElementById('form-desc').textContent = 'Actualice los datos del ejecutivo. El RUT no puede ser modificado.';
-            document.getElementById('form-rut').value = editData.rut_ejecutivo;
+            document.getElementById('form-title').textContent = 'Editar Coordinador';
+            document.getElementById('form-id').value = editData.id;
+            document.getElementById('form-rut').value = editData.rut_coordinador;
             document.getElementById('form-rut').readOnly = true;
             document.getElementById('form-nombre').value = editData.nombre;
             document.getElementById('form-email').value = editData.email;
-            document.getElementById('rol-select').value = editData.rol;
-            document.getElementById('form-area').value = editData.area_departamento || '';
             document.getElementById('form-telefono').value = editData.telefono || '';
+            document.getElementById('form-cargo').value = editData.cargo || '';
+            document.getElementById('form-estado').value = editData.estado;
+            document.getElementById('form-fecha').value = editData.fecha_cumpleanos || '';
+            document.getElementById('form-cliente').value = editData.cliente;
+            document.getElementById('form-observaciones').value = editData.observaciones || '';
             document.getElementById('submit-btn').textContent = 'Guardar Cambios';
             document.querySelector('[name="is_edit"]').value = "true";
         } else {
-            document.getElementById('form-title').textContent = 'Alta de Ejecutivo';
-            document.getElementById('form-desc').textContent = 'Se creará automáticamente un usuario de sistema basado en el email.';
+            document.getElementById('form-title').textContent = 'Alta de Coordinador';
             document.getElementById('form-rut').readOnly = false;
-            document.getElementById('submit-btn').textContent = 'Crear Ejecutivo y Usuario';
+            document.getElementById('submit-btn').textContent = 'Crear Coordinador';
             document.querySelector('[name="is_edit"]').value = "false";
-            document.getElementById('exec-form').reset();
+            document.getElementById('coord-form').reset();
         }
     }
-
     function hideForm() {
         document.getElementById('list-view').style.display = 'block';
         document.getElementById('form-view').classList.remove('active');
         document.getElementById('btn-nuevo').classList.remove('active');
-        document.getElementById('exec-form').reset();
+        document.getElementById('coord-form').reset();
     }
-
-    async function loadEjecutivos() {
+    async function loadCoordinadores() {
         try {
-            const response = await fetch('/api/ejecutivos/');
+            const response = await fetch('/api/coordinadores/');
             if (!response.ok) throw new Error('Error en API');
 
             const data = await response.json();
-            currentEjecutivos = Array.isArray(data) ? data : (data.results || []);
+            currentCoordinadores = Array.isArray(data) ? data : (data.results || []);
 
             document.getElementById('loading').style.display = 'none';
 
-            if (currentEjecutivos.length === 0) {
+            if (currentCoordinadores.length === 0) {
                 document.getElementById('no-data').style.display = 'block';
                 document.getElementById('data-table').style.display = 'none';
             } else {
                 document.getElementById('no-data').style.display = 'none';
                 document.getElementById('data-table').style.display = 'table';
                 const tbody = document.getElementById('data-body');
-                tbody.innerHTML = currentEjecutivos.map(ej => {
+                tbody.innerHTML = currentCoordinadores.map(co => {
                     const clean = (val) => {
                         if (!val || val === 'nan' || val === 'None') return '-';
                         return val;
                     };
-                    return `
-                    <tr>
-                        <td>${clean(ej.rut_ejecutivo)}</td>
-                        <td>${clean(ej.nombre)}</td>
-                        <td>${clean(ej.email)}</td>
-                        <td>${clean(ej.telefono)}</td>
-                        <td><span class="status-badge ${ej.estado === 'activo' ? 'active' : ''}">${clean(ej.estado)}</span></td>
-                        <td>${clean(ej.rol_nombre)}</td>
-                        <td>
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
-                        </td>
-                    </tr>
+                    return `  
+                    <tr>  
+                        <td>${clean(co.rut_coordinador)}</td>  
+                        <td>${clean(co.nombre)}</td>  
+                        <td>${clean(co.email)}</td>  
+                        <td>${clean(co.telefono)}</td>  
+                        <td>${clean(co.cargo)}</td>  
+                        <td>${clean(co.cliente_nombre || co.cliente)}</td>  
+                        <td><span class="status-badge ${co.estado === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
+                        <td>  
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
+                        </td>  
+                    </tr>  
                 `}).join('');
             }
         } catch (error) {
@@ -302,34 +317,37 @@
             document.getElementById('loading').textContent = 'Error: ' + error.message;
         }
     }
-
-    function editEjecutivo(rut) {
-        const ej = currentEjecutivos.find(e => e.rut_ejecutivo === rut);
-        if (ej) showForm(ej);
+    function editCoordinador(id) {
+        const co = currentCoordinadores.find(c => c.id === id);
+        if (co) showForm(co);
     }
-
-    async function loadRoles() {
+    async function loadClientes() {
         try {
-            const response = await fetch('/api/roles/');
+            const response = await fetch('/api/clientes/');
+            if (!response.ok) return;
             const data = await response.json();
-            const select = document.getElementById('rol-select');
-            data.forEach(rol => {
+            const clientes = Array.isArray(data) ? data : (data.results || []);
+            const select = document.getElementById('form-cliente');
+            select.innerHTML = '<option value="">Seleccionar cliente</option>';
+            clientes.forEach(cliente => {
                 const opt = document.createElement('option');
-                opt.value = rol.id;
-                opt.textContent = rol.nombre;
+                opt.value = cliente.id;
+                opt.textContent = cliente.nombre || cliente.razon_social;
                 select.appendChild(opt);
             });
-        } catch (error) { console.error('Error loading roles'); }
+        } catch (error) { console.error('Error loading clientes for dropdown', error); }
     }
-
-    async function saveEjecutivo(e) {
+    async function saveCoordinador(e) {
         e.preventDefault();
         const form = e.target;
-        const rut = form.rut.value;
+        const isEdit = form.querySelector('[name="is_edit"]').value === "true";
+        const id = form.querySelector('[name="id"]').value;
+
+        const rut = form.rut_coordinador.value;
         const phone = form.telefono.value;
 
         if (!validateRut(rut)) {
-            showAlert('RUT inválido', 'error');
+            showAlert('RUT Coordinador inválido', 'error');
             return;
         }
 
@@ -339,16 +357,22 @@
         }
 
         const data = {
-            rut: rut,
+            rut_coordinador: rut,
             nombre: form.nombre.value,
             email: form.email.value,
-            rol: form.rol.value,
-            area: form.area.value,
-            telefono: phone
+            telefono: phone,
+            cargo: form.cargo.value,
+            estado: form.estado.value,
+            fecha_cumpleanos: form.fecha_cumpleanos.value,
+            cliente: form.cliente.value,
+            observaciones: form.observaciones.value
         };
         try {
-            const response = await fetch('/api/ejecutivos-create/', {
-                method: 'POST',
+            const url = isEdit ? `/api/coordinadores/${id}/` : '/api/coordinadores/';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
@@ -357,9 +381,9 @@
             });
             const result = await response.json().catch(() => ({}));
             if (response.ok) {
-                showAlert(result.message || 'Operación exitosa', 'success');
+                showAlert(isEdit ? 'Coordinador actualizado' : 'Coordinador creado exitosamente', 'success');
                 hideForm();
-                loadEjecutivos();
+                loadCoordinadores();
             } else {
                 let errorMsg = result.error || 'No se pudo procesar';
                 if (typeof result === 'object' && !result.error) {
@@ -367,10 +391,11 @@
                 }
                 showAlert('Error: ' + errorMsg, 'error');
             }
-        } catch (error) { showAlert('Error de conexión', 'error'); }
+        } catch (error) {
+            showAlert('Error de conexión', 'error');
+            console.error(error);
+        }
     }
-
-
 
     function getCookie(name) {
         let cookieValue = null;
@@ -386,7 +411,7 @@
         }
         return cookieValue;
     }
-    loadEjecutivos();
-    loadRoles();
+    loadCoordinadores();
+    loadClientes();  
 </script>
 {% endblock %}

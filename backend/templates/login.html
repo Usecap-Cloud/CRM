@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -6,6 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesion - CRM Usecap</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary-blue: #4a8db7;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --logo-main-color: #ffffff;
+        }
+
+        .light-mode {
+            --bg-color: #f1f5f9;
+            --container-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #2c516d;
+            --text-muted: #7c7c7c;
+            --primary-blue: #2c516d;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --logo-main-color: #2c516d;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,47 +39,54 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
+            background: var(--bg-color);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: var(--text-color);
+            transition: all 0.3s ease;
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
             border-radius: 24px;
             padding: 50px 40px;
             width: 100%;
             max-width: 420px;
             backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 40px;
+        .logo img {
+            max-width: 280px;
+            height: auto;
+            margin-bottom: 30px;
         }
 
-        .logo h1 {
-            font-size: 2.2rem;
-            color: #fff;
-            margin-bottom: 5px;
-            font-weight: 800;
+        .logo-light { display: none; }
+        .logo-dark { display: block; }
+
+        .light-mode .logo-light { display: block; }
+        .light-mode .logo-dark { display: none; }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #1a3a8a; /* Deep Night Blue */
+            cursor: pointer;
+            font-size: 1.6rem;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 0 5px rgba(26, 58, 138, 0.4));
         }
 
-        .logo h1 span {
-            color: #1e90ff;
-        }
-
-        .logo p {
-            color: #555;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
         }
 
         .form-group {
@@ -64,7 +96,7 @@
         .form-group label {
             display: block;
             margin-bottom: 10px;
-            color: #aaa;
+            color: var(--text-muted);
             font-size: 0.85rem;
             font-weight: 500;
         }
@@ -72,10 +104,10 @@
         .form-group input {
             width: 100%;
             padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
             border-radius: 12px;
-            color: #fff;
+            color: var(--text-color);
             font-size: 1rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -128,9 +160,12 @@
 
 <body>
     <div class="login-container">
+        <button onclick="toggleTheme()" class="theme-toggle" title="Cambiar Tema">
+            &#x1f314;
+        </button>
         <div class="logo">
-            <h1>USECAP <span>CRM</span></h1>
-            <p>Sistema de Gestión</p>
+            <img src="{% static 'img/logo_inst.svg' %}" alt="USECAP LOGO" class="logo-light">
+            <img src="{% static 'img/logo_inst_white.svg' %}" alt="USECAP LOGO" class="logo-dark">
         </div>
 
         {% if error %}
@@ -144,12 +179,48 @@
                 <input type="text" name="username" placeholder="Ingresa tu usuario" required>
             </div>
             <div class="form-group">
-                <label>Contrasena</label>
-                <input type="password" name="password" placeholder="Ingresa tu contrasena" required>
+                <label>Contraseña</label>
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password-field" placeholder="Ingresa tu contraseña"
+                        required style="padding-right: 50px;">
+                    <button type="button" onclick="togglePassword()"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #aaa; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center;">
+                        <span id="eye-icon" style="font-size: 1.2rem;">&#x1f441;</span>
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn-login">Iniciar Sesion</button>
+            <button type="submit" class="btn-login">Iniciar Sesión</button>
         </form>
     </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+            const isLight = body.classList.contains('light-mode');
+            localStorage.setItem('crm-theme', isLight ? 'light' : 'dark');
+        }
+
+        // Initialize theme
+        (function() {
+            const savedTheme = localStorage.getItem('crm-theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
+
+        function togglePassword() {
+            const passwordField = document.getElementById('password-field');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.innerHTML = '&#x1f576;';
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.innerHTML = '&#x1f441;';
+            }
+        }
+    </script>
 </body>
 
 </html>

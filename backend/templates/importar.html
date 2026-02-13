@@ -123,10 +123,11 @@
             <label>Tipo de Datos a Cargar</label>
             <select id="model-type" class="premium-select">
                 <option value="cliente">Clientes</option>
-                <option value="curso">Cursos</option>
-                <option value="proveedor">Proveedores</option>
+                <option value="coordinador">Coordinadores</option>
                 <option value="contrato">Contratos</option>
+                <option value="curso">Cursos</option>
                 <option value="ejecutivo">Ejecutivos</option>
+                <option value="proveedor">Proveedores</option>
             </select>
         </div>
 
@@ -149,12 +150,12 @@
     <div class="import-card" style="opacity: 0.9; border-color: rgba(30, 144, 255, 0.2);">
         <h3 style="margin-bottom: 15px; color: #1e90ff;">💡 Tips de Formato</h3>
         <ul style="color: #aaa; font-size: 0.85rem; list-style: none; padding: 0; line-height: 1.6;">
-            <li><strong>Clientes:</strong> Use columnas "RUT" (o "RUT_Empresa") y "Razón Social".</li>
-            <li><strong>Ejecutivos:</strong> Use columnas "RUT" (o "RUT_Ejecutivo") y "Nombre".</li>
-            <li><strong>Asignación:</strong> En el Excel de <u>Clientes</u>, añada una columna "RUT Ejecutivo" para
-                asignarlos automáticamente.</li>
-            <li><strong>Nota:</strong> Primero cargue los Ejecutivos y luego los Clientes para poder asignar las
-                relaciones.</li>
+            <li><strong>RUTs:</strong> Deben incluir puntos y guion (ej: <code>18.222.333-4</code>).</li>
+            <li><strong>Teléfonos:</strong> Use solo números, espacios, <code>+</code> o <code>-</code>.</li>
+            <li><strong>Clientes:</strong> Columnas sugeridas: "RUT_Empresa" y "Razón Social".</li>
+            <li><strong>Ejecutivos:</strong> Columnas sugeridas: "RUT_Ejecutivo" y "Nombre".</li>
+            <li><strong>Coordinadores:</strong> Requiere "RUT_Coordinador" y "RUT_Cliente" para vincular.</li>
+            <li><strong>Importante:</strong> El sistema detectará duplicados y te avisará en qué fila están.</li>
         </ul>
     </div>
 </div>
@@ -218,18 +219,28 @@
             const result = await response.json().catch(() => ({}));
 
             if (response.ok) {
-                let msg = result.message || 'Importación procesada exitosamente.';
+                let msg = `<strong>${result.message}</strong>`;
                 if (result.errors && result.errors.length > 0) {
-                    msg += '<br><br><strong>Alertas:</strong><ul style="margin: 10px 0 0 20px; text-align: left;">' +
-                        result.errors.map(e => `<li>${e}</li>`).join('') + '</ul>';
+                    msg += `<br><br><div style="text-align: left; font-size: 0.9rem;">
+                                <strong style="color: #ffcc00;">Observaciones/Alertas (${result.errors.length}):</strong>
+                                <ul style="margin: 10px 0 0 20px; max-height: 200px; overflow-y: auto;">
+                                    ${result.errors.map(e => `<li>${e}</li>`).join('')}
+                                </ul>
+                            </div>`;
                 }
                 showStatus(msg, 'success');
             } else {
                 let err = result.error || 'No se pudo procesar el archivo';
-                if (result.cols_detected) {
-                    err += '<br><br><strong>Columnas encontradas:</strong><br>' + result.cols_detected.join(', ');
+                if (result.errors && result.errors.length > 0) {
+                    err = `<strong>Errores encontrados (${result.errors.length}):</strong>
+                          <ul style="margin: 10px 0 0 20px; text-align: left; font-size: 0.9rem;">
+                              ${result.errors.map(e => `<li>${e}</li>`).join('')}
+                          </ul>`;
                 }
-                showStatus(`Error (${response.status}): ${err}`, 'error');
+                if (result.cols_detected) {
+                    err += '<br><br><strong>Columnas encontradas en el archivo:</strong><br>' + result.cols_detected.join(', ');
+                }
+                showStatus(err, 'error');
             }
         } catch (error) {
             showStatus('Error de conexión con el servidor. Reintente.', 'error');

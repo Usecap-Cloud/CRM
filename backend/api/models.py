@@ -59,7 +59,10 @@ class Ejecutivo(models.Model):
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    estado = models.CharField(max_length=10)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
     area_departamento = models.CharField(max_length=50, blank=True, null=True)
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
@@ -80,10 +83,10 @@ class Ejecutivo(models.Model):
 class Cliente(models.Model):
     rut_empresa = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     razon_social = models.CharField(max_length=100)
-    nombre = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    estado = models.CharField(max_length=10)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
     direccion = models.CharField(max_length=150, blank=True, null=True)
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
@@ -110,7 +113,10 @@ class Coordinador(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     cargo = models.CharField(max_length=50, blank=True, null=True)
     fecha_cumpleanos = models.DateField(blank=True, null=True)
-    estado = models.CharField(max_length=10)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
     observaciones = models.TextField(blank=True, null=True)
     
     # Relaciones
@@ -146,7 +152,10 @@ class Proveedor(models.Model):
     rut_proveedor = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     tipo = models.CharField(max_length=50, blank=True, null=True)
-    estado = models.CharField(max_length=10)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
     contacto = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(blank=True, null=True, unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -167,7 +176,10 @@ class Curso(models.Model):
     codigo = models.CharField(max_length=50, unique=True)
     nombre = models.CharField(max_length=100)
     categoria = models.CharField(max_length=50, blank=True, null=True)
-    estado = models.CharField(max_length=20)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+    )
     codigo_sence = models.CharField(max_length=50, blank=True, null=True)
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
@@ -182,17 +194,21 @@ class Curso(models.Model):
 class Contrato(models.Model):
     tipo_registro = models.CharField(max_length=20)
     empresa = models.CharField(max_length=100)
-    fecha_recepcion = models.DateField()
-    fecha_emision = models.DateField()
+    fecha_recepcion = models.DateField(blank=True, null=True)
+    fecha_emision = models.DateField(blank=True, null=True)
     fecha_inicio = models.DateField(blank=True, null=True)
+    fecha_vencimiento = models.DateField(blank=True, null=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    estado = models.CharField(max_length=20)
+    estado = models.CharField(
+        max_length=10,
+        choices=[("activo", "Activo"), ("finalizado", "Finalizado")]
+    )
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE, related_name="contratos_ejecutivo")
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
@@ -234,11 +250,11 @@ class ContratoCurso(models.Model):
 # Tabla Contratos_Servicios
 # =========================
 class ContratoServicio(models.Model):
-    cantidad = models.IntegerField()
+    cantidad = models.IntegerField(blank=True, null=True)
     precio_unidad = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     detalle = models.TextField(blank=True, null=True)
     duracion_horas = models.IntegerField(blank=True, null=True)
-    costo_negociado = models.DecimalField(max_digits=12, decimal_places=2)
+    costo_negociado = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
     # fechas y horas
@@ -284,7 +300,7 @@ class ContratoProveedor(models.Model):
 class Seguimiento(models.Model):
     tipo_seguimiento = models.CharField(max_length=50)
     requerimiento = models.TextField(blank=True, null=True)
-    fecha = models.DateField()
+    fecha = models.DateField(blank=True, null=True)
     respuesta = models.TextField(blank=True, null=True)
     fecha_respuesta = models.DateField(blank=True, null=True)
     estado = models.CharField(max_length=20)

@@ -16,7 +16,23 @@
         font-size: 2.2rem;
         margin-top: 5px;
         font-weight: 800;
-        color: #fff;
+        letter-spacing: -0.5px;
+    }
+
+    .usecap-text {
+        color: #ffffff; /* White in Dark Mode */
+    }
+
+    .crm-text {
+        color: #0ea5e9; /* Vibrant blue in Dark Mode */
+    }
+
+    .light-mode .usecap-text {
+        color: #0c6180; /* Corporate Blue in Light Mode */
+    }
+
+    .light-mode .crm-text {
+        color: #7c7c7c; /* Corporate Gray in Light Mode */
     }
 
     .stats-grid {
@@ -79,7 +95,7 @@
     .stat-card .number {
         font-size: 2.5rem;
         font-weight: 800;
-        color: #fff;
+        color: var(--text-color);
     }
 
     .stat-card .badge {
@@ -136,7 +152,7 @@
     }
 
     .activity-info .subtitle {
-        color: #888;
+        color: var(--text-muted);
         font-size: 0.8rem;
     }
 
@@ -159,12 +175,13 @@
 {% block content %}
 <div class="page-header">
     <div class="header-title">
-        <h1>USECAP CRM</h1>
+        <h1><span class="usecap-text">USECAP</span> <span class="crm-text">CRM</span></h1>
     </div>
     <div class="page-actions"></div>
 </div>
 
-<div id="loading-dashboard" style="text-align: center; padding: 40px; color: #1e90ff;">Cargando...</div>
+<div id="loading-dashboard" style="text-align: center; padding: 40px; color: #1e90ff;">Buscando Datos del Tablero...
+</div>
 
 <div id="content-dashboard" style="display: none;">
     <div class="stats-grid">
@@ -189,77 +206,75 @@
     </div>
 
     <div class="content-grid">
-        <div class="card-dashboard">
-            <div class="card-header">
-                <h3>&#x26A1; Actividad Reciente</h3>
-                <a href="/admin/" style="color: #1e90ff; font-size: 0.85rem; text-decoration: none;">Ver Historial</a>
-            </div>
-            <div id="activity-list">
-                <div class="activity-item">
-                    <div class="activity-icon seguimiento"
-                        style="background: rgba(0, 217, 255, 0.1); color: #00d9ff; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                        &#x1F4DE;</div>
-                    <div class="activity-info" style="flex: 1;">
-                        <div class="title">Constructora Nahuen</div>
-                        <div class="subtitle">Llamada de confirmación programada</div>
-                    </div>
-                    <div class="activity-meta" style="text-align: right;">
-                        <div style="font-size: 0.75rem; color: #666;">Hace 15 min</div>
-                        <div
-                            style="font-size: 0.7rem; color: #00d9ff; font-weight: 700; background: rgba(0,217,255,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
-                            EN RUTA</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon contrato"
-                        style="background: rgba(0, 255, 136, 0.1); color: #00ff88; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                        &#x2705;</div>
-                    <div class="activity-info" style="flex: 1;">
-                        <div class="title">Minera Los Pelambres</div>
-                        <div class="subtitle">Contrato validado correctamente</div>
-                    </div>
-                    <div class="activity-meta" style="text-align: right;">
-                        <div style="font-size: 0.75rem; color: #666;">Hace 2 horas</div>
-                        <div
-                            style="font-size: 0.7rem; color: #00ff88; font-weight: 700; background: rgba(0,255,136,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
-                            CERRADO</div>
-                    </div>
-                </div>
-            </div>
+        <div class="card-header">
+            <h3>&#x26A1; Actividad Reciente</h3>
         </div>
-
-        <div>
-            <div class="card-dashboard" style="margin-bottom: 24px;">
-                <div class="card-header">
-                    <h3>&#x1F4C5; Agenda</h3>
+        <div id="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon seguimiento"
+                    style="background: rgba(0, 217, 255, 0.1); color: #00d9ff; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    &#x1F4DE;</div>
+                <div class="activity-info" style="flex: 1;">
+                    <div class="title">Constructora Nahuen</div>
+                    <div class="subtitle">Llamada de confirmación programada</div>
                 </div>
-                <div style="padding: 10px 0;">
-                    <div style="margin-bottom: 15px;">
-                        <div style="font-weight: 600; font-size: 0.9rem;">Izaje Crítico</div>
-                        <div style="color: #666; font-size: 0.75rem;">Mañana - 09:00 AM</div>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Primeros Auxilios</div>
-                        <div style="color: #666; font-size: 0.75rem;">Jueves - 14:30 PM</div>
-                    </div>
+                <div class="activity-meta" style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: #666;">Hace 15 min</div>
+                    <div
+                        style="font-size: 0.7rem; color: #00d9ff; font-weight: 700; background: rgba(0,217,255,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                        EN RUTA</div>
                 </div>
             </div>
-
-            <div class="card-dashboard metas-card">
-                <div class="card-header">
-                    <h3>Metas Mensuales</h3>
+            <div class="activity-item">
+                <div class="activity-icon contrato"
+                    style="background: rgba(0, 255, 136, 0.1); color: #00ff88; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    &#x2705;</div>
+                <div class="activity-info" style="flex: 1;">
+                    <div class="title">Minera Los Pelambres</div>
+                    <div class="subtitle">Contrato validado correctamente</div>
                 </div>
-                <div style="color: #888; font-size: 0.85rem;">Facturación Estimada</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
-                    <span id="meta-percent" style="color: #00ff88;">0%</span>
-                    <span id="meta-amount" style="color: #fff;">$0 / $15M</span>
+                <div class="activity-meta" style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: #666;">Hace 2 horas</div>
+                    <div
+                        style="font-size: 0.7rem; color: #00ff88; font-weight: 700; background: rgba(0,255,136,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                        CERRADO</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div>
+        <div class="card-dashboard" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h3>&#x1F4C5; Agenda</h3>
+            </div>
+            <div style="padding: 10px 0;">
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 600; font-size: 0.9rem;">Izaje Crítico</div>
+                    <div style="color: #666; font-size: 0.75rem;">Mañana - 09:00 AM</div>
+                </div>
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Primeros Auxilios</div>
+                    <div style="color: #666; font-size: 0.75rem;">Jueves - 14:30 PM</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-dashboard metas-card">
+            <div class="card-header">
+                <h3>Metas Mensuales</h3>
+            </div>
+            <div style="color: #888; font-size: 0.85rem;">Facturación Estimada</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+                <span id="meta-percent" style="color: #00ff88;">0%</span>
+                <span id="meta-amount" style="color: #fff;">$0 / $15M</span>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 {% endblock %}
 

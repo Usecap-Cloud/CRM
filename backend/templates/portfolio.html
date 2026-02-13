@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Cartera de Clientes - USECAP CRM{% endblock %}
-{% block nav_clientes %}active{% endblock %}
+{% block nav_portfolio %}active{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -174,7 +174,9 @@
 </div>
 
 <div class="app-container-portfolio">
-    <div id="loading-portfolio" class="loading-portfolio">Cargando base de datos de cartera...</div>
+    <div id="loading-portfolio" class="loading-portfolio">Buscando Cartera...</div>
+    <div id="no-data-portfolio" style="text-align: center; padding: 60px; color: #888; display: none;">No hay
+        información disponible</div>
 
     <div id="content-portfolio" style="display: none;">
         <div class="summary" id="summary-portfolio"></div>
@@ -192,6 +194,12 @@
             const data = await resp.json();
 
             document.getElementById('loading-portfolio').style.display = 'none';
+
+            if (!data || data.length === 0) {
+                document.getElementById('no-data-portfolio').style.display = 'block';
+                return;
+            }
+
             document.getElementById('content-portfolio').style.display = 'block';
 
             const totalEjecutivos = data.length;
@@ -219,12 +227,18 @@
             const container = document.getElementById('executives-container');
             container.innerHTML = data.map((ej, index) => {
                 const ejRate = ej.total_contratos > 0 ? ((ej.contratos_firmados / ej.total_contratos) * 100).toFixed(0) : 0;
+
+                const clean = (val) => {
+                    if (!val || val === 'nan' || val === 'None') return '-';
+                    return val;
+                };
+
                 return `
                 <div class="executive-card">
                     <div class="executive-header" onclick="toggleClients(${index})">
                         <div class="executive-info">
-                            <h3>${ej.ejecutivo_nombre}</h3>
-                            <p>${ej.ejecutivo_email || 'Sin contacto email'}</p>
+                            <h3>${clean(ej.ejecutivo_nombre)}</h3>
+                            <p>${clean(ej.ejecutivo_email)}</p>
                             <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">
                                 Contratos: ${ej.contratos_firmados}/${ej.total_contratos} (${ejRate}%)
                             </div>
@@ -234,10 +248,10 @@
                     <div class="clients-list" id="clients-${index}">
                         ${ej.clientes.length > 0 ? ej.clientes.map(c => `
                             <div class="client-row">
-                                <span class="client-rut">${c.rut}</span>
-                                <span class="client-name">${c.razon_social}</span>
+                                <span class="client-rut">${clean(c.rut)}</span>
+                                <span class="client-name">${clean(c.razon_social)}</span>
                                 <span class="client-status">
-                                    <span class="status-badge ${c.estado ? c.estado.toLowerCase() : 'activo'}">${c.estado || 'Activo'}</span>
+                                    <span class="status-badge ${c.estado ? c.estado.toLowerCase() : 'activo'}">${clean(c.estado || 'Activo')}</span>
                                 </span>
                             </div>
                         `).join('') : '<div class="no-clients">No hay clientes asignados a este portafolio</div>'}

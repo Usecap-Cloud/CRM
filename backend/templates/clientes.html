@@ -150,10 +150,12 @@
         </div>
     </div>
 
-    <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
+
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Cargando clientes...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Clientes...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
+            disponible</div>
         <table class="clients-table" id="clients-table" style="display: none;">
             <thead>
                 <tr>
@@ -161,6 +163,10 @@
                     <th>Razon Social</th>
                     <th>Ejecutivo</th>
                     <th>Estado</th>
+                    <th>Dirección</th>
+                    <th>Comuna</th>
+                    <th>Region</th>
+                    <th>Holding</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -191,12 +197,33 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>RUT Empresa</label>
-                    <input type="text" name="rut" id="form-rut" placeholder="77.888.555-K" required>
+                    <input type="text" name="rut_empresa" id="form-rut" placeholder="76.123.456-7" required
+                        oninput="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
-                    <label>Razon Social</label>
-                    <input type="text" name="razon_social" id="form-razon_social" placeholder="Tech Solutions SpA"
-                        required>
+                    <label>Razón Social</label>
+                    <input type="text" name="razon_social" id="form-razon" placeholder="Empresa S.A." required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email Contacto</label>
+                    <input type="email" name="email" id="form-email" placeholder="contacto@empresa.cl">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 1234 5678">
                 </div>
             </div>
 
@@ -288,22 +315,45 @@
     async function loadClients() {
         try {
             const response = await fetch('/api/clientes/');
-            currentClients = await response.json();
+            if (!response.ok) throw new Error('Error en API');
+
+            const data = await response.json();
+            currentClients = Array.isArray(data) ? data : (data.results || []);
+
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('clients-table').style.display = 'table';
-            const tbody = document.getElementById('clients-body');
-            tbody.innerHTML = currentClients.map(client => `
-                <tr>
-                    <td>${client.rut_empresa}</td>
-                    <td>${client.razon_social}</td>
-                    <td>${client.ejecutivo_nombre || 'Sin asignar'}</td>
-                    <td><span class="status-badge active">${client.estado || 'Activo'}</span></td>
-                    <td>
-                        <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editClient(${client.id})'>Editar</button>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
+
+            if (currentClients.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('clients-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('clients-table').style.display = 'table';
+                const tbody = document.getElementById('clients-body');
+                tbody.innerHTML = currentClients.map(client => {
+                    const clean = (val) => {
+                        if (!val || val === 'nan' || val === 'None') return '-';
+                        return val;
+                    };
+                    return `
+                    <tr>
+                        <td>${clean(client.rut_empresa)}</td>
+                        <td>${clean(client.razon_social)}</td>
+                        <td>${clean(client.ejecutivo_nombre)}</td>
+                        <td><span class="status-badge active">${clean(client.estado)}</span></td>
+                        <td>${clean(client.direccion)}</td>
+                        <td>${clean(client.comuna)}</td>
+                        <td>${clean(client.region)}</td>
+                        <td>${clean(client.holding)}</td>
+                        <td>
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editClient(${client.id})'>Editar</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading').textContent = 'Error: ' + error.message;
+        }
     }
 
     function editClient(id) {
@@ -329,12 +379,27 @@
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('client-id').value;
+
+        const rut = form.rut_empresa.value;
+        const phone = form.telefono.value;
+
+        if (!validateRut(rut)) {
+            showAlert('RUT Empresa inválido', 'error');
+            return;
+        }
+
+        if (!validatePhone(phone)) {
+            showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
+            return;
+        }
+
         const data = {
-            rut_empresa: form.rut.value,
+            rut_empresa: rut,
             razon_social: form.razon_social.value,
-            nombre: form.razon_social.value, // Defaulting nombre to razon_social
-            ejecutivo: parseInt(form.ejecutivo.value),
-            estado: 'activo'
+            email_contacto: form.email.value,
+            estado: form.estado.value,
+            telefono: phone,
+            ejecutivo: parseInt(form.ejecutivo.value)
         };
         try {
             const url = id ? `/api/clientes/${id}/` : '/api/clientes/';
@@ -348,21 +413,24 @@
                 },
                 body: JSON.stringify(data)
             });
+
+            const result = await response.json().catch(() => ({}));
+
             if (response.ok) {
                 showAlert(id ? 'Cliente actualizado' : 'Cliente creado', 'success');
                 hideForm();
                 loadClients();
-            } else { showAlert('Error al guardar cliente', 'error'); }
-        } catch (error) { showAlert('Error de conexion', 'error'); }
+            } else {
+                let errorMsg = result.error || 'Error al guardar cliente';
+                if (typeof result === 'object' && !result.error) {
+                    errorMsg = Object.values(result).flat().join(' ');
+                }
+                showAlert(errorMsg, 'error');
+            }
+        } catch (error) { showAlert('Error de conexión con el servidor', 'error'); }
     }
 
-    function showAlert(message, type) {
-        const alert = document.getElementById('alert');
-        alert.textContent = message;
-        alert.style.display = 'block';
-        alert.style.background = type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(255,0,0,0.2)';
-        setTimeout(() => { alert.style.display = 'none'; }, 5000);
-    }
+
 
     function getCookie(name) {
         let cookieValue = null;

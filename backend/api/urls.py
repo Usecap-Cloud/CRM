@@ -23,7 +23,8 @@ router.register(r'import-history', ImportHistoryViewSet)
 
 from .views import (
     DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view, 
-    estadisticas_view, clientes_view, cursos_view, contratos_view, proveedores_view, 
+    estadisticas_view, clientes_view, coordinadores_view,
+    cursos_view, contratos_view, proveedores_view, servicios_view,
     importar_view, AnalyzeHeadersView, ProcessMappedImportView, UniversalImportView,
     ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view
 )
@@ -38,9 +39,11 @@ urlpatterns = [
     path('estadisticas-page/', estadisticas_view, name='estadisticas'),
     path('estadisticas/', estadisticas_view, name='estadisticas-alias'),
     path('clientes-page/', clientes_view, name='clientes-page'),
+    path('coordinadores-page/', coordinadores_view, name='coordinadores-page'),
     path('cursos-page/', cursos_view, name='cursos-page'),
     path('contratos-page/', contratos_view, name='contratos-page'),
     path('proveedores-page/', proveedores_view, name='proveedores-page'),
+    path('servicios-page/', servicios_view, name='servicios-page'),
     path('seguimiento-page/', seguimiento_view, name='seguimiento-page'),
     path('importar-page/', importar_view, name='importar-page'),
     path('ejecutivos-page/', ejecutivos_view, name='ejecutivos-page'),

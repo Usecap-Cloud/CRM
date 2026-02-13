@@ -17,16 +17,36 @@ class EjecutivoSerializer(serializers.ModelSerializer):
         model = Ejecutivo
         fields = '__all__'
 
+    def validate_rut_ejecutivo(self, value):
+        if Ejecutivo.objects.filter(rut_ejecutivo=value).exists():
+            raise serializers.ValidationError("Este RUT ya está registrado como ejecutivo.")
+        return value
+
+    def validate_email(self, value):
+        if Ejecutivo.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este correo ya está registrado por otro ejecutivo.")
+        return value
+
 class ClienteSerializer(serializers.ModelSerializer):
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
     class Meta:
         model = Cliente
         fields = '__all__'
 
+    def validate_rut_empresa(self, value):
+        if Cliente.objects.filter(rut_empresa=value).exists():
+            raise serializers.ValidationError("Este RUT ya está registrado como cliente.")
+        return value
+
 class CoordinadorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordinador
         fields = '__all__'
+
+    def validate_rut_coordinador(self, value):
+        if Coordinador.objects.filter(rut_coordinador=value).exists():
+            raise serializers.ValidationError("Este RUT ya está registrado como coordinador.")
+        return value
 
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +57,11 @@ class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
         fields = '__all__'
+
+    def validate_rut_proveedor(self, value):
+        if Proveedor.objects.filter(rut_proveedor=value).exists():
+            raise serializers.ValidationError("Este RUT ya está registrado como proveedor.")
+        return value
 
 class CursoSerializer(serializers.ModelSerializer):
     class Meta:

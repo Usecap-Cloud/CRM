@@ -1,6 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from rest_framework import viewsets
 from rest_framework.parsers import MultiPartParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 import pandas as pd
 import datetime
 from .models import (
@@ -15,7 +20,6 @@ from .serializers import (
     ServicioSerializer, ProveedorSerializer, CursoSerializer, ContratoSerializer,
     ContratoCursoSerializer, ContratoServicioSerializer, ContratoProveedorSerializer, SeguimientoSerializer
 )
-from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -67,11 +71,14 @@ class SeguimientoViewSet(viewsets.ModelViewSet):
     queryset = Seguimiento.objects.all()
     serializer_class = SeguimientoSerializer
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
 class DashboardStatsView(APIView):
     def get(self, request):
+        # Restricted access to Admin or Gerencia
+        if not request.user.is_superuser:
+            ej = getattr(request.user, 'ejecutivo', None)
+            if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+                return Response({"error": "No tiene permisos para ver estadísticas"}, status=403)
+
         stats = {
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
@@ -145,6 +152,17 @@ def normalize_col(text):
     text = "".join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
     return text.replace(".", "").replace("_", "").replace(" ", "").replace("-", "")
 
+def clean_val(val, default=""):
+    import pandas as pd
+    if pd.isna(val) or val is None:
+        return default
+    s = str(val).strip()
+    if s.lower() == 'nan':
+        return default
+    if s.endswith('.0'):
+        s = s[:-2]
+    return s
+
 class UniversalImportView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -183,22 +201,21 @@ class UniversalImportView(APIView):
                 elif norm in ['contacto', 'personacontacto', 'nombrecontacto']: mapping['nombre_contacto'] = col
                 
                 # Contract specific mapping
-                elif norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
-                elif norm in ['fecharecepcion', 'recepcion']: mapping['fecha_recepcion'] = col
-                elif norm in ['fechaemision', 'emision']: mapping['fecha_emision'] = col
-                elif norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']: mapping['cliente_rut'] = col
-                elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador']: mapping['coordinador_rut'] = col
-                elif norm in ['fechainicio', 'iniciocontrato', 'fecinicio']: mapping['fecha_inicio'] = col
-                elif norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
-                elif norm in ['direccion', 'dir', 'calle']: mapping['direccion'] = col
-                elif norm == 'comuna': mapping['comuna'] = col
-                elif norm == 'region': mapping['region'] = col
-                elif norm in ['sectorindustria', 'sector']: mapping['sector_industria'] = col
-                elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
+                elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
+                elif model_type == 'contrato' and norm in ['fecharecepcion', 'recepcion']: mapping['fecha_recepcion'] = col
+                elif model_type == 'contrato' and norm in ['fechaemision', 'emision']: mapping['fecha_emision'] = col
+                elif (model_type == 'contrato' or model_type == 'coordinador') and norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']: mapping['cliente_rut'] = col
+                elif model_type == 'contrato' and norm in ['rutcoordinador', 'coordinadorrut', 'coordinador']: mapping['coordinador_rut'] = col
+                elif model_type == 'contrato' and norm in ['fechainicio', 'iniciocontrato', 'fecinicio']: mapping['fecha_inicio'] = col
+                elif model_type == 'contrato' and norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
+                elif model_type == 'contrato' and norm in ['sectorindustria', 'sector']: mapping['sector_industria'] = col
+                elif model_type == 'contrato' and norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
                 elif norm in ['areadepartamento', 'area', 'departamento']: mapping['area'] = col
                 elif norm in ['especialidadtipoclientes', 'especialidad']: mapping['especialidad'] = col
                 elif norm in ['observaciones', 'obs', 'comentarios']: mapping['observaciones'] = col
                 elif norm in ['rol', 'idrol', 'rolnombre']: mapping['rol'] = col
+                elif norm in ['rutcoordinador', 'rut_coordinador']: mapping['rut'] = col
+                elif norm in ['fechacumpleanos', 'cumpleanos', 'fecha_cumpleanos']: mapping['fecha_cumpleanos'] = col
 
             created_count = 0
             errors = []
@@ -212,89 +229,86 @@ class UniversalImportView(APIView):
             elif model_type == 'curso': mandatory = ['nombre']
             elif model_type == 'proveedor': mandatory = ['rut']
             elif model_type == 'ejecutivo': mandatory = ['rut']
+            elif model_type == 'coordinador': mandatory = ['rut', 'cliente_rut']
             
             missing = [m for m in mandatory if m not in mapping]
             if missing:
                 return Response({
                     "error": f"Columnas faltantes requeridas: {', '.join(missing)}",
-                    "cols_detected": list(df.columns)
+                    "cols_detected": list(df.columns),
+                    "mapping_debug": mapping
                 }, status=400)
 
             for index, row in df.iterrows():
                 try:
                     if model_type == 'cliente':
-                        rut_val = row.get(mapping.get('rut'))
-                        rut = str(rut_val).strip() if rut_val is not None else ""
-                        if rut.endswith('.0'): rut = rut[:-2]
-                        
-                        if not rut or rut == 'nan' or Cliente.objects.filter(rut_empresa=rut).exists():
-                            if rut and rut != 'nan':
+                        rut = clean_val(row.get(mapping.get('rut')))
+                        if not rut or Cliente.objects.filter(rut_empresa=rut).exists():
+                            if rut:
                                 errors.append(f"Fila {index + 2}: ya existe o RUT inválido ({rut})")
                             continue
 
-                        rs_val = row.get(mapping.get('razon_social'))
-                        razon_social = str(rs_val).strip() if rs_val is not None else ""
+                        razon_social = clean_val(row.get(mapping.get('razon_social')))
+                        nombre = clean_val(row.get(mapping.get('nombre')))
                         
-                        nom_val = row.get(mapping.get('nombre'))
-                        nombre = str(nom_val).strip() if nom_val is not None else ""
-                        
-                        if not razon_social or razon_social == 'nan':
-                            razon_social = nombre if nombre and nombre != 'nan' else "Sin Razon Social"
-                        if not nombre or nombre == 'nan':
+                        if not razon_social:
+                            razon_social = nombre if nombre else "Sin Razon Social"
+                        if not nombre:
                             nombre = razon_social
 
-                        email_val = row.get(mapping.get('email'))
-                        email = str(email_val).strip() if email_val is not None else ""
-                        if not email or email == 'nan':
+                        email = clean_val(row.get(mapping.get('email')))
+                        if not email:
                             email = f"import_{rut.replace('.','').replace('-','')}@usecap.cl"
                         
-                        ejecutivo_rut = row.get(mapping.get('ejecutivo_rut'))
-                        ejecutivo = default_ejecutivo # Default to the first executive
-                        if ejecutivo_rut:
-                            ej_rut_str = str(ejecutivo_rut).strip()
-                            if ej_rut_str.endswith('.0'): ej_rut_str = ej_rut_str[:-2]
-                            found_ej = Ejecutivo.objects.filter(rut_ejecutivo=ej_rut_str).first()
-                            if found_ej: ejecutivo = found_ej
+                        telefono = clean_val(row.get(mapping.get('telefono')))
+                        rubro = clean_val(row.get(mapping.get('rubro')))
+                        
+                        # Find Ejecutivo
+                        ejecutivo = default_ejecutivo
+                        rut_ej_val = clean_val(row.get(mapping.get('ejecutivo_rut')))
+                        if rut_ej_val:
+                            ej_found = Ejecutivo.objects.filter(rut_ejecutivo=rut_ej_val).first()
+                            if ej_found: ejecutivo = ej_found
 
                         Cliente.objects.create(
                             rut_empresa=rut,
                             razon_social=razon_social,
-                            nombre=nombre,
-                            email=email,
-                            telefono=str(row.get(mapping.get('telefono'), '')).strip(),
-                            estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
-                            direccion=str(row.get(mapping.get('direccion'), '')).strip(),
-                            comuna=str(row.get(mapping.get('comuna'), '')).strip(),
-                            region=str(row.get(mapping.get('region'), '')).strip(),
-                            sector_industria=str(row.get(mapping.get('sector_industria'), '')).strip(),
-                            origen_referencia=str(row.get(mapping.get('origen_referencia'), '')).strip(),
-                            observaciones=str(row.get(mapping.get('observaciones'), '')).strip(),
-                            ejecutivo=ejecutivo
+                            nombre_fantasia=nombre,
+                            rubro=rubro,
+                            telefono=telefono,
+                            email_contacto=email,
+                            ejecutivo=ejecutivo,
+                            estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
+                            direccion="Sin Dirección",
+                            comuna="Santiago",
+                            region="RM"
                         )
                         created_count += 1
+                        
                     elif model_type == 'ejecutivo':
-                        rut_val = row.get(mapping.get('rut'))
-                        rut = str(rut_val).strip() if rut_val is not None else ""
-                        if rut.endswith('.0'): rut = rut[:-2]
-                        if not rut or rut == 'nan' or Ejecutivo.objects.filter(rut_ejecutivo=rut).exists(): continue
-
+                        rut = clean_val(row.get(mapping.get('rut')))
+                        if not rut or Ejecutivo.objects.filter(rut_ejecutivo=rut).exists():
+                            continue
+                        
                         rol = default_rol
-                        rol_val = row.get(mapping.get('rol'))
+                        rol_val = clean_val(row.get(mapping.get('rol')))
                         if rol_val:
-                            found_rol = Rol.objects.filter(nombre__iexact=str(rol_val).strip()).first()
+                            found_rol = Rol.objects.filter(nombre__iexact=rol_val).first()
                             if found_rol: rol = found_rol
 
                         # Handle User creation
-                        user_email = str(row.get(mapping.get('email'), f"ej_{rut.replace('-','')}@usecap.cl")).strip()
+                        user_email = clean_val(row.get(mapping.get('email')), f"ej_{rut.replace('.','').replace('-','')}@usecap.cl")
                         username = user_email.split('@')[0]
                         
                         is_admin = rol.nombre.lower() == "administrador"
                         
                         if not User.objects.filter(username=username).exists():
+                            # Clean RUT for password (numeric only)
+                            pass_prefix = rut.split('-')[0].replace('.', '')
                             new_user = User.objects.create_user(
                                 username=username,
                                 email=user_email,
-                                password=f"USECAP_{rut.split('-')[0]}",
+                                password=f"USECAP_{pass_prefix}",
                                 is_staff=is_admin,
                                 is_superuser=is_admin
                             )
@@ -308,34 +322,30 @@ class UniversalImportView(APIView):
                         Ejecutivo.objects.create(
                             user=new_user,
                             rut_ejecutivo=rut,
-                            nombre=str(row.get(mapping.get('nombre'), 'Sin Nombre')).strip(),
+                            nombre=clean_val(row.get(mapping.get('nombre')), 'Sin Nombre'),
                             email=user_email,
-                            telefono=str(row.get(mapping.get('telefono'), '')).strip(),
-                            estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
-                            area_departamento=str(row.get(mapping.get('area'), '')).strip(),
-                            region=str(row.get(mapping.get('region'), '')).strip(),
-                            comuna=str(row.get(mapping.get('comuna'), '')).strip(),
-                            especialidad_tipo_clientes=str(row.get(mapping.get('especialidad'), '')).strip(),
-                            observaciones=str(row.get(mapping.get('observaciones'), '')).strip(),
+                            telefono=clean_val(row.get(mapping.get('telefono'))),
+                            estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
+                            area_departamento=clean_val(row.get(mapping.get('area'))),
+                            region=clean_val(row.get(mapping.get('region'))),
+                            comuna=clean_val(row.get(mapping.get('comuna'))),
+                            especialidad_tipo_clientes=clean_val(row.get(mapping.get('especialidad'))),
+                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             rol=rol
                         )
                         created_count += 1
                     elif model_type == 'proveedor':
-                        rut_val = row.get(mapping.get('rut'))
-                        rut = str(rut_val).strip() if rut_val is not None else ""
-                        if rut.endswith('.0'): rut = rut[:-2]
-                        if not rut or rut == 'nan': continue
-                        
-                        if Proveedor.objects.filter(rut_proveedor=rut).exists():
+                        rut = clean_val(row.get(mapping.get('rut')))
+                        if not rut or Proveedor.objects.filter(rut_proveedor=rut).exists():
                             continue
                             
                         Proveedor.objects.create(
                             rut_proveedor=rut,
-                            nombre=str(row.get(mapping.get('nombre'), 'Sin Nombre')).strip(),
-                            contacto=str(row.get(mapping.get('nombre_contacto'), '')).strip(),
-                            email=str(row.get(mapping.get('email'), '')).strip(),
-                            telefono=str(row.get(mapping.get('telefono'), '')).strip(),
-                            rubro=str(row.get(mapping.get('rubro'), '')).strip()
+                            nombre=clean_val(row.get(mapping.get('nombre')), 'Sin Nombre'),
+                            contacto=clean_val(row.get(mapping.get('nombre_contacto'))),
+                            email=clean_val(row.get(mapping.get('email'))),
+                            telefono=clean_val(row.get(mapping.get('telefono'))),
+                            rubro=clean_val(row.get(mapping.get('rubro')))
                         )
                         created_count += 1
                     elif model_type == 'coordinador':
@@ -346,12 +356,44 @@ class UniversalImportView(APIView):
                         
                         if Coordinador.objects.filter(rut_coordinador=rut).exists():
                             continue
+
+                        # Find Cliente
+                        cliente = None
+                        rut_cli_val = row.get(mapping.get('cliente_rut'))
+                        if rut_cli_val:
+                            rut_cli = str(rut_cli_val).strip()
+                            if rut_cli.endswith('.0'): rut_cli = rut_cli[:-2]
+                            
+                            # Try exact match first
+                            cliente = Cliente.objects.filter(rut_empresa=rut_cli).first()
+                            
+                            if not cliente:
+                                # Try with dots if input has none
+                                if '.' not in rut_cli and '-' in rut_cli:
+                                    parts = rut_cli.split('-')
+                                    body = parts[0]
+                                    dv = parts[1]
+                                    formatted = f"{int(body):,}".replace(",", ".") + "-" + dv
+                                    cliente = Cliente.objects.filter(rut_empresa=formatted).first()
+                                
+                                # Try without dots if input has them
+                                if not cliente and '.' in rut_cli:
+                                    clean = rut_cli.replace('.', '')
+                                    cliente = Cliente.objects.filter(rut_empresa=clean).first()
+
+                        # Validate Client Existence (Mandatory)
+                        if not cliente:
+                             errors.append(f"Fila {index + 2}: Cliente no encontrado (RUT: {rut_cli_val})")
+                             continue
                             
                         Coordinador.objects.create(
                             rut_coordinador=rut,
                             nombre=str(row.get(mapping.get('nombre'), 'Sin Nombre')).strip(),
                             email=str(row.get(mapping.get('email'), '')).strip(),
-                            telefono=str(row.get(mapping.get('telefono'), '')).strip()
+                            telefono=str(row.get(mapping.get('telefono'), '')).strip(),
+                            cliente=cliente,
+                            estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
+                            fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None
                         )
                         created_count += 1
                     elif model_type == 'curso':
@@ -372,34 +414,28 @@ class UniversalImportView(APIView):
                         )
                         created_count += 1
                     elif model_type == 'contrato':
-                        rut_cli_val = row.get(mapping.get('cliente_rut'))
-                        rut_cli = str(rut_cli_val).strip() if rut_cli_val is not None else ""
-                        if rut_cli.endswith('.0'): rut_cli = rut_cli[:-2]
+                        rut_cli = clean_val(row.get(mapping.get('cliente_rut')))
                         
                         cliente = Cliente.objects.filter(rut_empresa=rut_cli).first()
                         if not cliente:
                             # Try by razon social if RUT mapping failed or not found
-                            rs_val = row.get(mapping.get('razon_social'))
+                            rs_val = clean_val(row.get(mapping.get('razon_social')))
                             if rs_val:
-                                cliente = Cliente.objects.filter(razon_social__icontains=str(rs_val).strip()).first()
+                                cliente = Cliente.objects.filter(razon_social__icontains=rs_val).first()
                         
                         if not cliente:
                             errors.append(f"Fila {index + 2}: Cliente no encontrado ({rut_cli})")
                             continue
 
                         ejecutivo = cliente.ejecutivo # Default to client's executive
-                        ej_rut_val = row.get(mapping.get('ejecutivo_rut'))
-                        if ej_rut_val:
-                            ej_rut = str(ej_rut_val).strip()
-                            if ej_rut.endswith('.0'): ej_rut = ej_rut[:-2]
+                        ej_rut = clean_val(row.get(mapping.get('ejecutivo_rut')))
+                        if ej_rut:
                             found_ej = Ejecutivo.objects.filter(rut_ejecutivo=ej_rut).first()
                             if found_ej: ejecutivo = found_ej
                         
                         coordinador = None
-                        coor_rut_val = row.get(mapping.get('coordinador_rut'))
-                        if coor_rut_val:
-                            coor_rut = str(coor_rut_val).strip()
-                            if coor_rut.endswith('.0'): coor_rut = coor_rut[:-2]
+                        coor_rut = clean_val(row.get(mapping.get('coordinador_rut')))
+                        if coor_rut:
                             coordinador = Coordinador.objects.filter(rut_coordinador=coor_rut).first()
 
                         # Date parsing
@@ -421,15 +457,15 @@ class UniversalImportView(APIView):
                             subtotal = 0
 
                         Contrato.objects.create(
-                            tipo_registro=str(row.get(mapping.get('tipo_registro'), 'Servicio')).strip(),
+                            tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Servicio'),
                             empresa=cliente.razon_social,
                             fecha_recepcion=fecha_rec,
                             fecha_emision=fecha_emi,
                             fecha_inicio=fecha_ini,
                             subtotal=subtotal,
-                            estado=str(row.get(mapping.get('estado'), 'Por Cerrar')).strip(),
-                            detalle=str(row.get(mapping.get('detalle'), '')).strip(),
-                            observaciones=str(row.get(mapping.get('observaciones'), '')).strip(),
+                            estado=clean_val(row.get(mapping.get('estado')), 'Por Cerrar'),
+                            detalle=clean_val(row.get(mapping.get('detalle'))),
+                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             cliente=cliente,
                             ejecutivo=ejecutivo,
                             coordinador=coordinador
@@ -445,9 +481,13 @@ class UniversalImportView(APIView):
                     errors.append(f"Fila {index + 2}: {str(e)}")
             
             return Response({
-                "message": f"Se procesaron {created_count} registros de tipo {model_type}",
-                "errors": errors if len(errors) < 10 else errors[:10] + ["... y más"]
-            })
+                "message": f"Proceso finalizado. Creados: {created_count}, Errores: {len(errors)}",
+                "created_count": created_count,
+                "error_count": len(errors),
+                "errors": errors if len(errors) < 20 else errors[:20] + ["... y más errores no mostrados."]
+            }, status=200 if (created_count > 0 or not errors) else 400)
+        except Exception as e:
+            return Response({"error": f"Error fatal en importación: {str(e)}"}, status=500)
         except Exception as e:
             return Response({"error": f"Error al procesar el archivo: {str(e)}"}, status=500)
 
@@ -502,10 +542,10 @@ class ProcessMappedImportView(APIView):
                     if not rut_col or not razon_social_col:
                         continue
                         
-                    rut = str(row.get(rut_col, '')).strip()
-                    razon_social = str(row.get(razon_social_col, '')).strip()
+                    rut = clean_val(row.get(rut_col))
+                    razon_social = clean_val(row.get(razon_social_col))
                     
-                    if not rut or rut == 'nan' or not razon_social or razon_social == 'nan':
+                    if not rut or not razon_social:
                         continue
                         
                     # Optional fields
@@ -513,11 +553,11 @@ class ProcessMappedImportView(APIView):
                     nombre_col = mapping.get('nombre')
                     estado_col = mapping.get('estado')
                     
-                    email = str(row.get(email_col, '')) if email_col else ""
-                    nombre = str(row.get(nombre_col, razon_social)) if nombre_col else razon_social
-                    estado = str(row.get(estado_col, 'activo')).lower() if estado_col else "activo"
+                    email = clean_val(row.get(email_col)) if email_col else ""
+                    nombre = clean_val(row.get(nombre_col), razon_social) if nombre_col else razon_social
+                    estado = clean_val(row.get(estado_col), 'activo').lower() if estado_col else "activo"
                     
-                    if not email or email == 'nan':
+                    if not email:
                         email = f"import_{rut.replace('.','').replace('-','')}@usecap.cl"
                     
                     if Cliente.objects.filter(rut_empresa=rut).exists():
@@ -530,10 +570,16 @@ class ProcessMappedImportView(APIView):
                     Cliente.objects.create(
                         rut_empresa=rut,
                         razon_social=razon_social,
-                        nombre=nombre,
-                        email=email,
+                        nombre_fantasia=nombre,
+                        email_contacto=email,
                         estado=estado,
-                        ejecutivo=default_ejecutivo
+                        ejecutivo=default_ejecutivo,
+                        # Added default fields to match model requirements
+                        direccion="Sin Dirección",
+                        comuna="Santiago",
+                        region="RM",
+                        telefono="",
+                        rubro=""
                     )
                     created_count += 1
                 except Exception as e:
@@ -569,12 +615,19 @@ def portfolio_view(request):
     return render(request, 'portfolio.html')
 
 def estadisticas_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+            return redirect('dashboard')
     return render(request, 'estadisticas.html')
 
 def clientes_view(request):
     from django.shortcuts import render
     return render(request, 'clientes.html')
+
+def coordinadores_view(request):
+    return render(request, "coordinadores.html")
 
 def cursos_view(request):
     from django.shortcuts import render
@@ -633,14 +686,20 @@ class CreateEjecutivoAPIView(APIView):
                 status_code = 200
             else:
                 # Create new executive
+                # Check duplicates by Email (RUT already checked by unique=True/serializer but we wrap it)
+                if Ejecutivo.objects.filter(email=email).exists():
+                    return Response({"error": f"El correo {email} ya está registrado"}, status=400)
+
                 username = email.split('@')[0]
                 if User.objects.filter(username=username).exists():
-                    username = f"{username}_{rut.split('-')[0]}"
+                    username = f"{username}_{rut.split('-')[0].replace('.','')}"
                     
+                # Clean RUT for password (numeric only)
+                pass_prefix = rut.split('-')[0].replace('.', '')
                 new_user = User.objects.create_user(
                     username=username,
                     email=email,
-                    password=f"USECAP_{rut.split('-')[0]}", # Default password
+                    password=f"USECAP_{pass_prefix}", # Default password
                     is_staff=is_admin,
                     is_superuser=is_admin
                 )
@@ -661,3 +720,7 @@ class CreateEjecutivoAPIView(APIView):
             return Response({"message": message, "username": ejecutivo_instance.user.username if ejecutivo_instance.user else ""}, status=status_code)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
+
+def servicios_view(request):
+    from django.shortcuts import render
+    return render(request, 'servicios.html')

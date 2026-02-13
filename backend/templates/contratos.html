@@ -170,13 +170,19 @@
     <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Cargando contratos...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Contratos...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
+            disponible</div>
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
+                    <th>Tipo</th>
                     <th>Empresa</th>
                     <th>Estado</th>
-                    <th>Fecha Inicio</th>
+                    <th>Fecha recepción</th>
+                    <th>Fecha emisión</th>
+                    <th>Fecha inicio</th>
+                    <th>Fecha vencimiento</th>
                     <th>Subtotal</th>
                     <th>Acciones</th>
                 </tr>
@@ -271,19 +277,36 @@
             const response = await fetch('/api/contratos/');
             currentContratos = await response.json();
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('contratos-table').style.display = 'table';
-            const tbody = document.getElementById('contratos-body');
-            tbody.innerHTML = currentContratos.map(c => `
-                <tr>
-                    <td>${c.empresa_nombre}</td>
-                    <td><span class="status-badge" style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 4px 10px; border-radius: 8px;">${c.estado}</span></td>
-                    <td>${c.fecha_inicio || ''}</td>
-                    <td style="font-weight: 600; color: #ff9f43;">$${parseFloat(c.subtotal || 0).toLocaleString()}</td>
-                    <td>
-                        <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
-                    </td>
-                </tr>
-            `).join('');
+
+            if (currentContratos.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('contratos-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('contratos-table').style.display = 'table';
+                const tbody = document.getElementById('contratos-body');
+                tbody.innerHTML = currentContratos.map(c => {
+                    const clean = (val) => {
+                        if (!val || val === 'nan' || val === 'None') return '-';
+                        return val;
+                    };
+                    const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString()}` : '$0';
+                    return `
+                    <tr>
+                        <td>${clean(c.tipo_registro)}</td>
+                        <td>${clean(c.empresa || c.empresa_nombre)}</td>
+                        <td><span class="status-badge" style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 4px 10px; border-radius: 8px;">${clean(c.estado)}</span></td>
+                        <td>${clean(c.fecha_recepcion)}</td>
+                        <td>${clean(c.fecha_emision)}</td>
+                        <td>${clean(c.fecha_inicio)}</td>
+                        <td>${clean(c.fecha_vencimiento)}</td>
+                        <td style="font-weight: 600; color: #ff9f43;">${subtotal}</td>
+                        <td>
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
         } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
     }
 

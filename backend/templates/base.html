@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -7,6 +8,32 @@
     <title>{% block title %}USECAP CRM{% endblock %}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .light-mode {
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #2c516d; /* Institucional Blue/Teal */
+            --text-muted: #7c7c7c; /* Institucional Gray */
+            --primary-blue: #2c516d;
+            --accent-blue: #4a8db7;
+            --nav-hover: rgba(44, 81, 109, 0.05);
+            --logo-main-color: #2c516d;
+        }
+
+        :root {
+            --bg-color: #0f172a; /* Deep Institutional Dark Blue */
+            --sidebar-bg: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary-blue: #4a8db7; /* Lighter institutional blue for dark mode */
+            --accent-blue: #0ea5e9;
+            --nav-hover: rgba(74, 141, 183, 0.1);
+            --logo-main-color: #fff;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,31 +42,44 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
-            color: #fff;
+            background: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
         }
 
         .sidebar {
             width: 240px;
-            background: #0f0f1f;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             padding: 20px 0;
             position: fixed;
             height: 100vh;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .sidebar-logo {
             padding: 0 20px 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            cursor: pointer;
         }
+
+        .sidebar-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 50px;
+        }
+
+        .logo-light { display: none; }
+        .logo-dark { display: block; }
+
+        .light-mode .logo-light { display: block; }
+        .light-mode .logo-dark { display: none; }
 
         .nav-menu {
             flex: 1;
@@ -50,17 +90,46 @@
             align-items: center;
             gap: 12px;
             padding: 14px 20px;
-            color: #888;
+            color: var(--text-muted);
             text-decoration: none;
             transition: all 0.3s;
             border-left: 3px solid transparent;
         }
 
+        .blue-icon {
+            background: linear-gradient(135deg, #001f3f 0%, #0074D9 25%, #7FDBFF 50%, #0074D9 75%, #001f3f 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            font-weight: bold;
+            filter: drop-shadow(0 0 1px rgba(0,0,0,0.3));
+        }
+
         .nav-item:hover,
         .nav-item.active {
-            background: rgba(30, 144, 255, 0.1);
-            color: #fff;
-            border-left-color: #1e90ff;
+            background: var(--nav-hover);
+            color: var(--primary-blue);
+            border-left-color: var(--primary-blue);
+        }
+
+        .theme-toggle-inline {
+            background: none;
+            border: none;
+            color: #1a3a8a; /* Deep Night Blue */
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: transform 0.3s, filter 0.3s;
+            filter: drop-shadow(0 0 5px rgba(26, 58, 138, 0.3));
+        }
+
+        .theme-toggle-inline:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
         }
 
         .main-content {
@@ -98,7 +167,8 @@
         /* Global Pill Button Styles */
         .pill-nav {
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 25px;
             padding: 4px;
             width: fit-content;
@@ -129,7 +199,7 @@
         }
 
         .pill-btn.secondary {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
             border: none;
         }
 
@@ -143,16 +213,17 @@
 
         /* Global Form Select Fixes */
         select option {
-            background: #0f0f1f;
-            color: #fff;
+            background: var(--sidebar-bg);
+            color: var(--text-color);
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .user-profile {
@@ -178,12 +249,25 @@
 
         .user-info .name {
             font-size: 0.85rem;
-            color: #fff;
+            color: var(--text-color);
+            font-weight: 600;
         }
 
         .user-info .role {
             font-size: 0.75rem;
-            color: #666;
+            color: var(--text-muted);
+        }
+
+        /* Dashboards and headers specifically */
+        .page-header h1, .header-title h1 {
+            color: var(--logo-main-color) !important;
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+
+        .header-blue-text {
+            color: var(--primary-blue) !important;
+            margin-left: 2px;
         }
 
         .logout-btn {
@@ -209,59 +293,146 @@
 
 <body>
     <aside class="sidebar">
-        <div class="sidebar-logo">
-            <span style="color: #1e90ff;">&#x1F4CA;</span> USECAP <span>CRM</span>
+        <div class="sidebar-logo" onclick="window.location.href='/'">
+            <img src="{% static 'img/logo_inst.svg' %}" alt="USECAP LOGO" class="logo-light">
+            <img src="{% static 'img/logo_inst_white.svg' %}" alt="USECAP LOGO" class="logo-dark">
         </div>
+
         <nav class="nav-menu">
-            <a href="/" class="nav-item {% block nav_home %}{% endblock %}">
-                <span class="icon">&#x1F3E0;</span> Inicio
-            </a>
+            <div style="display: flex; align-items: center;">
+                <a href="/" class="nav-item {% block nav_home %}{% endblock %}" style="flex: 1;">
+                    <span class="icon blue-icon">&#x26A1;</span> Inicio
+                </a>
+                <button onclick="toggleTheme()" class="theme-toggle-inline" title="Cambiar Tema">
+                    &#x1F314;
+                </button>
+            </div>
             <a href="/api/clientes-page/" class="nav-item {% block nav_clientes %}{% endblock %}">
-                <span class="icon">&#x1F465;</span> Clientes
+                <span class="icon blue-icon">&#x1F451;</span> Clientes
             </a>
             <a href="/api/ejecutivos-page/" class="nav-item {% block nav_ejecutivos %}{% endblock %}">
-                <span class="icon">&#x1F4BC;</span> Ejecutivos
+                <span class="icon blue-icon">&#x1F3C6;</span> Ejecutivos
+            </a>
+            <a href="/api/coordinadores-page/" class="nav-item {% block nav_coordinadores %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F91D;</span> Coordinadores
             </a>
             <a href="/api/cursos-page/" class="nav-item {% block nav_cursos %}{% endblock %}">
-                <span class="icon">&#x1F4D6;</span> Cursos
+                <span class="icon blue-icon">&#x1F9D1;&#x200D;&#x1F4BB;</span> Cursos
             </a>
             <a href="/api/contratos-page/" class="nav-item {% block nav_contratos %}{% endblock %}">
-                <span class="icon">&#x1F4DD;</span> Contratos
+                <span class="icon blue-icon">&#x270D;</span> Contratos
             </a>
-            <a href="/api/proveedores-page/" class="nav-item {% block nav_proveedores %}{% endblock %}">
-                <span class="icon">&#x1F69A;</span> Proveedores
+            <a href="/api/servicios-page/" class="nav-item {% block nav_servicios %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F4C2;</span> Servicios
             </a>
             <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">
-                <span class="icon">&#x1F4E5;</span> Importar
+                <span class="icon blue-icon">&#x1F4BF;</span> Importar
             </a>
+            {% if request.user.is_superuser or request.user.ejecutivo.rol.nombre == 'Administrador' or request.user.ejecutivo.rol.nombre == 'Gerencia' %}
             <a href="/api/estadisticas-page/" class="nav-item {% block nav_estadisticas %}{% endblock %}">
-                <span class="icon">&#x1F4C8;</span> Estadísticas
+                <span class="icon blue-icon">&#x1F4B0;</span> Estadísticas
             </a>
+            {% endif %}
             <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
-                <span class="icon">&#x1F4BC;</span> Cartera
+                <span class="icon blue-icon">&#x2728;</span> Cartera
+            </a>
+            <a href="/api/proveedores-page/" class="nav-item {% block nav_proveedores %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F4E6;</span> Proveedores
             </a>
             <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
-                <span class="icon">&#x1F4C5;</span> Seguimiento
+                <span class="icon blue-icon">&#x1F514;</span> Seguimiento
             </a>
         </nav>
         <div class="user-profile">
-            <div class="user-avatar">A</div>
+            <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
             <div class="user-info">
-                <div class="name">Admin</div>
-                <div class="role">Administrador</div>
+                <div class="name">{{ request.user.username }}</div>
+                <div class="role">{{ request.user.ejecutivo.rol.nombre }}</div>
             </div>
-            <a href="/logout/" class="logout-btn" title="Cerrar Sesión">
-                <span>Salir</span>
-                <span>&#x1F6AA;</span>
+            <a href="/logout/" class="logout-btn">
+                Salir
             </a>
         </div>
     </aside>
 
     <main class="main-content">
+        <div id="alert" class="alert"
+            style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px; position: sticky; top: 0; z-index: 1000;">
+        </div>
         {% block content %}{% endblock %}
     </main>
 
     {% block scripts %}{% endblock %}
+    <script>
+        // Global Validations
+        function validateRut(rut) {
+            if (!rut) return false;
+            let value = rut.replace(/\./g, '').replace(/-/g, '');
+            if (value.length < 8) return false;
+
+            let cuerpo = value.slice(0, -1);
+            let dv = value.slice(-1).toUpperCase();
+
+            // Check if body is number
+            if (!/^\d+$/.test(cuerpo)) return false;
+
+            let suma = 0;
+            let multiplo = 2;
+            for (let i = cuerpo.length - 1; i >= 0; i--) {
+                suma += multiplo * parseInt(cuerpo.charAt(i));
+                multiplo++;
+                if (multiplo > 7) multiplo = 2;
+            }
+
+            let dvr = 11 - (suma % 11);
+            let dvCalc = (dvr === 11) ? '0' : (dvr === 10) ? 'K' : dvr.toString();
+
+            return dvCalc === dv;
+        }
+
+        function validatePhone(phone) {
+            if (!phone) return true; // Empty is valid if not required
+            return /^[\d\s\+\-]+$/.test(phone);
+        }
+
+        function formatRut(rut) {
+            if (!rut) return '';
+            let value = rut.replace(/\./g, '').replace(/-/g, '');
+            if (value.length < 2) return rut;
+            let cuerpo = value.slice(0, -1);
+            let dv = value.slice(-1).toUpperCase();
+            return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            if (!alert) {
+                console.error('Alert element not found');
+                return;
+            }
+            alert.textContent = message;
+            alert.style.display = 'block';
+            alert.style.background = type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(255,0,0,0.2)';
+            alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => { alert.style.display = 'none'; }, 5000);
+        }
+    </script>
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+            const isLight = body.classList.contains('light-mode');
+            localStorage.setItem('crm-theme', isLight ? 'light' : 'dark');
+        }
+
+        // Initialize theme
+        (function() {
+            const savedTheme = localStorage.getItem('crm-theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
+    </script>
 </body>
 
 </html>
