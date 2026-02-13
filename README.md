@@ -1,3 +1,8 @@
+# USECAP CRM
+
+## Status
+- Last Branding Update: 2026-02-13 18:20 (Triggering Deployment)
+
 # Crear entorno virtual con CMD
 python -m venv venv
 venv\Scripts\activate
