@@ -44,7 +44,11 @@ class CoordinadorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_rut_coordinador(self, value):
-        if Coordinador.objects.filter(rut_coordinador=value).exists():
+        # Exclude current instance when editing
+        queryset = Coordinador.objects.filter(rut_coordinador=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
             raise serializers.ValidationError("Este RUT ya está registrado como coordinador.")
         return value
 
