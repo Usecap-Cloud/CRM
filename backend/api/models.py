@@ -63,7 +63,24 @@ class Ejecutivo(models.Model):
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
-    area_departamento = models.CharField(max_length=50, blank=True, null=True)
+    area_departamento = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        choices=[
+            ("ventas", "Ventas"),
+            ("marketing", "Marketing"),
+            ("operaciones", "Operaciones"),
+            ("finanzas", "Finanzas"),
+            ("rrhh", "Recursos Humanos"),
+            ("ti", "Tecnología e Informática"),
+            ("administracion", "Administración"),
+            ("comercial", "Comercial"),
+            ("logistica", "Logística"),
+            ("atencion_cliente", "Atención al Cliente"),
+            ("otro", "Otro")
+        ]
+    )
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
     especialidad_tipo_clientes = models.CharField(max_length=50, blank=True, null=True)
