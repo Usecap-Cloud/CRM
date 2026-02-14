@@ -180,8 +180,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>RUT</label>
-                    <input type="text" name="rut" id="form-rut" placeholder="12345678-9" required
-                        oninput="this.value = formatRut(this.value)">
+                    <input type="text" name="rut" id="form-rut" placeholder="12345678-9" required>
                 </div>
                 <div class="form-group">
                     <label>Nombre Completo</label>
@@ -220,9 +219,17 @@
                         <option value="otro">Otro</option>
                     </select>
                 </div>
+            <div class="form-row">
                 <div class="form-group">
                     <label>Teléfono</label>
                     <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 ...">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
                 </div>
             </div>
 
@@ -247,7 +254,7 @@
 
         if (editData) {
             document.getElementById('form-title').textContent = 'Editar Ejecutivo';
-            document.getElementById('form-desc').textContent = 'Actualice los datos del ejecutivo. El RUT no puede ser modificado.';
+            document.getElementById('form-desc').textContent = '';
             document.getElementById('form-rut').value = editData.rut_ejecutivo;
             document.getElementById('form-rut').readOnly = true;
             document.getElementById('form-nombre').value = editData.nombre;
@@ -255,15 +262,18 @@
             document.getElementById('rol-select').value = editData.rol;
             document.getElementById('form-area').value = editData.area_departamento || '';
             document.getElementById('form-telefono').value = editData.telefono || '';
+            document.getElementById('form-estado').value = (editData.estado || 'activo').toLowerCase();
             document.getElementById('submit-btn').textContent = 'Guardar Cambios';
             document.querySelector('[name="is_edit"]').value = "true";
         } else {
             document.getElementById('form-title').textContent = 'Alta de Ejecutivo';
-            document.getElementById('form-desc').textContent = 'Se creará automáticamente un usuario de sistema basado en el email.';
+            document.getElementById('form-desc').textContent = '';
             document.getElementById('form-rut').readOnly = false;
+            document.getElementById('form-estado').value = 'activo';
             document.getElementById('submit-btn').textContent = 'Crear Ejecutivo y Usuario';
             document.querySelector('[name="is_edit"]').value = "false";
             document.getElementById('exec-form').reset();
+            document.getElementById('form-estado').value = 'activo'; // Reset sets it to first option, ensuring default
         }
     }
 
@@ -273,6 +283,7 @@
         document.getElementById('btn-nuevo').classList.remove('active');
         document.getElementById('exec-form').reset();
     }
+
 
     async function loadEjecutivos() {
         try {
@@ -302,7 +313,7 @@
                         <td>${clean(ej.nombre)}</td>
                         <td>${clean(ej.email)}</td>
                         <td>${clean(ej.telefono)}</td>
-                        <td><span class="status-badge ${ej.estado === 'activo' ? 'active' : ''}">${clean(ej.estado)}</span></td>
+                        <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(ej.estado)}</span></td>
                         <td>${clean(ej.rol_nombre)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
@@ -346,7 +357,7 @@
             return;
         }
 
-        if (!validatePhone(phone)) {
+        if (phone && !validatePhone(phone)) {
             showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
             return;
         }
@@ -357,7 +368,8 @@
             email: form.email.value,
             rol: form.rol.value,
             area_departamento: form.area.value,
-            telefono: phone
+            telefono: phone,
+            estado: form.estado.value
         };
         try {
             const response = await fetch('/api/ejecutivos-create/', {

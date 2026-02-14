@@ -7,13 +7,19 @@ import re
 def validate_rut(value):
     """
     Valida un RUT chileno.
-    Formato esperado: 12345678-9 (sin puntos, con guion)
+    Acepta cualquier formato (con/sin puntos, con/sin guion)
     """
-    rut = value.replace(".", "").upper()
-    if not re.match(r"^\d{7,8}-[0-9K]$", rut):
-        raise ValidationError("Formato de RUT inválido. Use 12345678-9")
+    rut_clean = value.replace(".", "").replace("-", "").upper()
     
-    cuerpo, dv = rut.split("-")
+    if len(rut_clean) < 2:
+        raise ValidationError("RUT inválido (muy corto).")
+
+    cuerpo = rut_clean[:-1]
+    dv = rut_clean[-1]
+    
+    if not cuerpo.isdigit():
+         raise ValidationError("RUT inválido (formato incorrecto).")
+
     suma = 0
     multiplo = 2
     

@@ -305,7 +305,7 @@
                         <td>${clean(co.telefono)}</td>  
                         <td>${clean(co.cargo)}</td>  
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
-                        <td><span class="status-badge ${co.estado === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
+                        <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
                         <td>  
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
                         </td>  

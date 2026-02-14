@@ -443,12 +443,12 @@ class UniversalImportView(APIView):
                             if pd.isna(val) or not val: return None
                             try:
                                 if isinstance(val, (pd.Timestamp, datetime.date)): return val
-                                return pd.to_datetime(val).date()
+                                return pd.to_datetime(val, dayfirst=True).date()
                             except: return None
 
-                        fecha_rec = parse_date(row.get(mapping.get('fecha_recepcion'))) or datetime.date.today()
-                        fecha_emi = parse_date(row.get(mapping.get('fecha_emision'))) or datetime.date.today()
-                        fecha_ini = parse_date(row.get(mapping.get('fecha_inicio'))) or fecha_rec
+                        fecha_rec = parse_date(row.get(mapping.get('fecha_recepcion')))
+                        fecha_emi = parse_date(row.get(mapping.get('fecha_emision')))
+                        fecha_ini = parse_date(row.get(mapping.get('fecha_inicio')))
 
                         subtotal_val = row.get(mapping.get('subtotal'))
                         try:

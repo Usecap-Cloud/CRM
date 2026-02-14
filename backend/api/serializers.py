@@ -39,6 +39,8 @@ class ClienteSerializer(serializers.ModelSerializer):
         return value
 
 class CoordinadorSerializer(serializers.ModelSerializer):
+    cliente_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
+
     class Meta:
         model = Coordinador
         fields = '__all__'

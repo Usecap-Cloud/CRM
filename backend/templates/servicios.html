@@ -300,7 +300,7 @@
                         <td>${clean(servicio.nombre)}</td>
                         <td>${clean(servicio.tipo)}</td>
                         <td>${clean(servicio.rubro)}</td>
-                        <td><span class="status-badge ${servicio.estado === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span></td>
+                        <td><span class="status-badge ${servicio.estado && servicio.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span></td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editService(${servicio.id})'>Editar</button>
                         </td>
