@@ -227,7 +227,6 @@
                     <select name="estado" id="form-estado" required>
                         <option value="activo">Activo</option>
                         <option value="inactivo">Inactivo</option>
-                        <option value="enviado">Enviado</option>
                         <option value="finalizado">Finalizado</option>
                     </select>
                 </div>
@@ -298,7 +297,7 @@
                         if (!val || val === 'nan' || val === 'None') return '-';
                         return val;
                     };
-                    const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString()}` : '$0';
+                    const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     return `
                     <tr>
                         <td>${clean(c.tipo_registro)}</td>
