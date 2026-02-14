@@ -200,8 +200,8 @@ class Contrato(models.Model):
     fecha_vencimiento = models.DateField(blank=True, null=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(
-        max_length=10,
-        choices=[("activo", "Activo"), ("finalizado", "Finalizado")]
+        max_length=20,
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo"), ("enviado", "Enviado"), ("finalizado", "Finalizado")]
     )
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)

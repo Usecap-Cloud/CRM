@@ -76,23 +76,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'crm_usecap.wsgi.application'
 
-import dj_database_url
-
-# Database configuration
-# Prioritize DATABASE_URL (standard for Zeabur/PaaS), fallback to manual Zeabur vars or local defaults
-_default_db_url = "mysql://{user}:{password}@{host}:{port}/{name}".format(
-    user=os.getenv('MYSQL_USERNAME') or os.getenv('MYSQL_USER') or os.getenv('MYSQLUSER') or os.getenv('DB_USER') or 'crm_user',
-    password=os.getenv('MYSQL_PASSWORD') or os.getenv('MYSQLPASSWORD') or os.getenv('DB_PASSWORD') or '',
-    host=os.getenv('MYSQL_HOST') or os.getenv('MYSQLHOST') or os.getenv('DB_HOST') or 'localhost',
-    port=os.getenv('MYSQL_PORT') or os.getenv('MYSQLPORT') or os.getenv('DB_PORT') or '3306',
-    name=os.getenv('MYSQL_DATABASE') or os.getenv('MYSQL_DABATASE') or os.getenv('MYSQLDATABASE') or os.getenv('DB_NAME') or 'crm_usecap'
-)
+# Database
+# Detect Zeabur MySQL variables (supports multiple naming conventions)
+_db_host = (os.getenv('MYSQL_HOST') or os.getenv('MYSQLHOST')
+            or os.getenv('DB_HOST') or 'localhost')
+_db_port = (os.getenv('MYSQL_PORT') or os.getenv('MYSQLPORT')
+            or os.getenv('DB_PORT') or '3306')
+_db_name = (os.getenv('MYSQL_DATABASE') or os.getenv('MYSQL_DABATASE')
+            or os.getenv('MYSQLDATABASE') or os.getenv('DB_NAME') or 'crm_usecap')
+_db_user = (os.getenv('MYSQL_USERNAME') or os.getenv('MYSQL_USER')
+            or os.getenv('MYSQLUSER') or os.getenv('DB_USER') or 'crm_user')
+_db_pass = (os.getenv('MYSQL_PASSWORD') or os.getenv('MYSQLPASSWORD')
+            or os.getenv('DB_PASSWORD') or '')
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=_default_db_url,
-        conn_max_age=600,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': _db_name,
+        'USER': _db_user,
+        'PASSWORD': _db_pass,
+        'HOST': _db_host,
+        'PORT': _db_port,
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [

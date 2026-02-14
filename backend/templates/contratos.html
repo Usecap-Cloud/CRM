@@ -203,6 +203,13 @@
             <input type="hidden" name="id" id="contrato-id">
             <div class="form-row">
                 <div class="form-group">
+                    <label>Tipo de Registro</label>
+                    <select name="tipo_registro" id="form-tipo_registro" required>
+                        <option value="Propuesta">Propuesta</option>
+                        <option value="Contrato">Contrato</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Empresa</label>
                     <select name="empresa" id="empresa-select" required>
                         <option value="">Seleccionar empresa...</option>
@@ -218,10 +225,10 @@
                 <div class="form-group">
                     <label>Estado Inicial</label>
                     <select name="estado" id="form-estado" required>
-                        <option value="Borrador">Borrador</option>
-                        <option value="Enviado">Enviado</option>
-                        <option value="Firmado">Firmado</option>
-                        <option value="Por Cerrar">Por Cerrar</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="finalizado">Finalizado</option>
                     </select>
                 </div>
             </div>
@@ -253,7 +260,8 @@
         if (data) {
             document.getElementById('form-title').textContent = 'Editar Contrato';
             document.getElementById('contrato-id').value = data.id;
-            document.getElementById('empresa-select').value = data.empresa;
+            document.getElementById('empresa-select').value = data.cliente; // Use client ID
+            document.getElementById('form-tipo_registro').value = data.tipo_registro || 'Contrato';
             document.getElementById('form-fecha_inicio').value = data.fecha_inicio;
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-subtotal').value = data.subtotal;
@@ -294,7 +302,7 @@
                     return `
                     <tr>
                         <td>${clean(c.tipo_registro)}</td>
-                        <td>${clean(c.empresa || c.empresa_nombre)}</td>
+                        <td>${clean(c.empresa_nombre || c.empresa)}</td>
                         <td><span class="status-badge" style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 4px 10px; border-radius: 8px;">${clean(c.estado)}</span></td>
                         <td>${clean(c.fecha_recepcion)}</td>
                         <td>${clean(c.fecha_emision)}</td>
@@ -334,7 +342,9 @@
         const form = e.target;
         const id = document.getElementById('contrato-id').value;
         const data = {
-            empresa: parseInt(form.empresa.value),
+            cliente: parseInt(form.empresa.value),
+            tipo_registro: form.tipo_registro.value,
+            empresa: form.empresa.options[form.empresa.selectedIndex].text,
             fecha_inicio: form.fecha_inicio.value,
             estado: form.estado.value,
             subtotal: parseFloat(form.subtotal.value)
