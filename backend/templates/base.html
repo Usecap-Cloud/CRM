@@ -252,9 +252,28 @@
         }
 
         /* Global Form Select Fixes */
+        input, select, textarea {
+            font-size: 1rem; /* Standardized font size */
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg); /* Use card background or specific input bg */
+            color: var(--text-color);
+            width: 100%; /* Default to full width in containers usually */
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e90ff;
+            box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.2);
+        }
+
         select option {
             background: var(--sidebar-bg);
             color: var(--text-color);
+            font-size: 1rem;
+            padding: 10px;
         }
 
         .card {
