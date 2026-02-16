@@ -33,12 +33,24 @@
     }
 
     /* pill-style buttons */
+    .fc-button-group {
+        background: var(--card-bg, #1a1a2e);
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+        border-radius: 25px !important;
+        padding: 4px !important;
+        gap: 5px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    /* pill-style buttons */
     .fc-button {
         border-radius: 20px !important;
-        padding: 8px 16px !important;
+        padding: 12px 32px !important;
         font-weight: 600 !important;
         text-transform: capitalize !important;
         transition: all 0.3s ease !important;
+        font-size: 1rem !important;
     }
 
     .fc-button-primary {
@@ -199,7 +211,7 @@
         const calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'es',
             headerToolbar: {
-                left: 'prev,next today',
+                left: 'prev,next,today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek'
             },
