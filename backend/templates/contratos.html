@@ -6,48 +6,18 @@
 {% block extra_styles %}
 <style>
     /* Premium Styles for Contratos Page */
+    /* Premium Styles for Contratos Page */
     .page-actions {
         display: flex;
         gap: 12px;
     }
 
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        height: 44px;
-        padding: 0 24px;
-        border-radius: 10px;
-        border: none;
+    /* Fix Date Picker Icon */
+
+    /* Fix Date Picker Icon */
+    input[type="date"]::-webkit-calendar-picker-indicator {
         cursor: pointer;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        white-space: nowrap;
-        min-width: 180px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #ff9f43, #ff6b6b) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 159, 67, 0.4);
-    }
-
-    .btn-secondary {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: #fff !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-color: rgba(255, 255, 255, 0.2) !important;
+        filter: invert(53%) sepia(92%) saturate(1556%) hue-rotate(193deg) brightness(103%) contrast(101%);
     }
 
     .contratos-table {
@@ -147,7 +117,7 @@
     }
 
     .form-group input:focus {
-        border-color: #ff9f43;
+        border-color: #1e90ff;
         outline: none;
     }
 </style>

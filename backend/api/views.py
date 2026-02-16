@@ -79,10 +79,39 @@ class DashboardStatsView(APIView):
             if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
                 return Response({"error": "No tiene permisos para ver estadísticas"}, status=403)
 
+        # Recent Activity (Seguimiento)
+        recent_activity = []
+        seguimientos = Seguimiento.objects.select_related('contrato__cliente').order_by('-fecha')[:5]
+        for s in seguimientos:
+            recent_activity.append({
+                "id": s.id,
+                "cliente": s.contrato.cliente.razon_social if s.contrato and s.contrato.cliente else "N/A",
+                "tipo": s.tipo_seguimiento,
+                "fecha": s.fecha,
+                "estado": s.estado
+            })
+
+        # Agenda (Contracts expiring soon)
+        agenda = []
+        today = datetime.date.today()
+        # Filter contracts that are active or 'por cerrar' and have a future expiration date
+        contratos = Contrato.objects.filter(
+            fecha_vencimiento__gte=today
+        ).exclude(estado__iexact='finalizado').order_by('fecha_vencimiento')[:5]
+        
+        for c in contratos:
+            agenda.append({
+                "id": c.id,
+                "titulo": c.empresa, # Using company name as title
+                "fecha": c.fecha_vencimiento
+            })
+
         stats = {
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
             "contratos_cerrar": Contrato.objects.filter(estado__iexact='por cerrar').count(),
+            "actividad_reciente": recent_activity,
+            "agenda": agenda
         }
         return Response(stats)
 

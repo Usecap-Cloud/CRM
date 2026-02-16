@@ -248,15 +248,9 @@
             <div class="card-header">
                 <h3>&#x1F4C5; Agenda</h3>
             </div>
-            <div style="padding: 10px 0;">
-                <div style="margin-bottom: 15px;">
-                    <div style="font-weight: 600; font-size: 0.9rem;">Izaje Crítico</div>
-                    <div style="color: #666; font-size: 0.75rem;">Mañana - 09:00 AM</div>
-                </div>
-                <div>
-                    <div style="font-weight: 600; font-size: 0.9rem;">Primeros Auxilios</div>
-                    <div style="color: #666; font-size: 0.75rem;">Jueves - 14:30 PM</div>
-                </div>
+            <div id="agenda-list" style="padding: 10px 0;">
+                <!-- Content will be loaded via JS -->
+                <div style="color: #666; font-size: 0.85rem; text-align: center; padding: 10px;">Cargando agenda...</div>
             </div>
         </div>
 
@@ -292,6 +286,9 @@
             animateNumber('cursos-count', data.cursos_proceso || 0);
             animateNumber('contratos-count', data.contratos_cerrar || 0);
 
+            renderActivity(data.actividad_reciente || []);
+            renderAgenda(data.agenda || []);
+
             setTimeout(() => {
                 const percent = Math.min(72, (data.empresas_activas || 0) * 3 + 45);
                 document.getElementById('meta-progress').style.width = percent + '%';
@@ -300,8 +297,68 @@
             }, 300);
 
         } catch (error) {
+            console.error(error);
             document.getElementById('loading-dashboard').textContent = 'Error de conexión';
         }
+    }
+
+    function renderActivity(activities) {
+        const container = document.getElementById('activity-list');
+        if (!activities.length) {
+            container.innerHTML = '<div style="padding:15px; text-align:center; color:#666;">No hay actividad reciente</div>';
+            return;
+        }
+        
+        container.innerHTML = activities.map(item => {
+            const isContract = item.tipo && item.tipo.toLowerCase().includes('contrato');
+             // Icon & Color based on type
+             let icon = '&#x1F4DE;'; // Phone default
+             let color = '#00d9ff';
+             let bg = 'rgba(0, 217, 255, 0.1)';
+             let statusBadge = 'EN PROCESO';
+
+            if (item.estado && item.estado.toLowerCase() === 'cerrado') {
+                icon = '&#x2705;';
+                color = '#00ff88';
+                bg = 'rgba(0, 255, 136, 0.1)';
+                statusBadge = 'CERRADO';
+            } else if (item.tipo && item.tipo.toLowerCase().includes('correo')) {
+                icon = '&#x2709;';
+            }
+
+            return `
+            <div class="activity-item">
+                <div class="activity-icon" style="background: ${bg}; color: ${color}; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    ${icon}
+                </div>
+                <div class="activity-info" style="flex: 1;">
+                    <div class="title">${item.cliente}</div>
+                    <div class="subtitle">${item.tipo}</div>
+                </div>
+                <div class="activity-meta" style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: #666;">${item.fecha}</div>
+                    <div style="font-size: 0.7rem; color: ${color}; font-weight: 700; background: ${bg}; padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                        ${item.estado || statusBadge}
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    function renderAgenda(items) {
+        const container = document.getElementById('agenda-list');
+        if (!items.length) {
+            container.innerHTML = '<div style="padding:15px; text-align:center; color:#666;">No hay contratos próximos</div>';
+            return;
+        }
+
+        container.innerHTML = items.map(item => `
+            <div style="margin-bottom: 15px; border-left: 3px solid #1e90ff; padding-left: 10px;">
+                <div style="font-weight: 600; font-size: 0.9rem;">${item.titulo}</div>
+                <div style="color: #666; font-size: 0.75rem;">Vence: ${item.fecha}</div>
+            </div>
+        `).join('');
     }
 
     function animateNumber(id, target) {

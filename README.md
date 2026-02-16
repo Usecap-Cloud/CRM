@@ -61,3 +61,9 @@ Content-Type: application/json
   "ejecutivo_asignado": 1
 }
 
+# Comandos utiles
+python manage.py makemigrations 
+python manage.py migrate
+python manage.py runserver
+
+
