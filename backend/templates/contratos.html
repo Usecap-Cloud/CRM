@@ -272,12 +272,12 @@
                     <tr>
                         <td>${clean(c.tipo_registro)}</td>
                         <td>${clean(c.empresa_nombre || c.empresa)}</td>
-                        <td><span class="status-badge" style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 4px 10px; border-radius: 8px;">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 4px 10px; border-radius: 8px;">${clean(c.estado)}</span></td>
                         <td>${clean(c.fecha_recepcion)}</td>
                         <td>${clean(c.fecha_emision)}</td>
                         <td>${clean(c.fecha_inicio)}</td>
                         <td>${clean(c.fecha_vencimiento)}</td>
-                        <td style="font-weight: 600; color: #ff9f43;">${subtotal}</td>
+                        <td style="font-weight: 600; color: var(--primary-blue);">${subtotal}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
                         </td>
@@ -341,7 +341,7 @@
         const alert = document.getElementById('alert');
         alert.textContent = message;
         alert.style.display = 'block';
-        alert.style.background = type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(255,0,0,0.2)';
+        alert.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,0,0,0.2)';
         setTimeout(() => { alert.style.display = 'none'; }, 5000);
     }
 

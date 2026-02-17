@@ -36,8 +36,8 @@
     }
 
     .status-badge.active {
-        background: rgba(0, 255, 136, 0.2);
-        color: #00ff88;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
     }
 
     /* Form Page Styles */
@@ -313,7 +313,7 @@
                         <td>${clean(ej.nombre)}</td>
                         <td>${clean(ej.email)}</td>
                         <td>${clean(ej.telefono)}</td>
-                        <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(ej.estado)}</span></td>
+                        <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span></td>
                         <td>${clean(ej.rol_nombre)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>

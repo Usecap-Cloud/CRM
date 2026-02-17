@@ -261,7 +261,7 @@
                         <td>${clean(c.codigo)}</td>
                         <td>${clean(c.nombre)}</td>
                         <td>${clean(c.categoria)}</td>
-                        <td><span class="status-badge ${c.estado === 'activo' ? 'active' : ''}">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge ${c.estado && c.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(c.estado)}</span></td>
                         <td>${clean(c.codigo_sence)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCurso(${c.id})'>Editar</button>
