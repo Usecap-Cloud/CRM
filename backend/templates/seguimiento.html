@@ -23,7 +23,7 @@
     }
 
     .fc {
-        color: #fff;
+        color: var(--text-color);
     }
 
     .fc-toolbar-title {
@@ -34,8 +34,8 @@
 
     /* pill-style buttons */
     .fc-button-group {
-        background: var(--card-bg, #1a1a2e);
-        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1)) !important;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color) !important;
         border-radius: 25px !important;
         padding: 4px !important;
         display: inline-flex !important;
@@ -46,7 +46,7 @@
     .fc-button {
         background: transparent !important;
         border: none !important;
-        color: #888 !important;
+        color: var(--text-muted) !important;
         padding: 12px 32px !important;
         border-radius: 20px !important;
         cursor: pointer !important;
@@ -84,8 +84,8 @@
     }
 
     #alerts-panel {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 20px;
         padding: 20px;
         overflow-y: auto;
@@ -110,6 +110,10 @@
         font-size: 0.85rem;
     }
 
+    .light-mode .alert-card {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
     .alert-card.urgent {
         border-left-color: #ff6b6b;
     }
@@ -119,14 +123,14 @@
     }
 
     .alert-date {
-        color: #888;
+        color: var(--text-muted);
         font-size: 0.75rem;
         margin-bottom: 4px;
     }
 
     .alert-desc {
         font-weight: 500;
-        color: #fff;
+        color: var(--text-color);
     }
 
     .alert-link {
@@ -141,7 +145,15 @@
     .fc-theme-standard td,
     .fc-theme-standard th,
     .fc-scrollgrid {
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    .fc-col-header-cell-cushion {
+        color: var(--text-color) !important;
+    }
+
+    .fc-daygrid-day-number {
+        color: var(--text-color) !important;
     }
 
     .fc-day-today {
