@@ -20,6 +20,8 @@
             --nav-hover: rgba(15, 23, 42, 0.05);
             --logo-main-color: #1e3a8a;
             --card-gradient: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            --success-green: #0d9488;
+            --success-green-bg: rgba(16, 185, 129, 0.15);
         }
 
         :root {
@@ -34,6 +36,8 @@
             --nav-hover: rgba(74, 141, 183, 0.1);
             --logo-main-color: #fff;
             --card-gradient: linear-gradient(135deg, rgba(30, 58, 95, 0.4) 0%, rgba(15, 39, 68, 0.4) 100%);
+            --success-green: #0d9488;
+            --success-green-bg: rgba(16, 185, 129, 0.1);
         }
 
         * {
@@ -473,6 +477,7 @@
             }
             alert.textContent = message;
             alert.style.display = 'block';
+            alert.style.background = type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(255,0,0,0.2)';
             alert.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,0,0,0.2)';
             alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setTimeout(() => { alert.style.display = 'none'; }, 5000);
