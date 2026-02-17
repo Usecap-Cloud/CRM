@@ -35,36 +35,48 @@
     /* pill-style buttons */
     .fc-button-group {
         background: var(--card-bg, #1a1a2e);
-        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1)) !important;
         border-radius: 25px !important;
         padding: 4px !important;
-        gap: 5px !important;
         display: inline-flex !important;
         align-items: center !important;
+        margin-right: 15px !important;
     }
 
-    /* pill-style buttons */
     .fc-button {
-        border-radius: 20px !important;
+        background: transparent !important;
+        border: none !important;
+        color: #888 !important;
         padding: 12px 32px !important;
+        border-radius: 20px !important;
+        cursor: pointer !important;
         font-weight: 600 !important;
-        text-transform: capitalize !important;
         transition: all 0.3s ease !important;
         font-size: 1rem !important;
-    }
-
-    .fc-button-primary {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: #888 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: auto !important;
+        box-shadow: none !important;
+        margin: 0 !important;
     }
 
     .fc-button-primary:hover,
     .fc-button-primary.fc-button-active {
         background-color: #1e90ff !important;
-        border-color: #1e90ff !important;
         color: #fff !important;
         box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3) !important;
+    }
+
+    .fc-button-active {
+        background-color: #1e90ff !important;
+        color: #fff !important;
+    }
+
+    /* Fix arrows centering */
+    .fc .fc-icon {
+        font-size: 1.2em !important;
+        vertical-align: middle !important;
     }
 
     .fc-daygrid-day:hover {
