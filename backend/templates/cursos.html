@@ -39,8 +39,8 @@
     }
 
     .status-badge.active {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
+        background: var(--success-green-bg);
+        color: var(--success-green);
     }
 
     /* Form Page Styles */
@@ -115,7 +115,7 @@
     }
 
     .form-group input:focus {
-        border-color: #10b981;
+        border-color: var(--success-green);
         outline: none;
     }
 </style>
@@ -272,7 +272,7 @@
                         <td>${clean(c.codigo)}</td>
                         <td>${clean(c.nombre)}</td>
                         <td>${clean(c.categoria)}</td>
-                        <td><span class="status-badge ${c.estado && c.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge ${c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado') || c.estado.toLowerCase().includes('completado')) ? 'active' : ''}">${clean(c.estado)}</span></td>
                         <td>${clean(c.codigo_sence)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCurso(${c.id})'>Editar</button>

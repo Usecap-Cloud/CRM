@@ -355,13 +355,14 @@
 
         if (serviceChart) serviceChart.destroy();
         const sCtx = document.getElementById('serviceChart').getContext('2d');
+        const successColor = getComputedStyle(document.body).getPropertyValue('--success-green').trim() || '#0d9488';
         serviceChart = new Chart(sCtx, {
             type: 'doughnut',
             data: {
                 labels: ['SENCE', 'Privado', 'Convenio'],
                 datasets: [{
                     data: [40, 35, 25],
-                    backgroundColor: ['#1e90ff', '#0d9488', '#ff9f43'],
+                    backgroundColor: ['#1e90ff', successColor, '#ff9f43'],
                     borderWidth: 0
                 }]
             },
