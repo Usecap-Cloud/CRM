@@ -21,8 +21,8 @@
     }
 
     .stat-premium-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 20px;
         padding: 24px;
         backdrop-filter: blur(10px);
@@ -44,7 +44,7 @@
     .stat-premium-card .value {
         font-size: 2rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--text-color);
         margin-bottom: 4px;
     }
 
@@ -71,8 +71,8 @@
     }
 
     .chart-box {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 20px;
         padding: 24px;
     }
@@ -80,7 +80,7 @@
     .chart-box h3 {
         font-size: 1.1rem;
         margin-bottom: 20px;
-        color: #fff;
+        color: var(--text-color);
     }
 
     .funnel-container {
@@ -139,7 +139,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
     }
 
@@ -164,7 +165,7 @@
 
     .rank-name {
         font-weight: 500;
-        color: #fff;
+        color: var(--text-color);
     }
 
     .rank-value {
@@ -317,6 +318,10 @@
 
         if (salesChart) salesChart.destroy();
         const ctx = document.getElementById('salesChart').getContext('2d');
+        const isLight = document.body.classList.contains('light-mode');
+        const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+        const tickColor = isLight ? '#475569' : '#94a3b8';
+
         salesChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -334,8 +339,15 @@
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: tickColor }
+                    }
                 }
             }
         });
