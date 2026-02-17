@@ -27,7 +27,7 @@
 
     .clients-table td {
         padding: 15px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .status-badge {
@@ -37,14 +37,14 @@
     }
 
     .status-badge.active {
-        background: rgba(0, 255, 136, 0.2);
-        color: #00ff88;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
     }
 
     /* Form Page Styles */
     #form-view {
         display: none;
-        background: #0a0a1a;
+        background: var(--bg-color);
         max-width: 900px;
         margin: 0 auto;
     }
@@ -59,13 +59,13 @@
         align-items: center;
         gap: 20px;
         padding-bottom: 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .form-header .back-btn {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #fff;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -76,11 +76,11 @@
     }
 
     .form-body {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 24px;
         padding: 40px;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(8px);
     }
 
     .form-section-title {
@@ -112,17 +112,17 @@
 
     .form-group label {
         font-size: 0.85rem;
-        color: #aaa;
+        color: var(--text-muted);
     }
 
     .form-group input,
     .form-group select,
     .form-group textarea {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 12px 16px;
-        color: #fff;
+        color: var(--text-color);
         width: 100%;
     }
 
@@ -192,7 +192,7 @@
             </div>
 
             <div class="section-label"
-                style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: #fff; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
                 &#x1F4CB; IDENTIFICACION</div>
             <div class="form-row">
                 <div class="form-group">
@@ -238,7 +238,7 @@
 
             <!-- Botones adaptados -->
             <div class="form-actions"
-                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05);">
+                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
                 <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="submit-btn">Guardar Empresa</button>
             </div>
