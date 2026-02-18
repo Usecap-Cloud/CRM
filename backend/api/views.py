@@ -192,6 +192,32 @@ def clean_val(val, default=""):
         s = s[:-2]
     return s
 
+def validate_rut_chile(rut):
+    if not rut: return False
+    # Clean RUT: remove dots, dashes and convert to uppercase
+    rut = str(rut).upper().replace(".", "").replace("-", "").replace(" ", "").strip()
+    if len(rut) < 8: return False
+    
+    try:
+        cuerpo = rut[:-1]
+        dv = rut[-1]
+        
+        suma = 0
+        multiplo = 2
+        for c in reversed(cuerpo):
+            suma += int(c) * multiplo
+            multiplo += 1
+            if multiplo > 7: multiplo = 2
+            
+        dv_calc = 11 - (suma % 11)
+        if dv_calc == 11: dv_expected = '0'
+        elif dv_calc == 10: dv_expected = 'K'
+        else: dv_expected = str(dv_calc)
+        
+        return dv == dv_expected
+    except:
+        return False
+
 class UniversalImportView(APIView):
     parser_classes = [MultiPartParser]
 
@@ -272,9 +298,15 @@ class UniversalImportView(APIView):
                 try:
                     if model_type == 'cliente':
                         rut = clean_val(row.get(mapping.get('rut')))
-                        if not rut or Cliente.objects.filter(rut_empresa=rut).exists():
-                            if rut:
-                                errors.append(f"Fila {index + 2}: ya existe o RUT inválido ({rut})")
+                        if not rut:
+                            continue
+                        
+                        if not validate_rut_chile(rut):
+                            errors.append(f"Fila {index + 2}: RUT inválido ({rut})")
+                            continue
+                        
+                        if Cliente.objects.filter(rut_empresa=rut).exists():
+                            errors.append(f"Fila {index + 2}: El cliente ya existe ({rut})")
                             continue
 
                         razon_social = clean_val(row.get(mapping.get('razon_social')))
@@ -316,7 +348,15 @@ class UniversalImportView(APIView):
                         
                     elif model_type == 'ejecutivo':
                         rut = clean_val(row.get(mapping.get('rut')))
-                        if not rut or Ejecutivo.objects.filter(rut_ejecutivo=rut).exists():
+                        if not rut:
+                            continue
+                            
+                        if not validate_rut_chile(rut):
+                            errors.append(f"Fila {index + 2}: RUT inválido ({rut})")
+                            continue
+                            
+                        if Ejecutivo.objects.filter(rut_ejecutivo=rut).exists():
+                            errors.append(f"Fila {index + 2}: El ejecutivo ya existe ({rut})")
                             continue
                         
                         rol = default_rol
@@ -365,7 +405,15 @@ class UniversalImportView(APIView):
                         created_count += 1
                     elif model_type == 'proveedor':
                         rut = clean_val(row.get(mapping.get('rut')))
-                        if not rut or Proveedor.objects.filter(rut_proveedor=rut).exists():
+                        if not rut:
+                            continue
+                            
+                        if not validate_rut_chile(rut):
+                            errors.append(f"Fila {index + 2}: RUT inválido ({rut})")
+                            continue
+                            
+                        if Proveedor.objects.filter(rut_proveedor=rut).exists():
+                            errors.append(f"Fila {index + 2}: El proveedor ya existe ({rut})")
                             continue
                             
                         Proveedor.objects.create(
@@ -381,9 +429,15 @@ class UniversalImportView(APIView):
                         rut_val = row.get(mapping.get('rut'))
                         rut = str(rut_val).strip() if rut_val is not None else ""
                         if rut.endswith('.0'): rut = rut[:-2]
-                        if not rut or rut == 'nan': continue
+                        if not rut or rut == 'nan': 
+                            continue
+                        
+                        if not validate_rut_chile(rut):
+                            errors.append(f"Fila {index + 2}: RUT inválido ({rut})")
+                            continue
                         
                         if Coordinador.objects.filter(rut_coordinador=rut).exists():
+                            errors.append(f"Fila {index + 2}: El coordinador ya existe ({rut})")
                             continue
 
                         # Find Cliente
