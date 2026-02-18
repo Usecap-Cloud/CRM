@@ -39,15 +39,6 @@
         border-bottom: 1px solid var(--border-color);
     }
 
-    .status-badge {
-        padding: 5px 12px;
-        border-radius: 15px;
-        font-size: 0.8rem;
-    }
-    .status-badge.activo, .status-badge.firmado {
-        background: var(--success-green-bg);
-        color: var(--success-green);
-    }
 
     /* Form Page Styles */
     #form-view {
@@ -276,7 +267,7 @@
                     <tr>
                         <td>${clean(c.tipo_registro)}</td>
                         <td>${clean(c.empresa_nombre || c.empresa)}</td>
-                        <td><span class="status-badge" style="background: var(--success-green-bg); color: var(--success-green); padding: 4px 10px; border-radius: 8px;">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge active">${clean(c.estado)}</span></td>
                         <td>${clean(c.fecha_recepcion)}</td>
                         <td>${clean(c.fecha_emision)}</td>
                         <td>${clean(c.fecha_inicio)}</td>

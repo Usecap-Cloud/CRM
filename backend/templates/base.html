@@ -352,6 +352,25 @@
         .logout-btn:hover {
             background: rgba(255, 107, 107, 0.1);
         }
+
+        /* Global Status Badges */
+        .status-badge {
+            padding: 5px 14px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .status-badge.active {
+            background: var(--success-green-bg);
+            color: var(--success-green);
+        }
+
+        .status-badge.info {
+            background: rgba(30, 144, 255, 0.15);
+            color: #1e90ff;
+        }
     </style>
     {% block extra_styles %}{% endblock %}
 </head>
