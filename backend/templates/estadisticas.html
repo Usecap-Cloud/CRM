@@ -56,7 +56,7 @@
     }
 
     .trend.up {
-        color: #10b981;
+        color: var(--success-green);
     }
 
     .trend.down {
@@ -124,9 +124,8 @@
     }
 
     .stage-4 {
-        background: #10b981; /* Solid institutional teal */
+        background: rgba(5, 150, 105, 0.2); /* Emerald with matching transparency logic */
         width: 35%;
-        opacity: 0.8;
     }
 
     .ranking-list {
@@ -361,7 +360,7 @@
                 labels: ['SENCE', 'Privado', 'Convenio'],
                 datasets: [{
                     data: [40, 35, 25],
-                    backgroundColor: ['#1e90ff', '#10b981', '#ff9f43'],
+                    backgroundColor: ['#1e90ff', successColor, '#ff9f43'],
                     borderWidth: 0
                 }]
             },

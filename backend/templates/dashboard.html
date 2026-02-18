@@ -68,7 +68,7 @@
 
     .stat-card.cursos .icon-box {
         background: rgba(16, 185, 129, 0.15);
-        color: #10b981;
+        color: var(--success-green);
     }
 
     .stat-card.contratos .icon-box {
@@ -158,7 +158,7 @@
 
     .metas-card .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #1e90ff, #0d9488); /* More muted teal */
+        background: linear-gradient(90deg, #1e90ff, var(--success-green));
         border-radius: 10px;
         transition: width 1s ease-out;
     }
@@ -220,7 +220,7 @@
             </div>
             <div class="activity-item">
                 <div class="activity-icon contrato"
-                    style="background: rgba(16, 185, 129, 0.1); color: #10b981; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    style="background: var(--success-green-bg); color: var(--success-green); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                     &#x2705;</div>
                 <div class="activity-info" style="flex: 1;">
                     <div class="title">Minera Los Pelambres</div>
@@ -229,7 +229,7 @@
                 <div class="activity-meta" style="text-align: right;">
                     <div style="font-size: 0.75rem; color: #666;">Hace 2 horas</div>
                     <div
-                        style="font-size: 0.7rem; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
+                        style="font-size: 0.7rem; color: var(--success-green); font-weight: 700; background: var(--success-green-bg); padding: 2px 8px; border-radius: 4px; margin-top: 4px;">
                         CERRADO</div>
                 </div>
             </div>
@@ -255,7 +255,7 @@
             <div class="progress-bar">
                 <div class="progress-fill" id="meta-progress" style="width: 0%"></div>
             </div>
-                <span id="meta-percent" style="color: #10b981;">0%</span>
+                <span id="meta-percent" style="color: var(--success-green);">0%</span>
                 <span id="meta-amount" style="color: var(--text-color);">$0 / $15M</span>
             </div>
         </div>
@@ -311,7 +311,7 @@
 
             if (item.estado && item.estado.toLowerCase() === 'cerrado') {
                 icon = '&#x2705;';
-                color = '#10b981';
+                color = '#059669';
                 bg = 'rgba(16, 185, 129, 0.1)';
                 statusBadge = 'CERRADO';
             } else if (item.tipo && item.tipo.toLowerCase().includes('correo')) {

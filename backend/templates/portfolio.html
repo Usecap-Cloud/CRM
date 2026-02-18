@@ -140,8 +140,8 @@
     }
 
     .status-badge.activo {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
+        background: var(--success-green-bg);
+        color: var(--success-green);
     }
 
     .status-badge.inactivo {
@@ -219,7 +219,7 @@
                     <div class="label">Contratos Totales</div>
                 </div>
                 <div class="summary-card">
-                    <div class="number" style="color: ${parseFloat(successRate) > 50 ? '#10b981' : '#ff9f43'}">${successRate}%</div>
+                    <div class="number" style="color: ${parseFloat(successRate) > 50 ? '#059669' : '#ff9f43'}">${successRate}%</div>
                     <div class="label">Tasa de Éxito de Cierre</div>
                 </div>
             `;
