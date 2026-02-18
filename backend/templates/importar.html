@@ -150,11 +150,11 @@
     <div class="import-card" style="opacity: 0.9; border-color: rgba(30, 144, 255, 0.2);">
         <h3 style="margin-bottom: 15px; color: #1e90ff;">💡 Tips de Formato</h3>
         <ul style="color: #aaa; font-size: 0.85rem; list-style: none; padding: 0; line-height: 1.6;">
-            <li><strong>RUTs:</strong> Se acepta cualquier formato (con o sin puntos/guion). El sistema los normalizará automáticamente.</li>
-            <li><strong>Teléfonos:</strong> Use solo números, espacios, <code>+</code> o <code>-</code>.</li>
-            <li><strong>Clientes:</strong> Columnas sugeridas: "RUT_Empresa" y "Razón Social".</li>
-            <li><strong>Ejecutivos:</strong> Columnas sugeridas: "RUT_Ejecutivo" y "Nombre".</li>
-            <li><strong>Coordinadores:</strong> Requiere "RUT_Coordinador" y "RUT_Cliente" para vincular.</li>
+            <li><strong>RUTs:</strong> Deben incluir dígito verificador.</li>
+            <li><strong>Teléfonos:</strong> Use solo números, <code>+</code>.</li>
+            <li><strong>Clientes:</strong> Requiere RUT de la empresa y razón social (nombre completo).</li>
+            <li><strong>Ejecutivos:</strong> Requiere datos personales del ejecutivo y rol (Nombre: "Ventas" o el ID 2).</li>
+            <li><strong>Coordinadores:</strong> Requiere <code>rut_coordinador</code>, <code>rut_cliente</code> para vincular, <code>fecha_cumpleanos</code>, <code>cargo</code>.</li>
             <li><strong>Importante:</strong> El sistema detectará duplicados y te avisará en qué fila están.</li>
         </ul>
     </div>

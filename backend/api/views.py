@@ -285,6 +285,7 @@ class UniversalImportView(APIView):
                 elif norm in ['rol', 'idrol', 'rolnombre']: mapping['rol'] = col
                 elif norm in ['rutcoordinador', 'rut_coordinador']: mapping['rut'] = col
                 elif norm in ['fechacumpleanos', 'cumpleanos', 'fecha_cumpleanos']: mapping['fecha_cumpleanos'] = col
+                elif norm in ['cargo', 'puesto', 'position']: mapping['cargo'] = col
 
             created_count = 0
             errors = []
@@ -487,6 +488,7 @@ class UniversalImportView(APIView):
                             telefono=str(row.get(mapping.get('telefono'), '')).strip(),
                             cliente=cliente,
                             estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
+                            cargo=str(row.get(mapping.get('cargo'), '')).strip(),
                             fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None
                         )
                         created_count += 1
