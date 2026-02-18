@@ -189,8 +189,8 @@
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
                     </select>
                 </div>
             </div>
@@ -262,7 +262,7 @@
                         <td>${clean(c.codigo)}</td>
                         <td>${clean(c.nombre)}</td>
                         <td>${clean(c.categoria)}</td>
-                        <td><span class="status-badge ${c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado') || c.estado.toLowerCase().includes('completado')) ? 'active' : ''}">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge ${c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado') || c.estado.toLowerCase().includes('completado')) ? 'active' : ''}">${clean(c.estado).toUpperCase()}</span></td>
                         <td>${clean(c.codigo_sence)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCurso(${c.id})'>Editar</button>

@@ -193,8 +193,8 @@
                     <label>Estado</label>
                     <select name="estado" id="form-estado" required>
                         <option value="">Seleccionar estado</option>
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
                     </select>
                 </div>
             </div>
@@ -294,7 +294,7 @@
                         <td>${clean(co.telefono)}</td>  
                         <td>${clean(co.cargo)}</td>  
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
-                        <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
+                        <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado).toUpperCase()}</span></td>  
                         <td>  
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
                         </td>  

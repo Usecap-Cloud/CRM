@@ -1,0 +1,593 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$6Mr59m7pVKuJXoo26NnhXK$msWePdlGaU9oY2blEHNvAUgSMosre8cyZ8TRil6WP/o=",
+      "last_login": "2026-02-10T20:54:28.021Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-02-10T16:40:23.737Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$C3KFlGjnkPbEPi6FWuozfF$CSYyToI4JFFf0w8+qS96CSCESGssAZ6YGY7BK6AhMqM=",
+      "last_login": "2026-02-10T18:31:44.683Z",
+      "is_superuser": false,
+      "username": "marketing",
+      "first_name": "",
+      "last_name": "",
+      "email": "marketing@usecap.cl",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-02-10T18:06:40.129Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$WLcp5DWSKvm4B18NTJzrBj$bauJpvu6i9UL8xieBn8zzyJEVsUe/60BkfDaw1wNffs=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "jzuares",
+      "first_name": "",
+      "last_name": "",
+      "email": "jzuares@usecap.cl",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-02-10T18:06:40.823Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$0GnCnU5grpR95jwUnqYaXS$Ibwwh/F7gldiaPIli5blS5eVXPTzvwCOH0N2clunjCk=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "comercial",
+      "first_name": "",
+      "last_name": "",
+      "email": "comercial@usecap.cl",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-02-10T18:06:41.369Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "sessions.session",
+    "pk": "v7sqys3x16ym3mff0us3zusmzts6r600",
+    "fields": {
+      "session_data": ".eJxVjEsOwiAUAO_y1oZAgQd06d4zED4PqRpISrsy3t006UK3M5N5gw_7Vv0-aPVLhhkEXH5ZDOlJ7RD5Edq9s9Tbti6RHQk77WC3nul1Pdu_QQ2jwgxcEyp0HKPRyQYioYI1jhwWNGSltEpHpFQKoZ54nmRRGYswxJOJTsLnC9ZoN8k:1vpuke:Pw8BY1u6nOrJ4bmWs7YqEKnrjF90ylo_SIXoItwUznk",
+      "expire_date": "2026-02-24T20:54:28.025Z"
+    }
+  },
+  {
+    "model": "api.rol",
+    "pk": 1,
+    "fields": {
+      "nombre": "Administrador",
+      "estado": "Activo",
+      "descripcion": "Acceso total al sistema y gestion de usuarios.",
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.rol",
+    "pk": 2,
+    "fields": {
+      "nombre": "Ejecutivo Comercial",
+      "estado": "Activo",
+      "descripcion": "Encargado de gestionar clientes, ventas y seguimientos.",
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.rol",
+    "pk": 3,
+    "fields": {
+      "nombre": "Coordinador Academico",
+      "estado": "Activo",
+      "descripcion": "Gestiona cursos y relatores.",
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.rol",
+    "pk": 4,
+    "fields": {
+      "nombre": "Gerencia",
+      "estado": "Activo",
+      "descripcion": "Vision global de reportes y estados.",
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.ejecutivo",
+    "pk": 1,
+    "fields": {
+      "user": 2,
+      "rut_ejecutivo": "21597150-3",
+      "nombre": "Simon Urrutia",
+      "email": "marketing@usecap.cl",
+      "telefono": "226714073",
+      "estado": "activo",
+      "area_departamento": "Administracion",
+      "region": "",
+      "comuna": "",
+      "especialidad_tipo_clientes": "",
+      "observaciones": "Administracion comercial",
+      "rol": 1
+    }
+  },
+  {
+    "model": "api.ejecutivo",
+    "pk": 2,
+    "fields": {
+      "user": 3,
+      "rut_ejecutivo": "12396184-6",
+      "nombre": "Jose Zuares",
+      "email": "jzuares@usecap.cl",
+      "telefono": "226714073",
+      "estado": "activo",
+      "area_departamento": "Administracion",
+      "region": "",
+      "comuna": "",
+      "especialidad_tipo_clientes": "",
+      "observaciones": "Director",
+      "rol": 4
+    }
+  },
+  {
+    "model": "api.ejecutivo",
+    "pk": 3,
+    "fields": {
+      "user": 4,
+      "rut_ejecutivo": "19886801-9",
+      "nombre": "Felipe Rifo",
+      "email": "comercial@usecap.cl",
+      "telefono": "226714073",
+      "estado": "activo",
+      "area_departamento": "Comercial",
+      "region": "",
+      "comuna": "",
+      "especialidad_tipo_clientes": "",
+      "observaciones": "Ejecutivo de ventas",
+      "rol": 2
+    }
+  },
+  {
+    "model": "api.cliente",
+    "pk": 1,
+    "fields": {
+      "rut_empresa": "78806090-4",
+      "razon_social": "GAMA CHILE S.A.",
+      "estado": "activo",
+      "direccion": "Av. Andres Bello 1255",
+      "region": "SANTIAGO",
+      "comuna": "LAS CONDES",
+      "sector_industria": "Industria del Retail",
+      "origen_referencia": "nan",
+      "fecha_creacion": null,
+      "observaciones": "nan",
+      "ejecutivo": 1,
+      "cliente_padre": null
+    }
+  },
+  {
+    "model": "api.cliente",
+    "pk": 2,
+    "fields": {
+      "rut_empresa": "76242087-2",
+      "razon_social": "TUA RETAIL S.A.",
+      "estado": "activo",
+      "direccion": "Av. Andres Bello 1255",
+      "region": "SANTIAGO",
+      "comuna": "LAS CONDES",
+      "sector_industria": "Industria del Retail",
+      "origen_referencia": "nan",
+      "fecha_creacion": null,
+      "observaciones": "nan",
+      "ejecutivo": 1,
+      "cliente_padre": null
+    }
+  },
+  {
+    "model": "api.cliente",
+    "pk": 3,
+    "fields": {
+      "rut_empresa": "78425850-5",
+      "razon_social": "BALL CHILE S.A.",
+      "estado": "activo",
+      "direccion": "Av. La Montana 1294",
+      "region": "LAMPA",
+      "comuna": "LAMPA",
+      "sector_industria": "industria Metalurgia",
+      "origen_referencia": "nan",
+      "fecha_creacion": null,
+      "observaciones": "nan",
+      "ejecutivo": 1,
+      "cliente_padre": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 1,
+    "fields": {
+      "codigo": "CUR_0_1770737914",
+      "nombre": "Tecnicas de Comunicacion Efectiva y Resolucion de Conflictos",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 2,
+    "fields": {
+      "codigo": "CUR_1_1770737914",
+      "nombre": "Uso de Tecnicas de Liderazgo Efectivo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 3,
+    "fields": {
+      "codigo": "CUR_2_1770737914",
+      "nombre": "Tecnicas de Ventas",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 4,
+    "fields": {
+      "codigo": "CUR_3_1770737914",
+      "nombre": "Uso de Tecnicas de Liderazgo Efectivo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 5,
+    "fields": {
+      "codigo": "CUR_4_1770737914",
+      "nombre": "Tecnicas de Ventas",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 6,
+    "fields": {
+      "codigo": "CUR_5_1770737914",
+      "nombre": "Microsoft Excel B�sico",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 7,
+    "fields": {
+      "codigo": "CUR_6_1770737914",
+      "nombre": "Microsoft Excel Intermedio",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 8,
+    "fields": {
+      "codigo": "CUR_7_1770737914",
+      "nombre": "Microsoft Excel Avanzado",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 9,
+    "fields": {
+      "codigo": "CUR_8_1770737914",
+      "nombre": "Inteligencia Artificial",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 10,
+    "fields": {
+      "codigo": "CUR_9_1770737914",
+      "nombre": "Trabajo en Equipo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 11,
+    "fields": {
+      "codigo": "CUR_10_1770737914",
+      "nombre": "Neuroliderazgo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 12,
+    "fields": {
+      "codigo": "CUR_11_1770737914",
+      "nombre": "Habilidades de Comunicacion y Persuasion",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 13,
+    "fields": {
+      "codigo": "CUR_12_1770737914",
+      "nombre": "Power BI Basico",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 14,
+    "fields": {
+      "codigo": "CUR_13_1770737914",
+      "nombre": "Power BI Intermedio",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 15,
+    "fields": {
+      "codigo": "CUR_14_1770737914",
+      "nombre": "Reclutamiento y Seleccion de Personas",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 16,
+    "fields": {
+      "codigo": "CUR_15_1770737914",
+      "nombre": "Tecnicas de Ventas",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 17,
+    "fields": {
+      "codigo": "CUR_16_1770737914",
+      "nombre": "Tecnicas de Ventas",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 18,
+    "fields": {
+      "codigo": "CUR_17_1770737914",
+      "nombre": "Impacto y Persuasion",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 19,
+    "fields": {
+      "codigo": "CUR_18_1770737914",
+      "nombre": "Impacto y Persuasion",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 20,
+    "fields": {
+      "codigo": "CUR_19_1770737914",
+      "nombre": "Liderazgo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.curso",
+    "pk": 21,
+    "fields": {
+      "codigo": "CUR_20_1770737914",
+      "nombre": "Liderazgo",
+      "categoria": null,
+      "estado": "activo",
+      "codigo_sence": null,
+      "detalle": null,
+      "observaciones": null
+    }
+  },
+  {
+    "model": "api.contrato",
+    "pk": 1,
+    "fields": {
+      "tipo_registro": "Contrato",
+      "empresa": "GAMA CHILE S.A.",
+      "fecha_recepcion": "2026-02-10",
+      "fecha_emision": "2025-03-15",
+      "fecha_inicio": null,
+      "subtotal": "0.00",
+      "estado": "Finalizado",
+      "detalle": "",
+      "observaciones": "",
+      "cliente": 1,
+      "ejecutivo": 1,
+      "coordinador": null
+    }
+  },
+  {
+    "model": "api.contrato",
+    "pk": 2,
+    "fields": {
+      "tipo_registro": "Contrato",
+      "empresa": "GAMA CHILE S.A.",
+      "fecha_recepcion": "2026-02-10",
+      "fecha_emision": "2025-03-15",
+      "fecha_inicio": null,
+      "subtotal": "0.00",
+      "estado": "Finalizado",
+      "detalle": "",
+      "observaciones": "",
+      "cliente": 1,
+      "ejecutivo": 1,
+      "coordinador": null
+    }
+  },
+  {
+    "model": "api.contrato",
+    "pk": 3,
+    "fields": {
+      "tipo_registro": "Contrato",
+      "empresa": "GAMA CHILE S.A.",
+      "fecha_recepcion": "2026-02-10",
+      "fecha_emision": "2026-02-10",
+      "fecha_inicio": null,
+      "subtotal": "0.00",
+      "estado": "Finalizado",
+      "detalle": "",
+      "observaciones": "",
+      "cliente": 1,
+      "ejecutivo": 1,
+      "coordinador": null
+    }
+  },
+  {
+    "model": "api.contrato",
+    "pk": 4,
+    "fields": {
+      "tipo_registro": "Contrato",
+      "empresa": "GAMA CHILE S.A.",
+      "fecha_recepcion": "2026-02-10",
+      "fecha_emision": "2026-02-10",
+      "fecha_inicio": null,
+      "subtotal": "0.00",
+      "estado": "Finalizado",
+      "detalle": "",
+      "observaciones": "",
+      "cliente": 1,
+      "ejecutivo": 1,
+      "coordinador": null
+    }
+  },
+  {
+    "model": "api.contrato",
+    "pk": 5,
+    "fields": {
+      "tipo_registro": "Contrato",
+      "empresa": "GAMA CHILE S.A.",
+      "fecha_recepcion": "2026-02-10",
+      "fecha_emision": "2025-09-30",
+      "fecha_inicio": null,
+      "subtotal": "0.00",
+      "estado": "Finalizado",
+      "detalle": "",
+      "observaciones": "",
+      "cliente": 1,
+      "ejecutivo": 1,
+      "coordinador": null
+    }
+  }
+]

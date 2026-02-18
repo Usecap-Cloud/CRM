@@ -217,8 +217,8 @@
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
                     </select>
                 </div>
             </div>
@@ -303,7 +303,7 @@
                         <td>${clean(ej.nombre)}</td>
                         <td>${clean(ej.email)}</td>
                         <td>${clean(ej.telefono)}</td>
-                        <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span></td>
+                        <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado).toUpperCase()}</span></td>
                         <td>${clean(ej.rol_nombre)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
