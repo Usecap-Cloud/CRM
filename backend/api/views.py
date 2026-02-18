@@ -291,7 +291,11 @@ class UniversalImportView(APIView):
             errors = []
             
             default_ejecutivo = Ejecutivo.objects.first()
-            default_rol = Rol.objects.first()
+            # Prioritize 'Ejecutivo de Ventas' or ID 2 as default
+            default_rol = Rol.objects.filter(nombre__iexact='Ejecutivo de Ventas').first() or \
+                         Rol.objects.filter(nombre__iexact='Ventas').first() or \
+                         Rol.objects.filter(id=2).first() or \
+                         Rol.objects.first()
 
             # Check for mandatory columns depending on model
             mandatory = []
