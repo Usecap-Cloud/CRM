@@ -219,7 +219,7 @@
                     <div class="label">Contratos Totales</div>
                 </div>
                 <div class="summary-card">
-                    <div class="number" style="color: #10b981">${successRate}%</div>
+                    <div class="number" style="color: ${parseFloat(successRate) > 50 ? '#059669' : '#ff9f43'}">${successRate}%</div>
                     <div class="label">Tasa de Éxito de Cierre</div>
                 </div>
             `;

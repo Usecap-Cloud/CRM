@@ -119,7 +119,7 @@
     }
 
     .alert-card.closure {
-        border-left-color: #10b981;
+        border-left-color: var(--success-green);
     }
 
     .alert-date {
@@ -214,7 +214,7 @@
                 events.push({
                     title: 'Prox Acción: ' + s.tipo_seguimiento,
                     start: s.fecha_proxima_accion,
-                    color: '#10b981',
+                    color: '#059669',
                     extendedProps: { type: 'proxima', id: s.id }
                 });
             }
@@ -226,7 +226,7 @@
                 events.push({
                     title: 'Emisión Contrato: ' + c.empresa_nombre,
                     start: c.fecha_emision,
-                    color: '#10b981',
+                    color: '#059669',
                     extendedProps: { type: 'contrato_emision', id: c.id }
                 });
             }
