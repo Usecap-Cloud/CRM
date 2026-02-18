@@ -191,7 +191,7 @@
                 </div>
                 <div class="form-group">
                     <label>Razón Social</label>
-                    <input type="text" name="razon_social" id="form-razon_social" placeholder="Empresa S.A." required>
+                    <input type="text" name="razon_social" id="form-razon" placeholder="Empresa S.A." required>
                 </div>
             </div>
 
@@ -203,8 +203,8 @@
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
-                        <option value="ACTIVO">ACTIVO</option>
-                        <option value="INACTIVO">INACTIVO</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
                     </select>
                 </div>
             </div>
@@ -328,7 +328,7 @@
                         <td>${clean(client.rut_empresa)}</td>
                         <td>${clean(client.razon_social)}</td>
                         <td>${clean(client.ejecutivo_nombre)}</td>
-                        <td><span class="status-badge active">${clean(client.estado).toUpperCase()}</span></td>
+                        <td><span class="status-badge active">${clean(client.estado)}</span></td>
                         <td>${clean(client.direccion)}</td>
                         <td>${clean(client.comuna)}</td>
                         <td>${clean(client.region)}</td>
