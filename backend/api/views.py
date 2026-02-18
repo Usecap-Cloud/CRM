@@ -316,7 +316,7 @@ class UniversalImportView(APIView):
                             continue
                         
                         if not validate_rut_chile(rut_raw):
-                            errors.append(f"Fila {index + 2}: RUT inválido ({rut_raw})")
+                            errors.append(f"Fila {index + 2}: Ingrese su RUT con dígito verificador ({rut_raw})")
                             continue
                         
                         rut = format_rut_chile(rut_raw)
@@ -368,7 +368,7 @@ class UniversalImportView(APIView):
                             continue
                             
                         if not validate_rut_chile(rut_raw):
-                            errors.append(f"Fila {index + 2}: RUT inválido ({rut_raw})")
+                            errors.append(f"Fila {index + 2}: Ingrese su RUT con dígito verificador ({rut_raw})")
                             continue
                         
                         rut = format_rut_chile(rut_raw)
@@ -426,7 +426,7 @@ class UniversalImportView(APIView):
                             continue
                             
                         if not validate_rut_chile(rut_raw):
-                            errors.append(f"Fila {index + 2}: RUT inválido ({rut_raw})")
+                            errors.append(f"Fila {index + 2}: Ingrese su RUT con dígito verificador ({rut_raw})")
                             continue
                         
                         rut = format_rut_chile(rut_raw)
@@ -451,7 +451,7 @@ class UniversalImportView(APIView):
                             continue
                         
                         if not validate_rut_chile(rut_raw):
-                            errors.append(f"Fila {index + 2}: RUT inválido ({rut_raw})")
+                            errors.append(f"Fila {index + 2}: Ingrese su RUT con dígito verificador ({rut_raw})")
                             continue
                         
                         rut = format_rut_chile(rut_raw)

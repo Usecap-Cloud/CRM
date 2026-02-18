@@ -9,16 +9,16 @@ def validate_rut(value):
     Valida un RUT chileno.
     Acepta cualquier formato (con/sin puntos, con/sin guion)
     """
-    rut_clean = value.replace(".", "").replace("-", "").upper()
+    rut_clean = value.replace(".", "").replace("-", "").replace(" ", "").upper()
     
     if len(rut_clean) < 2:
-        raise ValidationError("RUT inválido (muy corto).")
+        raise ValidationError("Ingrese su RUT con dígito verificador.")
 
     cuerpo = rut_clean[:-1]
     dv = rut_clean[-1]
     
     if not cuerpo.isdigit():
-         raise ValidationError("RUT inválido (formato incorrecto).")
+         raise ValidationError("Ingrese su RUT con dígito verificador.")
 
     suma = 0
     multiplo = 2
@@ -38,7 +38,7 @@ def validate_rut(value):
         dv_calc = str(dv_esperado)
         
     if dv_calc != dv:
-        raise ValidationError("RUT inválido.")
+        raise ValidationError("Ingrese su RUT con dígito verificador.")
     return value
 
 # =========================
