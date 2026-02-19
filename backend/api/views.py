@@ -11,7 +11,8 @@ import datetime
 from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
-    ContratoServicio, ContratoProveedor,Seguimiento, ImportHistory
+    ContratoServicio, ContratoProveedor,Seguimiento, ImportHistory,
+    normalize_rut_str
 )
 from django.http import HttpResponse
 import io
@@ -194,43 +195,25 @@ def clean_val(val, default=""):
 
 def validate_rut_chile(rut):
     if not rut: return False
-    # Clean RUT: remove dots, dashes and convert to uppercase
-    rut = str(rut).upper().replace(".", "").replace("-", "").replace(" ", "").strip()
-    if len(rut) < 8: return False
-    
-    try:
-        cuerpo = rut[:-1]
-        dv = rut[-1]
-        
-        suma = 0
-        multiplo = 2
-        for c in reversed(cuerpo):
-            suma += int(c) * multiplo
-            multiplo += 1
-            if multiplo > 7: multiplo = 2
-            
-        dv_calc = 11 - (suma % 11)
-        if dv_calc == 11: dv_expected = '0'
-        elif dv_calc == 10: dv_expected = 'K'
-        else: dv_expected = str(dv_calc)
-        
-        return dv == dv_expected
-    except:
-        return False
+    rut_clean = str(rut).upper().replace(".", "").replace("-", "").replace(" ", "").strip()
+    if len(rut_clean) < 2: return False
+    cuerpo = rut_clean[:-1]
+    dv = rut_clean[-1]
+    if not cuerpo.isdigit(): return False
+    suma = 0
+    multiplo = 2
+    for c in reversed(cuerpo):
+        suma += int(c) * multiplo
+        multiplo += 1
+        if multiplo == 8: multiplo = 2
+    dv_esperado = 11 - (suma % 11)
+    if dv_esperado == 11: dv_calc = "0"
+    elif dv_esperado == 10: dv_calc = "K"
+    else: dv_calc = str(dv_esperado)
+    return dv_calc == dv
 
 def format_rut_chile(rut):
-    if not rut: return ""
-    clean = str(rut).upper().replace(".", "").replace("-", "").replace(" ", "").strip()
-    if len(clean) < 2: return clean
-    cuerpo = clean[:-1]
-    dv = clean[-1]
-    
-    try:
-        cuerpo_formatted = f"{int(cuerpo):,}".replace(",", ".")
-    except:
-        cuerpo_formatted = cuerpo
-        
-    return f"{cuerpo_formatted}-{dv}"
+    return normalize_rut_str(rut)
 
 class UniversalImportView(APIView):
     parser_classes = [MultiPartParser]

@@ -5,10 +5,27 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 import re
 
+def normalize_rut_str(value):
+    """
+    Normaliza un RUT al formato 12.345.678-9
+    """
+    if not value:
+        return value
+    clean = str(value).upper().replace(".", "").replace("-", "").replace(" ", "").strip()
+    if len(clean) < 2:
+        return clean
+    cuerpo = clean[:-1]
+    dv = clean[-1]
+    try:
+        # Formato con puntos: 12.345.678
+        cuerpo_fmt = f"{int(cuerpo):,}".replace(",", ".")
+        return f"{cuerpo_fmt}-{dv}"
+    except:
+        return f"{cuerpo}-{dv}"
+
 def validate_rut(value):
     """
     Valida un RUT chileno.
-    Acepta cualquier formato (con/sin puntos, con/sin guion)
     """
     rut_clean = value.replace(".", "").replace("-", "").replace(" ", "").upper()
     
@@ -94,6 +111,10 @@ class Ejecutivo(models.Model):
     # Relaciones
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        self.rut_ejecutivo = normalize_rut_str(self.rut_ejecutivo)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.nombre
 
@@ -120,6 +141,10 @@ class Cliente(models.Model):
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        self.rut_empresa = normalize_rut_str(self.rut_empresa)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.razon_social
 
@@ -142,6 +167,10 @@ class Coordinador(models.Model):
     
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.rut_coordinador = normalize_rut_str(self.rut_coordinador)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
@@ -184,6 +213,10 @@ class Proveedor(models.Model):
     comuna = models.CharField(max_length=50, blank=True, null=True)
     rubro = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.rut_proveedor = normalize_rut_str(self.rut_proveedor)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
