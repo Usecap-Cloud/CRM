@@ -335,6 +335,7 @@
                         <td>${clean(client.cliente_padre_nombre)}</td>
                         <td>
                             <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editClient(${client.id})'>Editar</button>
+                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem; background: #e63946; border-color: #e63946;" onclick='deleteClient(${client.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -420,6 +421,26 @@
     }
 
 
+
+    async function deleteClient(id) {
+        if (!confirm('¿Está seguro de eliminar este cliente? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/clientes/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Cliente eliminado correctamente', 'success');
+                loadClients();
+            } else {
+                showAlert('Error al eliminar el cliente. Es posible que tenga contratos asociados.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
+    }
 
     function getCookie(name) {
         let cookieValue = null;
