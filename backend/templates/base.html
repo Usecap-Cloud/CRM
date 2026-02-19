@@ -450,6 +450,15 @@
             <a href="/api/servicios-page/" class="nav-item {% block nav_servicios %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F4C2;</span> Servicios
             </a>
+            <a href="/api/proveedores-page/" class="nav-item {% block nav_proveedores %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F4E6;</span> Proveedores
+            </a>
+            <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F514;</span> Seguimiento
+            </a>
+            <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
+                <span class="icon blue-icon">&#x2728;</span> Cartera
+            </a>
             <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F4BF;</span> Importar
             </a>
@@ -458,15 +467,6 @@
                 <span class="icon blue-icon">&#x1F4B0;</span> Estadísticas
             </a>
             {% endif %}
-            <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
-                <span class="icon blue-icon">&#x2728;</span> Cartera
-            </a>
-            <a href="/api/proveedores-page/" class="nav-item {% block nav_proveedores %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4E6;</span> Proveedores
-            </a>
-            <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F514;</span> Seguimiento
-            </a>
         </nav>
         <div class="user-profile">
             <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
