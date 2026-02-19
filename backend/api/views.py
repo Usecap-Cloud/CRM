@@ -256,8 +256,11 @@ class UniversalImportView(APIView):
                 elif norm in ['id', 'cedula'] and 'rut' not in mapping: mapping['rut'] = col
                 
                 # Relationship logic
-                if model_type == 'cliente' and norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'asignadoa']:
-                    mapping['ejecutivo_rut'] = col
+                if model_type == 'cliente':
+                    if norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'asignadoa']:
+                        mapping['ejecutivo_rut'] = col
+                    elif norm in ['rutclientepadre', 'clientepadre', 'padre']:
+                        mapping['cliente_padre_rut'] = col
                 
                 # Common fields
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
@@ -266,8 +269,13 @@ class UniversalImportView(APIView):
                 elif norm in ['telefono', 'fono', 'celular', 'phone', 'tel']: mapping['telefono'] = col
                 elif norm in ['estado', 'status', 'estadocliente', 'estadoejecutivo']: mapping['estado'] = col
                 elif norm in ['codigo', 'code', 'cod']: mapping['codigo'] = col
-                elif norm in ['rubro', 'especialidad', 'sector']: mapping['rubro'] = col
+                elif norm in ['rubro', 'especialidad', 'sector', 'sectorindustria']: mapping['sector_industria'] = col
                 elif norm in ['contacto', 'personacontacto', 'nombrecontacto']: mapping['nombre_contacto'] = col
+                elif norm in ['direccion', 'address', 'dir']: mapping['direccion'] = col
+                elif norm in ['region']: mapping['region'] = col
+                elif norm in ['comuna']: mapping['comuna'] = col
+                elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
+                elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
                 
                 # Contract specific mapping
                 elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
@@ -330,19 +338,9 @@ class UniversalImportView(APIView):
                             continue
 
                         razon_social = clean_val(row.get(mapping.get('razon_social')))
-                        nombre = clean_val(row.get(mapping.get('nombre')))
-                        
                         if not razon_social:
+                            nombre = clean_val(row.get(mapping.get('nombre')))
                             razon_social = nombre if nombre else "Sin Razon Social"
-                        if not nombre:
-                            nombre = razon_social
-
-                        email = clean_val(row.get(mapping.get('email')))
-                        if not email:
-                            email = f"import_{rut.replace('.','').replace('-','')}@usecap.cl"
-                        
-                        telefono = clean_val(row.get(mapping.get('telefono')))
-                        rubro = clean_val(row.get(mapping.get('rubro')))
                         
                         # Find Ejecutivo
                         ejecutivo = default_ejecutivo
@@ -351,18 +349,36 @@ class UniversalImportView(APIView):
                             ej_found = Ejecutivo.objects.filter(rut_ejecutivo=rut_ej_val).first()
                             if ej_found: ejecutivo = ej_found
 
+                        # Date parsing for Cliente
+                        def parse_date_custom(val):
+                            if pd.isna(val) or not val: return None
+                            try:
+                                if isinstance(val, (pd.Timestamp, datetime.date)): return val
+                                return pd.to_datetime(val, dayfirst=True).date()
+                            except: return None
+
+                        fecha_creacion = parse_date_custom(row.get(mapping.get('fecha_creacion')))
+                        
+                        # Find Cliente Padre
+                        cliente_padre = None
+                        rut_padre_raw = clean_val(row.get(mapping.get('cliente_padre_rut')))
+                        if rut_padre_raw:
+                            rut_padre_fmt = format_rut_chile(rut_padre_raw)
+                            cliente_padre = Cliente.objects.filter(rut_empresa=rut_padre_fmt).first()
+
                         Cliente.objects.create(
                             rut_empresa=rut,
                             razon_social=razon_social,
-                            nombre_fantasia=nombre,
-                            rubro=rubro,
-                            telefono=telefono,
-                            email_contacto=email,
-                            ejecutivo=ejecutivo,
                             estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
-                            direccion="Sin Dirección",
-                            comuna="Santiago",
-                            region="RM"
+                            sector_industria=clean_val(row.get(mapping.get('sector_industria'))),
+                            direccion=clean_val(row.get(mapping.get('direccion')), "Sin Dirección"),
+                            comuna=clean_val(row.get(mapping.get('comuna')), "Santiago"),
+                            region=clean_val(row.get(mapping.get('region')), "RM"),
+                            origen_referencia=clean_val(row.get(mapping.get('origen_referencia'))),
+                            fecha_creacion=fecha_creacion,
+                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
+                            ejecutivo=ejecutivo,
+                            cliente_padre=cliente_padre
                         )
                         created_count += 1
                         
@@ -678,16 +694,12 @@ class ProcessMappedImportView(APIView):
                     Cliente.objects.create(
                         rut_empresa=rut,
                         razon_social=razon_social,
-                        nombre_fantasia=nombre,
-                        email_contacto=email,
                         estado=estado,
                         ejecutivo=default_ejecutivo,
-                        # Added default fields to match model requirements
                         direccion="Sin Dirección",
                         comuna="Santiago",
                         region="RM",
-                        telefono="",
-                        rubro=""
+                        sector_industria=""
                     )
                     created_count += 1
                 except Exception as e:
@@ -696,7 +708,7 @@ class ProcessMappedImportView(APIView):
             # Save to history
             ImportHistory.objects.create(
                 nombre_archivo=file_obj.name,
-                filas_processed=created_count,
+                filas_procesadas=created_count,
                 estado='exito' if created_count > 0 else 'error',
                 mensaje_error="; ".join(errors[:5]) if errors else None
             )

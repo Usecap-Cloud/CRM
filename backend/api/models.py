@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 import re
 
 def validate_rut(value):
@@ -54,8 +55,6 @@ class Rol(models.Model):
         return self.nombre
 
 
-from django.contrib.auth.models import User
-
 # =========================
 # Tabla Ejecutivos
 # =========================
@@ -102,7 +101,6 @@ class Ejecutivo(models.Model):
 # =========================
 # Tabla Clientes
 # =========================
-
 class Cliente(models.Model):
     rut_empresa = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     razon_social = models.CharField(max_length=100)
@@ -110,10 +108,10 @@ class Cliente(models.Model):
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
+    sector_industria = models.CharField(max_length=50, blank=True, null=True)
     direccion = models.CharField(max_length=150, blank=True, null=True)
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
-    sector_industria = models.CharField(max_length=50, blank=True, null=True)
     origen_referencia = models.CharField(max_length=50, blank=True, null=True)
     fecha_creacion = models.DateField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
@@ -170,7 +168,6 @@ class Servicio(models.Model):
 # =========================
 # Tabla Proveedores
 # =========================
-
 class Proveedor(models.Model):
     rut_proveedor = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
@@ -263,8 +260,6 @@ class ContratoCurso(models.Model):
     contrato = models.ForeignKey(Contrato, on_delete=models.CASCADE)
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
 
-
-
     def __str__(self):
         return f"{self.tipo_curso} - Contrato {self.contrato.id}"
 
@@ -321,14 +316,18 @@ class ContratoProveedor(models.Model):
 # Tabla Seguimiento
 # =========================
 class Seguimiento(models.Model):
-    tipo_seguimiento = models.CharField(max_length=50)
-    requerimiento = models.TextField(blank=True, null=True)
+    tipo = models.CharField(max_length=50)
     fecha = models.DateField(blank=True, null=True)
+    requerimiento = models.TextField(blank=True, null=True)
+    fecha_envio = models.DateField(blank=True, null=True)
     respuesta = models.TextField(blank=True, null=True)
     fecha_respuesta = models.DateField(blank=True, null=True)
     estado = models.CharField(max_length=20)
     cerrado = models.BooleanField(default=False)
-    fecha_proxima_accion = models.DateField(blank=True, null=True)
+    fecha_seguimiento = models.DateField(blank=True, null=True)
+    accion = models.CharField(max_length=50)
+    respuesta_seguimiento = models.TextField(blank=True, null=True)
+    fecha_respuesta_seguimiento = models.DateField(blank=True, null=True)
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
@@ -336,6 +335,7 @@ class Seguimiento(models.Model):
     contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
     coordinador = models.ForeignKey("Coordinador", on_delete=models.CASCADE)
     ejecutivo = models.ForeignKey("Ejecutivo", on_delete=models.CASCADE)
+    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Seguimiento {self.id} - Contrato {self.contrato_id}"
