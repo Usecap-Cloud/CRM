@@ -29,6 +29,7 @@ class EjecutivoSerializer(serializers.ModelSerializer):
 
 class ClienteSerializer(serializers.ModelSerializer):
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
+    cliente_padre_nombre = serializers.ReadOnlyField(source='cliente_padre.razon_social')
     class Meta:
         model = Cliente
         fields = '__all__'
