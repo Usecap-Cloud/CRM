@@ -296,7 +296,8 @@
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
                         <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
                         <td>  
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
+                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
+                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
                         </td>  
                     </tr>  
                 `}).join('');
@@ -383,6 +384,26 @@
         } catch (error) {
             showAlert('Error de conexión', 'error');
             console.error(error);
+        }
+    }
+
+    async function deleteCoordinador(id) {
+        if (!confirm('¿Está seguro de eliminar este coordinador? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/coordinadores/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Coordinador eliminado correctamente', 'success');
+                loadCoordinadores();
+            } else {
+                showAlert('Error al eliminar coordinador.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
         }
     }
 

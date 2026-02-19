@@ -274,7 +274,8 @@
                         <td>${clean(c.fecha_vencimiento)}</td>
                         <td style="font-weight: 600; color: var(--primary-blue);">${subtotal}</td>
                         <td>
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
+                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
+                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteContrato(${c.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -330,6 +331,26 @@
                 loadContratos();
             } else { showAlert('Error al guardar contrato', 'error'); }
         } catch (error) { showAlert('Error de conexion', 'error'); }
+    }
+
+    async function deleteContrato(id) {
+        if (!confirm('¿Está seguro de eliminar este contrato? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/contratos/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Contrato eliminado correctamente', 'success');
+                loadContratos();
+            } else {
+                showAlert('Error al eliminar contrato.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
     }
 
     function showAlert(message, type) {

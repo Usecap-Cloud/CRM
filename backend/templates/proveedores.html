@@ -262,7 +262,8 @@
                         <td>${clean(p.email)}</td>
                         <td><span class="status-badge info">${clean(p.tipo)}</span></td>
                         <td>
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editProveedor(${p.id})'>Editar</button>
+                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editProveedor(${p.id})'>Editar</button>
+                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteProveedor(${p.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -330,6 +331,26 @@
     }
 
 
+
+    async function deleteProveedor(id) {
+        if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/proveedores/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Proveedor eliminado correctamente', 'success');
+                loadProveedores();
+            } else {
+                showAlert('Error al eliminar proveedor.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
+    }
 
     function getCookie(name) {
         let cookieValue = null;

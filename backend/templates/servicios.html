@@ -291,7 +291,8 @@
                         <td>${clean(servicio.rubro)}</td>
                         <td><span class="status-badge ${servicio.estado && servicio.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span></td>
                         <td>
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editService(${servicio.id})'>Editar</button>
+                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editService(${servicio.id})'>Editar</button>
+                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteService(${servicio.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -342,6 +343,26 @@
         } catch (error) {
             console.error(error);
             showAlert('Error de conexion', 'error');
+        }
+    }
+
+    async function deleteService(id) {
+        if (!confirm('¿Está seguro de eliminar este servicio? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/servicios/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Servicio eliminado correctamente', 'success');
+                loadServicios();
+            } else {
+                showAlert('Error al eliminar servicio.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
         }
     }
 

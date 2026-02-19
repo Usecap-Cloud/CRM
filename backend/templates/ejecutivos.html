@@ -307,7 +307,8 @@
                         <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span></td>
                         <td>${clean(ej.rol_nombre)}</td>
                         <td>
-                            <button class="pill-btn secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
+                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
+                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteEjecutivo(${ej.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -387,6 +388,26 @@
     }
 
 
+
+    async function deleteEjecutivo(id) {
+        if (!confirm('¿Está seguro de eliminar este ejecutivo? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/ejecutivos/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Ejecutivo eliminado correctamente', 'success');
+                loadEjecutivos();
+            } else {
+                showAlert('Error al eliminar ejecutivo. Es posible que tenga contratos vinculados.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
+    }
 
     function getCookie(name) {
         let cookieValue = null;
