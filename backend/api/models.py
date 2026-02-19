@@ -5,6 +5,45 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 import re
 
+# Abreviaciones empresariales/geográficas que permanecen en MAYÚSCULAS
+_UPPERCASE_ABBR = {
+    'S.A.', 'SPA', 'S.P.A.', 'LTDA.', 'LTDA', 'EIRL', 'E.I.R.L.',
+    'S.A.C.', 'SRL', 'SAC', 'SA', 'AG', 'LLC', 'INC', 'S.A.S.',
+    'RRHH', 'TI', 'RM',
+}
+
+def normalize_text(value):
+    """
+    Convierte texto a Title Case inteligente, preservando abreviaciones
+    comunes como S.A., LTDA., SpA, etc.
+    """
+    if not value or not isinstance(value, str):
+        return value
+    value = value.strip()
+    if not value:
+        return value
+    words = value.split()
+    result = []
+    for word in words:
+        if word.upper() in _UPPERCASE_ABBR or word.upper().rstrip('.,') in _UPPERCASE_ABBR:
+            result.append(word.upper())
+        else:
+            result.append(word.capitalize())
+    return ' '.join(result)
+
+def normalize_estado(value):
+    """Normaliza estados a Title Case consistente."""
+    if not value or not isinstance(value, str):
+        return value
+    mapping = {
+        'activo': 'Activo', 'inactivo': 'Inactivo',
+        'finalizado': 'Finalizado', 'firmado': 'Firmado',
+        'en proceso': 'En Proceso', 'por cerrar': 'Por Cerrar',
+        'pendiente': 'Pendiente', 'completado': 'Completado',
+    }
+    return mapping.get(value.strip().lower(), value.strip().capitalize())
+
+
 def normalize_rut_str(value):
     """
     Normaliza un RUT al formato 12.345.678-9
@@ -113,6 +152,12 @@ class Ejecutivo(models.Model):
 
     def save(self, *args, **kwargs):
         self.rut_ejecutivo = normalize_rut_str(self.rut_ejecutivo)
+        self.nombre = normalize_text(self.nombre)
+        if self.email:
+            self.email = self.email.strip().lower()
+        self.estado = normalize_estado(self.estado)
+        self.region = normalize_text(self.region)
+        self.comuna = normalize_text(self.comuna)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -143,6 +188,13 @@ class Cliente(models.Model):
 
     def save(self, *args, **kwargs):
         self.rut_empresa = normalize_rut_str(self.rut_empresa)
+        self.razon_social = normalize_text(self.razon_social)
+        self.estado = normalize_estado(self.estado)
+        self.sector_industria = normalize_text(self.sector_industria)
+        self.direccion = normalize_text(self.direccion)
+        self.region = normalize_text(self.region)
+        self.comuna = normalize_text(self.comuna)
+        self.origen_referencia = normalize_text(self.origen_referencia)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -170,6 +222,11 @@ class Coordinador(models.Model):
 
     def save(self, *args, **kwargs):
         self.rut_coordinador = normalize_rut_str(self.rut_coordinador)
+        self.nombre = normalize_text(self.nombre)
+        if self.email:
+            self.email = self.email.strip().lower()
+        self.cargo = normalize_text(self.cargo)
+        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -189,6 +246,13 @@ class Servicio(models.Model):
     )
     rubro = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.nombre = normalize_text(self.nombre)
+        self.tipo = normalize_text(self.tipo)
+        self.rubro = normalize_text(self.rubro)
+        self.estado = normalize_estado(self.estado)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
@@ -216,6 +280,15 @@ class Proveedor(models.Model):
 
     def save(self, *args, **kwargs):
         self.rut_proveedor = normalize_rut_str(self.rut_proveedor)
+        self.nombre = normalize_text(self.nombre)
+        self.tipo = normalize_text(self.tipo)
+        self.contacto = normalize_text(self.contacto)
+        if self.email:
+            self.email = self.email.strip().lower()
+        self.region = normalize_text(self.region)
+        self.comuna = normalize_text(self.comuna)
+        self.rubro = normalize_text(self.rubro)
+        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -236,6 +309,12 @@ class Curso(models.Model):
     codigo_sence = models.CharField(max_length=50, blank=True, null=True)
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.nombre = normalize_text(self.nombre)
+        self.categoria = normalize_text(self.categoria)
+        self.estado = normalize_estado(self.estado)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
