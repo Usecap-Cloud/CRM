@@ -155,7 +155,6 @@ class Ejecutivo(models.Model):
         self.nombre = normalize_text(self.nombre)
         if self.email:
             self.email = self.email.strip().lower()
-        self.estado = normalize_estado(self.estado)
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
         super().save(*args, **kwargs)
@@ -189,7 +188,6 @@ class Cliente(models.Model):
     def save(self, *args, **kwargs):
         self.rut_empresa = normalize_rut_str(self.rut_empresa)
         self.razon_social = normalize_text(self.razon_social)
-        self.estado = normalize_estado(self.estado)
         self.sector_industria = normalize_text(self.sector_industria)
         self.direccion = normalize_text(self.direccion)
         self.region = normalize_text(self.region)
@@ -226,7 +224,6 @@ class Coordinador(models.Model):
         if self.email:
             self.email = self.email.strip().lower()
         self.cargo = normalize_text(self.cargo)
-        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -251,7 +248,6 @@ class Servicio(models.Model):
         self.nombre = normalize_text(self.nombre)
         self.tipo = normalize_text(self.tipo)
         self.rubro = normalize_text(self.rubro)
-        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -288,7 +284,6 @@ class Proveedor(models.Model):
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
         self.rubro = normalize_text(self.rubro)
-        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -1,6 +1,5 @@
 """
-Script para normalizar todos los datos ya existentes en la BD.
-Aplica el mismo normalize_text() de models.py a todos los registros.
+Normaliza TODOS los registros existentes en la BD (fuerza actualización sin chequear diferencias).
 """
 import os
 import django
@@ -10,124 +9,43 @@ load_dotenv()
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crm_usecap.settings')
 django.setup()
 
-from backend.api.models import (
-    Cliente, Ejecutivo, Coordinador, Servicio, Proveedor, Curso, normalize_text, normalize_estado
-)
+from backend.api.models import Cliente, Ejecutivo, Coordinador, Servicio, Proveedor, Curso, normalize_text
 
-def run():
-    print("=== Normalizando Clientes ===")
-    for obj in Cliente.objects.all():
-        changed = False
-        nt = normalize_text(obj.razon_social)
-        if nt != obj.razon_social:
-            obj.razon_social = nt
-            changed = True
-        for field in ['direccion', 'region', 'comuna', 'sector_industria', 'origen_referencia']:
-            val = getattr(obj, field)
+def force_normalize(model, text_fields, label_field='id'):
+    count = 0
+    for obj in model.objects.all():
+        for field in text_fields:
+            val = getattr(obj, field, None)
             if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.razon_social}")
+                setattr(obj, field, normalize_text(val))
+        # Usar update() directo para no disparar validaciones de choices
+        update_kwargs = {f: getattr(obj, f) for f in text_fields if getattr(obj, f)}
+        model.objects.filter(pk=obj.pk).update(**update_kwargs)
+        count += 1
+    return count
 
-    print("=== Normalizando Ejecutivos ===")
-    for obj in Ejecutivo.objects.all():
-        changed = False
-        for field in ['nombre', 'region', 'comuna']:
-            val = getattr(obj, field)
-            if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.nombre}")
+print("=== Normalizando Clientes ===")
+n = force_normalize(Cliente, ['razon_social', 'sector_industria', 'direccion', 'region', 'comuna', 'origen_referencia'])
+print(f"  {n} registros actualizados.")
 
-    print("=== Normalizando Coordinadores ===")
-    for obj in Coordinador.objects.all():
-        changed = False
-        for field in ['nombre', 'cargo']:
-            val = getattr(obj, field)
-            if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.nombre}")
+print("=== Normalizando Ejecutivos ===")
+n = force_normalize(Ejecutivo, ['nombre', 'region', 'comuna'])
+print(f"  {n} registros actualizados.")
 
-    print("=== Normalizando Servicios ===")
-    for obj in Servicio.objects.all():
-        changed = False
-        for field in ['nombre', 'tipo', 'rubro']:
-            val = getattr(obj, field)
-            if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.nombre}")
+print("=== Normalizando Coordinadores ===")
+n = force_normalize(Coordinador, ['nombre', 'cargo'])
+print(f"  {n} registros actualizados.")
 
-    print("=== Normalizando Proveedores ===")
-    for obj in Proveedor.objects.all():
-        changed = False
-        for field in ['nombre', 'tipo', 'contacto', 'region', 'comuna', 'rubro']:
-            val = getattr(obj, field)
-            if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.nombre}")
+print("=== Normalizando Servicios ===")
+n = force_normalize(Servicio, ['nombre', 'tipo', 'rubro'])
+print(f"  {n} registros actualizados.")
 
-    print("=== Normalizando Cursos ===")
-    for obj in Curso.objects.all():
-        changed = False
-        for field in ['nombre', 'categoria']:
-            val = getattr(obj, field)
-            if val:
-                norm = normalize_text(val)
-                if norm != val:
-                    setattr(obj, field, norm)
-                    changed = True
-        ne = normalize_estado(obj.estado)
-        if ne != obj.estado:
-            obj.estado = ne
-            changed = True
-        if changed:
-            obj.save()
-            print(f"  Actualizado: {obj.nombre}")
+print("=== Normalizando Proveedores ===")
+n = force_normalize(Proveedor, ['nombre', 'tipo', 'contacto', 'region', 'comuna', 'rubro'])
+print(f"  {n} registros actualizados.")
 
-    print("\n✅ Normalización completada.")
+print("=== Normalizando Cursos ===")
+n = force_normalize(Curso, ['nombre', 'categoria'])
+print(f"  {n} registros actualizados.")
 
-if __name__ == "__main__":
-    run()
+print("\n✅ Normalización completada.")
