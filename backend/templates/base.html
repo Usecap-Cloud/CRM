@@ -217,27 +217,44 @@
             opacity: 1;
         }
 
-        /* Action Buttons Aesthetics */
+        /* Action Buttons Aesthetics - Identical to Status Badges */
+        .pill-btn.edit, .pill-btn.delete {
+            padding: 5px 14px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: none;
+            text-transform: capitalize;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
         .pill-btn.edit {
-            background: rgba(30, 144, 255, 0.1);
+            background: rgba(30, 144, 255, 0.15);
             color: #1e90ff;
-            border: 1px solid rgba(30, 144, 255, 0.2);
         }
 
         .pill-btn.edit:hover {
             background: #1e90ff;
             color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2);
         }
 
         .pill-btn.delete {
-            background: rgba(230, 57, 70, 0.1);
+            background: rgba(230, 57, 70, 0.15);
             color: #e63946;
-            border: 1px solid rgba(230, 57, 70, 0.2);
         }
 
         .pill-btn.delete:hover {
             background: #e63946;
             color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);
         }
 
         /* Global Action Buttons (Standardized) */

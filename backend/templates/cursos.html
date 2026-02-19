@@ -265,8 +265,8 @@
                         <td><span class="status-badge ${c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado') || c.estado.toLowerCase().includes('completado')) ? 'active' : ''}">${clean(c.estado)}</span></td>
                         <td>${clean(c.codigo_sence)}</td>
                         <td>
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCurso(${c.id})'>Editar</button>
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteCurso(${c.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editCurso(${c.id})'>Editar</button>
+                            <button class="pill-btn delete" onclick='deleteCurso(${c.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');

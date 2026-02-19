@@ -291,8 +291,8 @@
                         <td>${clean(servicio.rubro)}</td>
                         <td><span class="status-badge ${servicio.estado && servicio.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span></td>
                         <td>
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editService(${servicio.id})'>Editar</button>
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteService(${servicio.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editService(${servicio.id})'>Editar</button>
+                            <button class="pill-btn delete" onclick='deleteService(${servicio.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');

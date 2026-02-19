@@ -307,8 +307,8 @@
                         <td><span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span></td>
                         <td>${clean(ej.rol_nombre)}</td>
                         <td>
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteEjecutivo(${ej.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
+                            <button class="pill-btn delete" onclick='deleteEjecutivo(${ej.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');

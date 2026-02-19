@@ -296,8 +296,8 @@
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
                         <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
                         <td>  
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editCoordinador(${co.id})'>Editar</button>  
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>  
+                            <button class="pill-btn delete" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
                         </td>  
                     </tr>  
                 `}).join('');

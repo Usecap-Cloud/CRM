@@ -262,8 +262,8 @@
                         <td>${clean(p.email)}</td>
                         <td><span class="status-badge info">${clean(p.tipo)}</span></td>
                         <td>
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editProveedor(${p.id})'>Editar</button>
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteProveedor(${p.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>
+                            <button class="pill-btn delete" onclick='deleteProveedor(${p.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');

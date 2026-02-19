@@ -274,8 +274,8 @@
                         <td>${clean(c.fecha_vencimiento)}</td>
                         <td style="font-weight: 600; color: var(--primary-blue);">${subtotal}</td>
                         <td>
-                            <button class="pill-btn edit" style="padding: 4px 12px; font-size: 0.75rem;" onclick='editContrato(${c.id})'>Editar</button>
-                            <button class="pill-btn delete" style="padding: 4px 12px; font-size: 0.75rem;" onclick='deleteContrato(${c.id})'>Eliminar</button>
+                            <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
+                            <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
                         </td>
                     </tr>
                 `}).join('');
