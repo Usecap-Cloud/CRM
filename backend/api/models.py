@@ -349,7 +349,7 @@ class ContratoProveedor(models.Model):
 # Tabla Seguimiento
 # =========================
 class Seguimiento(models.Model):
-    tipo = models.CharField(max_length=50)
+    tipo = models.CharField(max_length=50, default="General")
     fecha = models.DateField(blank=True, null=True)
     requerimiento = models.TextField(blank=True, null=True)
     fecha_envio = models.DateField(blank=True, null=True)
@@ -358,7 +358,7 @@ class Seguimiento(models.Model):
     estado = models.CharField(max_length=20)
     cerrado = models.BooleanField(default=False)
     fecha_seguimiento = models.DateField(blank=True, null=True)
-    accion = models.CharField(max_length=50)
+    accion = models.CharField(max_length=50, default="Sin Acción")
     respuesta_seguimiento = models.TextField(blank=True, null=True)
     fecha_respuesta_seguimiento = models.DateField(blank=True, null=True)
     detalle = models.TextField(blank=True, null=True)
@@ -368,7 +368,7 @@ class Seguimiento(models.Model):
     contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
     coordinador = models.ForeignKey("Coordinador", on_delete=models.CASCADE)
     ejecutivo = models.ForeignKey("Ejecutivo", on_delete=models.CASCADE)
-    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
+    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"Seguimiento {self.id} - Contrato {self.contrato_id}"

@@ -1,0 +1,69 @@
+
+--- api_contrato ---
+CREATE TABLE `api_contrato` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `tipo_registro` varchar(20) NOT NULL,
+  `empresa` varchar(100) NOT NULL,
+  `fecha_recepcion` date DEFAULT NULL,
+  `fecha_emision` date DEFAULT NULL,
+  `estado` varchar(20) NOT NULL,
+  `detalle` longtext,
+  `observaciones` longtext,
+  `cliente_id` bigint NOT NULL,
+  `coordinador_id` bigint DEFAULT NULL,
+  `ejecutivo_id` bigint NOT NULL,
+  `fecha_inicio` date DEFAULT NULL,
+  `subtotal` decimal(12,2) NOT NULL,
+  `fecha_vencimiento` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `api_contrato_coordinador_id_d43ae57d_fk_api_coordinador_id` (`coordinador_id`),
+  KEY `api_contrato_ejecutivo_id_a6e5c0eb_fk_api_ejecutivo_id` (`ejecutivo_id`),
+  KEY `api_contrato_cliente_id_43b3a6e4_fk_api_cliente_id` (`cliente_id`),
+  CONSTRAINT `api_contrato_cliente_id_43b3a6e4_fk_api_cliente_id` FOREIGN KEY (`cliente_id`) REFERENCES `api_cliente` (`id`),
+  CONSTRAINT `api_contrato_coordinador_id_d43ae57d_fk_api_coordinador_id` FOREIGN KEY (`coordinador_id`) REFERENCES `api_coordinador` (`id`),
+  CONSTRAINT `api_contrato_ejecutivo_id_a6e5c0eb_fk_api_ejecutivo_id` FOREIGN KEY (`ejecutivo_id`) REFERENCES `api_ejecutivo` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+--- api_seguimiento ---
+CREATE TABLE `api_seguimiento` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `tipo_seguimiento` varchar(50) NOT NULL,
+  `requerimiento` longtext,
+  `fecha` date DEFAULT NULL,
+  `respuesta` longtext,
+  `fecha_respuesta` date DEFAULT NULL,
+  `estado` varchar(20) NOT NULL,
+  `cerrado` tinyint(1) NOT NULL,
+  `fecha_proxima_accion` date DEFAULT NULL,
+  `detalle` longtext,
+  `observaciones` longtext,
+  `contrato_id` bigint NOT NULL,
+  `coordinador_id` bigint NOT NULL,
+  `ejecutivo_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `api_seguimiento_contrato_id_76009f78_fk_api_contrato_id` (`contrato_id`),
+  KEY `api_seguimiento_coordinador_id_e5bf41b6_fk_api_coordinador_id` (`coordinador_id`),
+  KEY `api_seguimiento_ejecutivo_id_d564f843_fk_api_ejecutivo_id` (`ejecutivo_id`),
+  CONSTRAINT `api_seguimiento_contrato_id_76009f78_fk_api_contrato_id` FOREIGN KEY (`contrato_id`) REFERENCES `api_contrato` (`id`),
+  CONSTRAINT `api_seguimiento_coordinador_id_e5bf41b6_fk_api_coordinador_id` FOREIGN KEY (`coordinador_id`) REFERENCES `api_coordinador` (`id`),
+  CONSTRAINT `api_seguimiento_ejecutivo_id_d564f843_fk_api_ejecutivo_id` FOREIGN KEY (`ejecutivo_id`) REFERENCES `api_ejecutivo` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+--- api_coordinador ---
+CREATE TABLE `api_coordinador` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `rut_coordinador` varchar(12) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `cargo` varchar(50) DEFAULT NULL,
+  `fecha_cumpleanos` date DEFAULT NULL,
+  `estado` varchar(10) NOT NULL,
+  `observaciones` longtext,
+  `cliente_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rut` (`rut_coordinador`),
+  UNIQUE KEY `email` (`email`),
+  KEY `api_coordinador_cliente_id_6feaf450_fk_api_cliente_id` (`cliente_id`),
+  CONSTRAINT `api_coordinador_cliente_id_6feaf450_fk_api_cliente_id` FOREIGN KEY (`cliente_id`) REFERENCES `api_cliente` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
