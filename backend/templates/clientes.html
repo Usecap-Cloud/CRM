@@ -119,6 +119,15 @@
         border-color: #1e90ff;
         outline: none;
     }
+    .td-main { font-weight: 600; color: var(--text-color); display: block; }
+    .td-sub { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; }
+    .op-pill { background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; color: #475569; font-weight: 600; }
+    .convenio-pill { padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .convenio-otech { background: #e0f2fe; color: #0369a1; }
+    .convenio-sence { background: #fef3c7; color: #92400e; }
+    .convenio-particular { background: #f1f5f9; color: #475569; }
+
+    .clients-table td { vertical-align: top; padding: 16px 12px; }
 </style>
 {% endblock %}
 
@@ -151,16 +160,11 @@
         <table class="clients-table" id="clients-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>RUT</th>
-                    <th>Razon Social</th>
-                    <th>Ejecutivo</th>
-                    <th>Estado</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
-                    <th>Comuna</th>
-                    <th>Region</th>
-                    <th>Holding</th>
-                    <th>Contacto</th>
+                    <th>Empresa</th>
+                    <th>Ejecutivo / Estado</th>
+                    <th>Ubicación</th>
+                    <th>Operación</th>
+                    <th>Relaciones / Holding</th>
                     <th></th>
                 </tr>
             </thead>
@@ -366,25 +370,46 @@
                     };
                     return `
                     <tr>
-                        <td>${clean(client.rut_empresa)}</td>
-                        <td>${clean(client.razon_social)}</td>
-                        <td>${clean(client.ejecutivo_nombre)}</td>
-                        <td><span class="status-badge active">${clean(client.estado)}</span></td>
-                        <td>${clean(client.telefono_empresarial)}</td>
-                        <td>${clean(client.direccion)}</td>
-                        <td>${clean(client.comuna)}</td>
-                        <td>${clean(client.region)}</td>
                         <td>
-                            ${client.cliente_padre_nombre ? `<span style="font-size: 0.75rem; color: var(--text-color-secondary);">${clean(client.cliente_padre_nombre)}</span>` : '-'}
-                            ${client.filiales_count > 0 ? `<div style="font-size: 0.65rem; color: #3b82f6; font-weight: 600;">&#x1F3E2; ${client.filiales_count} filiales</div>` : ''}
+                            <span class="td-main">${clean(client.razon_social)}</span>
+                            <span class="td-sub">${clean(client.rut_empresa)}</span>
+                            ${client.nombre ? `<span class="td-sub" style="font-style: italic;">"${client.nombre}"</span>` : ''}
                         </td>
                         <td>
-                            <div style="font-size: 0.85rem; font-weight: 500;">${clean(client.contacto_nombre)}</div>
-                            <div style="font-size: 0.75rem; color: #888;">${clean(client.contacto_email)}</div>
+                            <span class="td-main">${clean(client.ejecutivo_nombre)}</span>
+                            <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
                         </td>
                         <td>
-                            <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteClient(${client.id})'>Eliminar</button>
+                            <span class="td-main">${clean(client.direccion)}</span>
+                            <span class="td-sub">${clean(client.comuna)}, ${clean(client.region)}</span>
+                        </td>
+                        <td>
+                            <div style="margin-bottom: 5px;">
+                                <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
+                            </div>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <span class="op-pill" title="Colaboradores">👥 ${client.numero_colaboradores || 0}</span>
+                                <span class="op-pill" title="Sucursales">🏢 ${client.cantidad_sucursales || 1}</span>
+                            </div>
+                            <span class="td-sub" style="margin-top: 5px;">📞 ${clean(client.telefono_empresarial)}</span>
+                        </td>
+                        <td>
+                            <div style="margin-bottom: 8px;">
+                                <span class="td-sub">Holding:</span>
+                                ${client.cliente_padre_nombre ? `<span class="td-main" style="font-size: 0.8rem;">${clean(client.cliente_padre_nombre)}</span>` : '-'}
+                                ${client.filiales_count > 0 ? `<div style="font-size: 0.65rem; color: #3b82f6; font-weight: 600;">&#x1F3E2; ${client.filiales_count} filiales</div>` : ''}
+                            </div>
+                            <div>
+                                <span class="td-sub">Contacto:</span>
+                                <span class="td-main" style="font-size: 0.8rem;">${clean(client.contacto_nombre)}</span>
+                                <span class="td-sub">${clean(client.contacto_email)}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteClient(${client.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');
