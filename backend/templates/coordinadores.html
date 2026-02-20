@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Coordinadores - USECAP CRM{% endblock %}
+{% block title %}Encargados - USECAP CRM{% endblock %}
 {% block nav_coordinadores %}active{% endblock %}
 {% block extra_styles %}
 <style>
@@ -116,12 +116,12 @@
 <div id="list-view">
     <div class="page-header">
         <div class="header-title">
-            <h1>Coordinadores</h1>
+            <h1>Encargados</h1>
         </div>
         <div class="page-actions">
             <div class="pill-nav">
                 <button class="pill-btn primary" onclick="showForm()" id="btn-nuevo"><span>&#x002B;</span> Nuevo
-                    Coordinador</button>
+                    Encargado</button>
             </div>
         </div>
     </div>
@@ -132,13 +132,13 @@
     </div>
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Coordinadores...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Encargados...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
             disponible</div>
         <table class="data-table" id="data-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Coordinador</th>
+                    <th>Encargado</th>
                     <th>Contacto</th>
                     <th>Cargo</th>
                     <th>Cliente</th>
@@ -154,16 +154,16 @@
 <div class="form-page" id="form-view">
     <div class="form-header">
         <button class="back-btn" onclick="hideForm()">&#x2190;</button>
-        <h2 id="form-title">Coordinadores</h2>
+        <h2 id="form-title">Encargados</h2>
     </div>
     <div class="form-body">
         <form id="coord-form" onsubmit="saveCoordinador(event)">
             <input type="hidden" name="is_edit" value="false">
             <input type="hidden" name="id" id="form-id" value="">
             <div class="form-section">
-                <div class="form-section-subtitle">Datos del Coordinador</div>
+                <div class="form-section-subtitle">Datos del Encargado</div>
                 <div class="form-section-desc" style="color: #888; margin-bottom: 30px;">Ingrese los datos del
-                    coordinador.</div>
+                    encargado.</div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -248,7 +248,7 @@
         document.getElementById('form-view').classList.add('active');
         document.getElementById('btn-nuevo').classList.add('active');
         if (editData) {
-            document.getElementById('form-title').textContent = 'Editar Coordinador';
+            document.getElementById('form-title').textContent = 'Editar Encargado';
             document.getElementById('form-id').value = editData.id;
             document.getElementById('form-rut').value = editData.rut_coordinador;
             document.getElementById('form-rut').readOnly = true;
@@ -265,9 +265,9 @@
             document.getElementById('submit-btn').textContent = 'Guardar Cambios';
             document.querySelector('[name="is_edit"]').value = "true";
         } else {
-            document.getElementById('form-title').textContent = 'Alta de Coordinador';
+            document.getElementById('form-title').textContent = 'Alta de Encargado';
             document.getElementById('form-rut').readOnly = false;
-            document.getElementById('submit-btn').textContent = 'Crear Coordinador';
+            document.getElementById('submit-btn').textContent = 'Crear Encargado';
             document.querySelector('[name="is_edit"]').value = "false";
             document.getElementById('coord-form').reset();
         }
@@ -381,7 +381,7 @@
         const phone = form.telefono.value;
 
         if (!validateRut(rut)) {
-            showAlert('RUT Coordinador inválido', 'error');
+            showAlert('RUT Encargado inválido', 'error');
             return;
         }
 
@@ -416,7 +416,7 @@
             });
             const result = await response.json().catch(() => ({}));
             if (response.ok) {
-                showAlert(isEdit ? 'Coordinador actualizado' : 'Coordinador creado exitosamente', 'success');
+                showAlert(isEdit ? 'Encargado actualizado' : 'Encargado creado exitosamente', 'success');
                 hideForm();
                 loadCoordinadores();
             } else {
@@ -433,7 +433,7 @@
     }
 
     async function deleteCoordinador(id) {
-        if (!confirm('¿Está seguro de eliminar este coordinador? Esta acción no se puede deshacer.')) return;
+        if (!confirm('¿Está seguro de eliminar este encargado? Esta acción no se puede deshacer.')) return;
         try {
             const response = await fetch(`/api/coordinadores/${id}/`, {
                 method: 'DELETE',
@@ -442,10 +442,10 @@
                 }
             });
             if (response.ok) {
-                showAlert('Coordinador eliminado correctamente', 'success');
+                showAlert('Encargado eliminado correctamente', 'success');
                 loadCoordinadores();
             } else {
-                showAlert('Error al eliminar coordinador.', 'error');
+                showAlert('Error al eliminar encargado.', 'error');
             }
         } catch (error) {
             showAlert('Error de conexión con el servidor', 'error');
