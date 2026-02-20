@@ -33,7 +33,6 @@ class ClienteSerializer(serializers.ModelSerializer):
     contacto_nombre = serializers.ReadOnlyField(source='contacto_principal.nombre')
     contacto_email = serializers.ReadOnlyField(source='contacto_principal.email')
     contacto_telefono = serializers.ReadOnlyField(source='contacto_principal.telefono')
-    health_score = serializers.SerializerMethodField()
     filiales_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -42,29 +41,6 @@ class ClienteSerializer(serializers.ModelSerializer):
 
     def get_filiales_count(self, obj):
         return Cliente.objects.filter(cliente_padre=obj).count()
-
-    def get_health_score(self, obj):
-        score = 0
-        # 1. Status (Max 40)
-        if obj.estado.lower() == 'activo':
-            score += 40
-        
-        # 2. Relationship (Holding vs Filial) (Max 10)
-        if obj.cliente_padre:
-            score += 10 # Is part of a group
-        
-        # 3. Main Contact (Max 20)
-        if obj.contacto_principal:
-            score += 20
-        
-        # 4. Recent activity check (Simplified for now - can use date_created or similar)
-        # In a real scenario we would check related Contrato or Seguimiento
-        # For now let's use a semi-random but stable logic for demo
-        import zlib
-        seed = zlib.adler32(obj.razon_social.encode()) % 30
-        score += seed # Add some variability
-        
-        return min(score, 100)
 
     def validate_rut_empresa(self, value):
         queryset = Cliente.objects.filter(rut_empresa=value)
