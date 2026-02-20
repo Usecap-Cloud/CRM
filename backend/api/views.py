@@ -328,6 +328,11 @@ class UniversalImportView(APIView):
                 elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
                 elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
                 elif norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
+                elif norm in ['telefonoempresarial', 'telefnotrabajo', 'fonoempresa']: mapping['telefono_empresarial'] = col
+                elif norm in ['nombrefantasia', 'nombrecomercial', 'fantasia']: mapping['nombre_fantasia'] = col
+                elif norm in ['numerocolaboradores', 'colaboradores', 'empleados', 'dotacion']: mapping['numero_colaboradores'] = col
+                elif norm in ['tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
+                elif norm in ['cantidadsucursales', 'sucursales']: mapping['cantidad_sucursales'] = col
                 
                 # Contract specific mapping
                 elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
@@ -430,7 +435,12 @@ class UniversalImportView(APIView):
                             fecha_creacion=fecha_creacion,
                             observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             ejecutivo=ejecutivo,
-                            cliente_padre=cliente_padre
+                            cliente_padre=cliente_padre,
+                            nombre=clean_val(row.get(mapping.get('nombre_fantasia'))),
+                            telefono_empresarial=clean_val(row.get(mapping.get('telefono_empresarial'))),
+                            numero_colaboradores=int(row.get(mapping.get('numero_colaboradores'), 0)) if not pd.isna(row.get(mapping.get('numero_colaboradores'), 0)) else 0,
+                            cantidad_sucursales=int(row.get(mapping.get('cantidad_sucursales'), 1)) if not pd.isna(row.get(mapping.get('cantidad_sucursales'), 1)) else 1,
+                            tipo_convenio=str(row.get(mapping.get('tipo_convenio'), 'particular')).strip().lower()
                         )
                         created_count += 1
                         
@@ -567,6 +577,7 @@ class UniversalImportView(APIView):
                             cliente=cliente,
                             estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
                             cargo=str(row.get(mapping.get('cargo'), '')).strip(),
+                            area=str(row.get(mapping.get('area'), '')).strip(),
                             fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None,
                             ejecutivo=ejecutivo
                         )

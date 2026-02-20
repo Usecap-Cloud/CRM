@@ -179,7 +179,15 @@ class Cliente(models.Model):
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
     origen_referencia = models.CharField(max_length=50, blank=True, null=True)
-    fecha_creacion = models.DateField(blank=True, null=True)
+    telefono_empresarial = models.CharField(max_length=20, blank=True, null=True)
+    nombre = models.CharField(max_length=100, blank=True, null=True)
+    numero_colaboradores = models.IntegerField(default=0)
+    tipo_convenio = models.CharField(
+        max_length=20, 
+        choices=[("otech", "OTEC"), ("sence", "SENCE"), ("particular", "Particular")],
+        default="particular"
+    )
+    cantidad_sucursales = models.IntegerField(default=1)
     observaciones = models.TextField(blank=True, null=True)
     
     # Relaciones
@@ -201,6 +209,7 @@ class Cliente(models.Model):
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
         self.origen_referencia = normalize_text(self.origen_referencia)
+        self.nombre = normalize_text(self.nombre)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -217,6 +226,7 @@ class Coordinador(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     cargo = models.CharField(max_length=50, blank=True, null=True)
     fecha_cumpleanos = models.DateField(blank=True, null=True)
+    area = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
@@ -233,6 +243,7 @@ class Coordinador(models.Model):
         if self.email:
             self.email = self.email.strip().lower()
         self.cargo = normalize_text(self.cargo)
+        self.area = normalize_text(self.area)
         super().save(*args, **kwargs)
 
     def __str__(self):

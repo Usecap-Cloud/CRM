@@ -199,6 +199,36 @@
 
             <div class="form-row">
                 <div class="form-group">
+                    <label>Nombre de Fantasía</label>
+                    <input type="text" name="nombre" id="form-nombre" placeholder="Nombre Comercial">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono Empresarial</label>
+                    <input type="text" name="telefono_empresarial" id="form-telefono-emp" placeholder="+56 9 ...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>N° Colaboradores</label>
+                    <input type="number" name="numero_colaboradores" id="form-colaboradores" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Cant. Sucursales</label>
+                    <input type="number" name="cantidad_sucursales" id="form-sucursales" value="1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo Convenio</label>
+                    <select name="tipo_convenio" id="form-convenio">
+                        <option value="particular">Particular</option>
+                        <option value="sence">SENCE</option>
+                        <option value="otech">OTEC</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
                         <option value="activo">Activo</option>
@@ -252,6 +282,11 @@
             document.getElementById('form-rut').readOnly = true;
             document.getElementById('form-razon').value = data.razon_social;
             document.getElementById('form-estado').value = data.estado || 'activo';
+            document.getElementById('form-nombre').value = data.nombre || '';
+            document.getElementById('form-telefono-emp').value = data.telefono_empresarial || '';
+            document.getElementById('form-colaboradores').value = data.numero_colaboradores || 0;
+            document.getElementById('form-sucursales').value = data.cantidad_sucursales || 1;
+            document.getElementById('form-convenio').value = data.tipo_convenio || 'particular';
             document.getElementById('ejecutivo-select').value = data.ejecutivo;
             
             populateCoordinadores(data.id);

@@ -143,6 +143,7 @@
                     <th>Email</th>
                     <th>Teléfono</th>
                     <th>Cargo</th>
+                    <th>Área</th>
                     <th>Cliente</th>
                     <th>Ejecutivo</th>
                     <th>Estado</th>
@@ -210,6 +211,10 @@
                     <input type="date" name="fecha_cumpleanos" id="form-fecha">
                 </div>
                 <div class="form-group">
+                    <label>Área</label>
+                    <input type="text" name="area" id="form-area" placeholder="Ej: Recursos Humanos">
+                </div>
+                <div class="form-group">
                     <label>Cliente Asociado</label>
                     <select name="cliente" id="form-cliente" required>
                         <option value="">Seleccionar cliente</option>
@@ -258,6 +263,7 @@
             document.getElementById('form-cargo').value = editData.cargo || '';
             document.getElementById('form-estado').value = editData.estado;
             document.getElementById('form-fecha').value = editData.fecha_cumpleanos || '';
+            document.getElementById('form-area').value = editData.area || '';
             document.getElementById('form-cliente').value = editData.cliente;
             document.getElementById('form-ejecutivo').value = editData.ejecutivo || '';
             document.getElementById('form-observaciones').value = editData.observaciones || '';
@@ -306,6 +312,7 @@
                         <td>${clean(co.email)}</td>  
                         <td>${clean(co.telefono)}</td>  
                         <td>${clean(co.cargo)}</td>  
+                        <td>${clean(co.area)}</td>  
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
                         <td>${clean(co.ejecutivo_nombre || '-')}</td>  
                         <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
