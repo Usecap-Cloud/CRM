@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Auditoría - USECAP CRM{% endblock %}
+{% block nav_audit %}active{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .audit-table th {
+        color: #888;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .audit-table td {
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .action-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .action-crear { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .action-editar { background: rgba(30, 144, 255, 0.1); color: #1e90ff; }
+    .action-eliminar { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .action-importar { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+
+    .audit-detail {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="list-view">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Registro de <span class="header-blue-text">Auditoría</span></h1>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por Usuario, Acción, Modelo..." onkeyup="filterTable('search-input', 'audit-table')">
+    </div>
+
+    <div class="card">
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Cargando registros de auditoría...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay registros disponibles</div>
+        <table class="audit-table" id="audit-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Fecha/Hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Módulo</th>
+                    <th>Objeto</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody id="audit-body"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadAuditLogs() {
+        try {
+            const response = await fetch('/api/audit-logs/');
+            if (!response.ok) throw new Error('Error en la API');
+
+            const data = await response.json();
+            const logs = Array.isArray(data) ? data : (data.results || []);
+
+            document.getElementById('loading').style.display = 'none';
+
+            if (logs.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('audit-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('audit-table').style.display = 'table';
+                const tbody = document.getElementById('audit-body');
+                tbody.innerHTML = logs.map(log => {
+                    const date = new Date(log.fecha).toLocaleString('es-CL');
+                    const actionClass = `action-${log.accion.toLowerCase()}`;
+                    return `
+                    <tr>
+                        <td style="white-space: nowrap;">${date}</td>
+                        <td style="font-weight: 600;">${log.usuario_nombre || 'Sistema'}</td>
+                        <td><span class="action-badge ${actionClass}">${log.accion}</span></td>
+                        <td>${log.modelo}</td>
+                        <td><strong>${log.objeto_repr}</strong> <small>(ID: ${log.objeto_id})</small></td>
+                        <td class="audit-detail" title="${log.detalle}">${log.detalle}</td>
+                    </tr>
+                `}).join('');
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading').textContent = 'Error cargando auditoría';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAuditLogs);
+</script>
+{% endblock %}

@@ -126,6 +126,11 @@
         </div>
     </div>
 
+    <div class="search-container">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por RUT, Nombre, Cliente, Cargo..." onkeyup="filterTable('search-input', 'data-table')">
+    </div>
+
     <div class="card">
         <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Coordinadores...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
@@ -139,6 +144,7 @@
                     <th>Teléfono</th>
                     <th>Cargo</th>
                     <th>Cliente</th>
+                    <th>Ejecutivo</th>
                     <th>Estado</th>
                     <th></th>
                 </tr>
@@ -212,6 +218,12 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
+                    <label>Ejecutivo Asignado</label>
+                    <select name="ejecutivo" id="form-ejecutivo">
+                        <option value="">Seleccionar ejecutivo (opcional)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Observaciones</label>
                     <textarea name="observaciones" id="form-observaciones" placeholder="Notas adicionales"
                         style="min-height: 100px;"></textarea>
@@ -247,6 +259,7 @@
             document.getElementById('form-estado').value = editData.estado;
             document.getElementById('form-fecha').value = editData.fecha_cumpleanos || '';
             document.getElementById('form-cliente').value = editData.cliente;
+            document.getElementById('form-ejecutivo').value = editData.ejecutivo || '';
             document.getElementById('form-observaciones').value = editData.observaciones || '';
             document.getElementById('submit-btn').textContent = 'Guardar Cambios';
             document.querySelector('[name="is_edit"]').value = "true";
@@ -294,6 +307,7 @@
                         <td>${clean(co.telefono)}</td>  
                         <td>${clean(co.cargo)}</td>  
                         <td>${clean(co.cliente_nombre || co.cliente)}</td>  
+                        <td>${clean(co.ejecutivo_nombre || '-')}</td>  
                         <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
                         <td>  
                             <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>  
@@ -327,6 +341,22 @@
             });
         } catch (error) { console.error('Error loading clientes for dropdown', error); }
     }
+    async function loadEjecutivos() {
+        try {
+            const response = await fetch('/api/ejecutivos/');
+            if (!response.ok) return;
+            const data = await response.json();
+            const ejs = Array.isArray(data) ? data : (data.results || []);
+            const select = document.getElementById('form-ejecutivo');
+            select.innerHTML = '<option value="">Seleccionar ejecutivo (opcional)</option>';
+            ejs.forEach(ej => {
+                const opt = document.createElement('option');
+                opt.value = ej.id;
+                opt.textContent = ej.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading ejecutivos for dropdown', error); }
+    }
     async function saveCoordinador(e) {
         e.preventDefault();
         const form = e.target;
@@ -355,6 +385,7 @@
             estado: form.estado.value,
             fecha_cumpleanos: form.fecha_cumpleanos.value,
             cliente: form.cliente.value,
+            ejecutivo: form.ejecutivo.value || null,
             observaciones: form.observaciones.value
         };
         try {
@@ -423,5 +454,6 @@
     }
     loadCoordinadores();
     loadClientes();  
+    loadEjecutivos();
 </script>
 {% endblock %}

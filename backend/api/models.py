@@ -56,6 +56,7 @@ def normalize_rut_str(value):
     cuerpo = clean[:-1]
     dv = clean[-1]
     try:
+
         # Formato con puntos: 12.345.678
         cuerpo_fmt = f"{int(cuerpo):,}".replace(",", ".")
         return f"{cuerpo_fmt}-{dv}"
@@ -184,6 +185,13 @@ class Cliente(models.Model):
     # Relaciones
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
+    contacto_principal = models.ForeignKey(
+        "Coordinador",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="es_principal_de"
+    )
 
     def save(self, *args, **kwargs):
         self.rut_empresa = normalize_rut_str(self.rut_empresa)
@@ -217,6 +225,7 @@ class Coordinador(models.Model):
     
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.rut_coordinador = normalize_rut_str(self.rut_coordinador)
@@ -447,6 +456,7 @@ class Seguimiento(models.Model):
     def __str__(self):
         return f"Seguimiento {self.id} - Contrato {self.contrato_id}"
 
+
 # =========================
 # Historial de Importaciones
 # =========================
@@ -459,3 +469,22 @@ class ImportHistory(models.Model):
 
     def __str__(self):
         return f"{self.nombre_archivo} - {self.fecha.strftime('%Y-%m-%d %H:%M')}"
+
+
+# =========================
+# Auditoría de Cambios
+# =========================
+class AuditLog(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    accion = models.CharField(max_length=20) # 'CREAR', 'EDITAR', 'ELIMINAR'
+    modelo = models.CharField(max_length=50)
+    objeto_id = models.IntegerField()
+    objeto_repr = models.CharField(max_length=255)
+    detalle = models.TextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.fecha.strftime('%Y-%m-%d %H:%M')} - {self.usuario} - {self.accion} {self.modelo}"

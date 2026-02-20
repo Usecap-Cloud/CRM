@@ -126,6 +126,11 @@
 
 
 
+    <div class="search-container">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por RUT, Nombre, Contacto, Tipo..." onkeyup="filterTable('search-input', 'proveedores-table')">
+    </div>
+
     <div class="card">
         <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Proveedores...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información

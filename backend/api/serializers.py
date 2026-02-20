@@ -3,7 +3,7 @@ from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
     ContratoServicio, ContratoProveedor,
-    Seguimiento, ImportHistory
+    Seguimiento, ImportHistory, AuditLog
 )
 
 class RolSerializer(serializers.ModelSerializer):
@@ -30,6 +30,9 @@ class EjecutivoSerializer(serializers.ModelSerializer):
 class ClienteSerializer(serializers.ModelSerializer):
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
     cliente_padre_nombre = serializers.ReadOnlyField(source='cliente_padre.razon_social')
+    contacto_nombre = serializers.ReadOnlyField(source='contacto_principal.nombre')
+    contacto_email = serializers.ReadOnlyField(source='contacto_principal.email')
+    contacto_telefono = serializers.ReadOnlyField(source='contacto_principal.telefono')
     class Meta:
         model = Cliente
         fields = '__all__'
@@ -41,6 +44,7 @@ class ClienteSerializer(serializers.ModelSerializer):
 
 class CoordinadorSerializer(serializers.ModelSerializer):
     cliente_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
+    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
 
     class Meta:
         model = Coordinador
@@ -127,4 +131,10 @@ class SeguimientoSerializer(serializers.ModelSerializer):
 class ImportHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ImportHistory
+        fields = '__all__'
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    usuario_nombre = serializers.ReadOnlyField(source='usuario.username')
+    class Meta:
+        model = AuditLog
         fields = '__all__'

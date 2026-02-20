@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RolViewSet, EjecutivoViewSet, ClienteViewSet, CoordinadorViewSet,
     ServicioViewSet, ProveedorViewSet, CursoViewSet, ContratoViewSet,
-    ContratoCursoViewSet, ContratoServicioViewSet, ContratoProveedorViewSet, SeguimientoViewSet, ImportHistoryViewSet
+    ContratoCursoViewSet, ContratoServicioViewSet, ContratoProveedorViewSet, SeguimientoViewSet, ImportHistoryViewSet, AuditLogViewSet
 )
 
 router = DefaultRouter()
@@ -20,13 +20,14 @@ router.register(r'contratos-servicios', ContratoServicioViewSet)
 router.register(r'contratos-proveedores', ContratoProveedorViewSet)
 router.register(r'seguimientos', SeguimientoViewSet)
 router.register(r'import-history', ImportHistoryViewSet)
+router.register(r'audit-logs', AuditLogViewSet)
 
 from .views import (
     DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view, 
     estadisticas_view, clientes_view, coordinadores_view,
     cursos_view, contratos_view, proveedores_view, servicios_view,
     importar_view, AnalyzeHeadersView, ProcessMappedImportView, UniversalImportView,
-    ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view
+    ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view, audit_log_view
 )
 
 urlpatterns = [
@@ -50,4 +51,5 @@ urlpatterns = [
     path('ejecutivos-create/', CreateEjecutivoAPIView.as_view(), name='ejecutivos-create'),
     path('importar-analizar/', AnalyzeHeadersView.as_view(), name='importar-analizar'),
     path('importar-procesar/', ProcessMappedImportView.as_view(), name='importar-procesar'),
+    path('audit-log-page/', audit_log_view, name='audit-log-page'),
 ]

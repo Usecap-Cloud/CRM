@@ -12,65 +12,103 @@ from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
     ContratoServicio, ContratoProveedor,Seguimiento, ImportHistory,
-    normalize_rut_str
+    AuditLog, normalize_rut_str
 )
 from django.http import HttpResponse
 import io
 from .serializers import (
     RolSerializer, EjecutivoSerializer, ClienteSerializer, CoordinadorSerializer,
     ServicioSerializer, ProveedorSerializer, CursoSerializer, ContratoSerializer,
-    ContratoCursoSerializer, ContratoServicioSerializer, ContratoProveedorSerializer, SeguimientoSerializer
+    ContratoCursoSerializer, ContratoServicioSerializer, ContratoProveedorSerializer, SeguimientoSerializer, AuditLogSerializer
 )
 
 # Create your views here.
 
-class RolViewSet(viewsets.ModelViewSet):
+class AuditMixin:
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        AuditLog.objects.create(
+            usuario=self.request.user if not self.request.user.is_anonymous else None,
+            accion='CREAR',
+            modelo=self.__class__.__name__.replace('ViewSet', ''),
+            objeto_id=instance.id,
+            objeto_repr=str(instance),
+            detalle=f"Creado nuevo registro de {self.__class__.__name__.replace('ViewSet', '')}"
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        AuditLog.objects.create(
+            usuario=self.request.user if not self.request.user.is_anonymous else None,
+            accion='EDITAR',
+            modelo=self.__class__.__name__.replace('ViewSet', ''),
+            objeto_id=instance.id,
+            objeto_repr=str(instance),
+            detalle=f"Actualizado registro de {self.__class__.__name__.replace('ViewSet', '')}"
+        )
+
+    def perform_destroy(self, instance):
+        AuditLog.objects.create(
+            usuario=self.request.user if not self.request.user.is_anonymous else None,
+            accion='ELIMINAR',
+            modelo=self.__class__.__name__.replace('ViewSet', ''),
+            objeto_id=instance.id,
+            objeto_repr=str(instance),
+            detalle=f"Eliminado registro de {self.__class__.__name__.replace('ViewSet', '')}"
+        )
+        instance.delete()
+
+class RolViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Rol.objects.all()
     serializer_class = RolSerializer
 
-class EjecutivoViewSet(viewsets.ModelViewSet):
+class EjecutivoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Ejecutivo.objects.all()
     serializer_class = EjecutivoSerializer
 
-class ClienteViewSet(viewsets.ModelViewSet):
+class ClienteViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
 
-class CoordinadorViewSet(viewsets.ModelViewSet):
+class CoordinadorViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Coordinador.objects.all()
     serializer_class = CoordinadorSerializer
 
-class ServicioViewSet(viewsets.ModelViewSet):
+class ServicioViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Servicio.objects.all()
     serializer_class = ServicioSerializer
 
-class ProveedorViewSet(viewsets.ModelViewSet):
+class ProveedorViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Proveedor.objects.all()
     serializer_class = ProveedorSerializer
 
-class CursoViewSet(viewsets.ModelViewSet):
+class CursoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
 
-class ContratoViewSet(viewsets.ModelViewSet):
+class ContratoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Contrato.objects.all()
     serializer_class = ContratoSerializer
 
-class ContratoCursoViewSet(viewsets.ModelViewSet):
+class ContratoCursoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoCurso.objects.all()
     serializer_class = ContratoCursoSerializer
 
-class ContratoServicioViewSet(viewsets.ModelViewSet):
+class ContratoServicioViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoServicio.objects.all()
     serializer_class = ContratoServicioSerializer
 
-class ContratoProveedorViewSet(viewsets.ModelViewSet):
+class ContratoProveedorViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoProveedor.objects.all()
     serializer_class = ContratoProveedorSerializer
 
-class SeguimientoViewSet(viewsets.ModelViewSet):
+class SeguimientoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Seguimiento.objects.all()
     serializer_class = SeguimientoSerializer
+
+class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.all().order_by('-fecha')
+    serializer_class = AuditLogSerializer
 
 class DashboardStatsView(APIView):
     def get(self, request):
@@ -224,6 +262,15 @@ class UniversalImportView(APIView):
         
         if not file_obj:
             return Response({"error": "No se subio ningun archivo"}, status=400)
+
+        AuditLog.objects.create(
+            usuario=request.user if not request.user.is_anonymous else None,
+            accion='IMPORTAR',
+            modelo=model_type.capitalize(),
+            objeto_id=0,
+            objeto_repr=file_obj.name,
+            detalle=f"Iniciada importación masiva de {model_type} desde archivo {file_obj.name}"
+        )
         
         try:
             df = pd.read_excel(file_obj)
@@ -259,6 +306,7 @@ class UniversalImportView(APIView):
                 elif norm in ['comuna']: mapping['comuna'] = col
                 elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
                 elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
+                elif norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
                 
                 # Contract specific mapping
                 elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
@@ -483,6 +531,13 @@ class UniversalImportView(APIView):
                              errors.append(f"Fila {index + 2}: Cliente no encontrado (RUT: {rut_cli_raw})")
                              continue
                             
+                        # Find Ejecutivo (Optional)
+                        ejecutivo = None
+                        rut_ej_raw = row.get(mapping.get('ejecutivo_rut'))
+                        if rut_ej_raw:
+                            rut_ej = format_rut_chile(clean_val(rut_ej_raw))
+                            ejecutivo = Ejecutivo.objects.filter(rut_ejecutivo=rut_ej).first()
+
                         Coordinador.objects.create(
                             rut_coordinador=rut,
                             nombre=str(row.get(mapping.get('nombre'), 'Sin Nombre')).strip(),
@@ -491,7 +546,8 @@ class UniversalImportView(APIView):
                             cliente=cliente,
                             estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
                             cargo=str(row.get(mapping.get('cargo'), '')).strip(),
-                            fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None
+                            fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None,
+                            ejecutivo=ejecutivo
                         )
                         created_count += 1
                     elif model_type == 'curso':
@@ -623,6 +679,15 @@ class ProcessMappedImportView(APIView):
         
         if not file_obj or not mapping_str:
             return Response({"error": "Falta el archivo o el mapeo"}, status=400)
+        
+        AuditLog.objects.create(
+            usuario=request.user if not request.user.is_anonymous else None,
+            accion='IMPORTAR',
+            modelo='Cliente',
+            objeto_id=0,
+            objeto_repr=file_obj.name,
+            detalle=f"Iniciada importación mapeada de clientes desde archivo {file_obj.name}"
+        )
         
         try:
             import json
@@ -820,6 +885,14 @@ class CreateEjecutivoAPIView(APIView):
                 message = "Ejecutivo creado correctamente"
                 status_code = 201
             
+            AuditLog.objects.create(
+                usuario=request.user if not request.user.is_anonymous else None,
+                accion='EDITAR' if status_code == 200 else 'CREAR',
+                modelo='Ejecutivo',
+                objeto_id=ejecutivo_instance.id,
+                objeto_repr=str(ejecutivo_instance),
+                detalle=f"{message} manualmente vía API"
+            )
             return Response({"message": message, "username": ejecutivo_instance.user.username if ejecutivo_instance.user else ""}, status=status_code)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
@@ -827,3 +900,11 @@ class CreateEjecutivoAPIView(APIView):
 def servicios_view(request):
     from django.shortcuts import render
     return render(request, 'servicios.html')
+
+def audit_log_view(request):
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+            return redirect('dashboard')
+    return render(request, 'audit_log.html')

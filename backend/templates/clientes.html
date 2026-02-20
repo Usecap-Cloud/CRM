@@ -139,7 +139,10 @@
         </div>
     </div>
 
-
+    <div class="search-container">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por RUT, Razón Social, Ejecutivo..." onkeyup="filterTable('search-input', 'clients-table')">
+    </div>
 
     <div class="card">
         <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Clientes...</div>
@@ -156,6 +159,7 @@
                     <th>Comuna</th>
                     <th>Region</th>
                     <th>Holding</th>
+                    <th>Contacto Principal</th>
                     <th></th>
                 </tr>
             </thead>
@@ -176,13 +180,11 @@
             <div class="form-section">
                 <div class="form-section-title">NUEVA FICHA</div>
                 <div class="form-section-subtitle">Datos Corporativos</div>
-                <div class="form-section-desc" id="form-desc">Complete la informacion legal y operativa de la empresa.
-                </div>
             </div>
 
             <div class="section-label"
                 style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
-                &#x1F4CB; IDENTIFICACION</div>
+                &#x1F4CB; COMPLETE LA INFORMACION DE LA EMPRESA</div>
             <div class="form-row">
                 <div class="form-group">
                     <label>RUT Empresa</label>
@@ -197,10 +199,6 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Email Contacto</label>
-                    <input type="email" name="email" id="form-email" placeholder="contacto@empresa.cl">
-                </div>
-                <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
                         <option value="activo">Activo</option>
@@ -209,18 +207,19 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 1234 5678">
-                </div>
-            </div>
+
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Ejecutivo Asignado</label>
                     <select name="ejecutivo" id="ejecutivo-select" required>
                         <option value="">Seleccionar ejecutivo...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contacto Principal (Coordinador)</label>
+                    <select name="contacto_principal" id="contacto-select">
+                        <option value="">Ninguno / Seleccione Empresa para cargar contactos</option>
                     </select>
                 </div>
             </div>
@@ -251,14 +250,20 @@
             document.getElementById('client-id').value = data.id;
             document.getElementById('form-rut').value = data.rut_empresa;
             document.getElementById('form-rut').readOnly = true;
-            document.getElementById('form-razon_social').value = data.razon_social;
+            document.getElementById('form-razon').value = data.razon_social;
+            document.getElementById('form-estado').value = data.estado || 'activo';
             document.getElementById('ejecutivo-select').value = data.ejecutivo;
+            
+            populateCoordinadores(data.id);
+            document.getElementById('contacto-select').value = data.contacto_principal || '';
+            
             document.getElementById('submit-btn').textContent = 'Actualizar Empresa';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Empresa';
             document.getElementById('client-id').value = '';
             document.getElementById('form-rut').readOnly = false;
             document.getElementById('client-form').reset();
+            populateCoordinadores(null); 
             document.getElementById('submit-btn').textContent = 'Guardar Empresa';
         }
     }
@@ -334,6 +339,10 @@
                         <td>${clean(client.region)}</td>
                         <td>${clean(client.cliente_padre_nombre)}</td>
                         <td>
+                            <div style="font-size: 0.85rem; font-weight: 500;">${clean(client.contacto_nombre)}</div>
+                            <div style="font-size: 0.75rem; color: #888;">${clean(client.contacto_email)}</div>
+                        </td>
+                        <td>
                             <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
                             <button class="pill-btn delete" onclick='deleteClient(${client.id})'>Eliminar</button>
                         </td>
@@ -365,31 +374,60 @@
         } catch (error) { console.error('Error loading ejecutivos'); }
     }
 
+    let allCoordinators = [];
+    async function loadCoordinadores() {
+        try {
+            const response = await fetch('/api/coordinadores/');
+            const data = await response.json();
+            allCoordinators = Array.isArray(data) ? data : (data.results || []);
+        } catch (error) { console.error('Error loading coordinadores'); }
+    }
+
+    function populateCoordinadores(clientId = null) {
+        const select = document.getElementById('contacto-select');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Ninguno / Sin contacto seleccionado</option>';
+        
+        // Filter by client if ID is provided, else show nothing or all depending on UX
+        // For editing, we definitely want only that client's contacts.
+        let filtered = clientId 
+            ? allCoordinators.filter(c => c.cliente === clientId)
+            : []; // For new clients, don't show any yet.
+
+        filtered.forEach(co => {
+            const opt = document.createElement('option');
+            opt.value = co.id;
+            opt.textContent = `${co.nombre} (${co.cargo || '-'})`;
+            select.appendChild(opt);
+        });
+        
+        if (clientId && filtered.length === 0) {
+            const opt = document.createElement('option');
+            opt.disabled = true;
+            opt.textContent = "Sin coordinadores creados para esta empresa";
+            select.appendChild(opt);
+        }
+    }
+
     async function saveClient(e) {
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('client-id').value;
 
         const rut = form.rut_empresa.value;
-        const phone = form.telefono.value;
 
         if (!validateRut(rut)) {
             showAlert('RUT Empresa inválido', 'error');
             return;
         }
 
-        if (!validatePhone(phone)) {
-            showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
-            return;
-        }
-
         const data = {
             rut_empresa: rut,
             razon_social: form.razon_social.value,
-            email_contacto: form.email.value,
             estado: form.estado.value,
-            telefono: phone,
-            ejecutivo: parseInt(form.ejecutivo.value)
+            ejecutivo: parseInt(form.ejecutivo.value),
+            contacto_principal: form.contacto_principal.value || null
         };
         try {
             const url = id ? `/api/clientes/${id}/` : '/api/clientes/';
@@ -458,5 +496,6 @@
     }
     loadClients();
     loadEjecutivos();
+    loadCoordinadores();
 </script>
 {% endblock %}

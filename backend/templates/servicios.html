@@ -141,6 +141,11 @@
 
     <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
 
+    <div class="search-container">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por Nombre, Tipo, Rubro, Estado..." onkeyup="filterTable('search-input', 'servicios-table')">
+    </div>
+
     <div class="card">
         <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Servicios...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
