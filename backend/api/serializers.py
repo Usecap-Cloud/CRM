@@ -38,7 +38,10 @@ class ClienteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_rut_empresa(self, value):
-        if Cliente.objects.filter(rut_empresa=value).exists():
+        queryset = Cliente.objects.filter(rut_empresa=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
             raise serializers.ValidationError("Este RUT ya está registrado como cliente.")
         return value
 
