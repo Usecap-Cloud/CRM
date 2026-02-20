@@ -148,11 +148,32 @@ class DashboardStatsView(APIView):
         stats = {
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
-            "contratos_cerrar": Contrato.objects.filter(estado__iexact='por cerrar').count(),
-            "actividad_reciente": recent_activity,
+            "contratos": Contrato.objects.count(),
+            "seguimientos_pendientes": Seguimiento.objects.filter(cerrado=False).count(),
+            "recent_activity": recent_activity,
             "agenda": agenda
         }
         return Response(stats)
+
+class SidebarAlertsView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({"pending_seguimientos": 0})
+        
+        # Determine filtering based on role
+        count = 0
+        if request.user.is_superuser:
+            count = Seguimiento.objects.filter(cerrado=False).count()
+        else:
+            ej = getattr(request.user, 'ejecutivo', None)
+            if ej:
+                if ej.rol.nombre in ['Administrador', 'Gerencia']:
+                    count = Seguimiento.objects.filter(cerrado=False).count()
+                else:
+                    # Individual executive only sees their own pending follow-ups
+                    count = Seguimiento.objects.filter(cerrado=False, ejecutivo=ej).count()
+        
+        return Response({"pending_seguimientos": count})
 
 def dashboard_view(request):
     from django.shortcuts import render

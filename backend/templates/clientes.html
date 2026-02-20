@@ -159,6 +159,7 @@
                     <th>Comuna</th>
                     <th>Region</th>
                     <th>Holding</th>
+                    <th>Salud</th>
                     <th>Contacto</th>
                     <th></th>
                 </tr>
@@ -337,7 +338,15 @@
                         <td>${clean(client.direccion)}</td>
                         <td>${clean(client.comuna)}</td>
                         <td>${clean(client.region)}</td>
-                        <td>${clean(client.cliente_padre_nombre)}</td>
+                        <td>
+                            ${client.cliente_padre_nombre ? `<span style="font-size: 0.75rem; color: var(--text-color-secondary);">${clean(client.cliente_padre_nombre)}</span>` : '-'}
+                            ${client.filiales_count > 0 ? `<div style="font-size: 0.65rem; color: #3b82f6; font-weight: 600;">&#x1F3E2; ${client.filiales_count} filiales</div>` : ''}
+                        </td>
+                        <td>
+                            <div class="health-indicator" title="Puntuaje de Salud: ${client.health_score}%">
+                                <div class="health-bar" style="width: ${client.health_score}%; background: ${client.health_score > 70 ? '#10b981' : client.health_score > 40 ? '#f59e0b' : '#ef4444'};"></div>
+                            </div>
+                        </td>
                         <td>
                             <div style="font-size: 0.85rem; font-weight: 500;">${clean(client.contacto_nombre)}</div>
                             <div style="font-size: 0.75rem; color: #888;">${clean(client.contacto_email)}</div>

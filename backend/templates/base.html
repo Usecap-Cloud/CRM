@@ -112,11 +112,45 @@
             filter: drop-shadow(0 0 1px rgba(0,0,0,0.3));
         }
 
-        .nav-item:hover,
+        .nav-item:hover {
+            background: var(--nav-hover);
+            color: var(--primary-blue);
+            border-left-color: var(--primary-blue);
+        }
+
         .nav-item.active {
             background: var(--nav-hover);
             color: var(--primary-blue);
             border-left-color: var(--primary-blue);
+        }
+
+        .nav-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+        }
+
+        .health-indicator {
+            width: 80px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .health-bar {
+            height: 100%;
+            transition: width 0.3s ease;
         }
 
         .theme-toggle-inline {
@@ -628,19 +662,14 @@
 
         async function updateAlertBadges() {
             try {
-                const res = await fetch('/api/seguimientos/');
+                const res = await fetch('/api/sidebar-alerts/');
                 const data = await res.json();
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Count follow-ups due today or earlier that are not closed
-                const pending = data.filter(s => 
-                    s.fecha_proxima && s.fecha_proxima <= today && !s.cerrado
-                ).length;
+                const pending = data.pending_seguimientos || 0;
 
                 const badge = document.getElementById('seguimiento-badge');
                 if (pending > 0) {
                     badge.textContent = pending > 99 ? '99+' : pending;
-                    badge.style.display = 'block';
+                    badge.style.display = 'inline-flex';
                 } else {
                     badge.style.display = 'none';
                 }

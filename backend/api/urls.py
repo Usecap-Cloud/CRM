@@ -27,11 +27,13 @@ from .views import (
     estadisticas_view, clientes_view, coordinadores_view,
     cursos_view, contratos_view, proveedores_view, servicios_view,
     importar_view, AnalyzeHeadersView, ProcessMappedImportView, UniversalImportView,
-    ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view, audit_log_view
+    ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view, audit_log_view,
+    SidebarAlertsView
 )
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('sidebar-alerts/', SidebarAlertsView.as_view(), name='sidebar-alerts'),
     path('importar-universal/', UniversalImportView.as_view(), name='importar-universal'),
     path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('dashboard/', dashboard_view, name='dashboard'),
