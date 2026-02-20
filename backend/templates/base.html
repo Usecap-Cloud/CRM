@@ -494,6 +494,13 @@
             background: rgba(30, 144, 255, 0.15);
             color: #1e90ff;
         }
+
+        /* Default badge for inactive, finalizado, and any unclassified state */
+        .status-badge:not(.active):not(.info) {
+            background: rgba(120, 120, 120, 0.12);
+            color: #6b7280;
+        }
+
         .td-main { font-weight: 600; color: var(--text-color); display: block; }
         .td-sub { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; }
         .op-pill { background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; color: #475569; font-weight: 600; }

@@ -146,8 +146,8 @@
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Tipo</th>
                     <th>Empresa</th>
+                    <th>Estado</th>
                     <th>Recepción</th>
                     <th>Emisión</th>
                     <th>Inicio</th>
@@ -269,14 +269,14 @@
                     const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     return `
                     <tr>
-                        <td><span class="status-badge info">${clean(c.tipo_registro)}</span></td>
                         <td>
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
-                            </div>
+                            <span class="td-sub"><span class="status-badge info">${clean(c.tipo_registro)}</span></span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
                         </td>
                         <td>${clean(c.fecha_recepcion)}</td>
                         <td>${clean(c.fecha_emision)}</td>
