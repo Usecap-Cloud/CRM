@@ -929,3 +929,65 @@ def audit_log_view(request):
         if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
             return redirect('dashboard')
     return render(request, 'audit_log.html')
+
+class ForceDataSyncView(APIView):
+    """
+    Temporary view to force reload data from initial_data.json in remote environments
+    """
+    def get(self, request):
+        if not request.user.is_superuser:
+            return Response({"error": "Admin required"}, status=403)
+            
+        import os
+        import json
+        from .models import Cliente, Ejecutivo, Coordinador, Contrato, Curso, Rol
+        from django.contrib.auth.models import User
+        
+        json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'initial_data.json')
+        if not os.path.exists(json_path):
+            return Response({"error": f"JSON not found at {json_path}"}, status=404)
+            
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            summary = {}
+            
+            # 1. Load Roles
+            roles = [obj for obj in data if obj['model'] == 'api.rol']
+            for r in roles:
+                Rol.objects.update_or_create(id=r['pk'], defaults=r['fields'])
+            summary['roles'] = len(roles)
+            
+            # 2. Load Clientes (careful with changes)
+            clientes = [obj for obj in data if obj['model'] == 'api.cliente']
+            for c in clientes:
+                pk = c['pk']
+                fields = c['fields']
+                # Clean fields if they don't match latest model or cause FK issues
+                fields.pop('cliente_padre', None) # Dependency issues usually
+                Cliente.objects.update_or_create(id=pk, defaults=fields)
+            summary['clientes'] = len(clientes)
+            
+            # 3. Load Cursos
+            cursos = [obj for obj in data if obj['model'] == 'api.curso']
+            for cur in cursos:
+                Curso.objects.update_or_create(id=cur['pk'], defaults=cur['fields'])
+            summary['cursos'] = len(cursos)
+            
+            # 4. Load Contratos
+            contratos = [obj for obj in data if obj['model'] == 'api.contrato']
+            for con in contratos:
+                pk = con['pk']
+                fields = con['fields']
+                # Resolve relationships by ID or skip if missing
+                if Cliente.objects.filter(id=fields.get('cliente')).exists():
+                    Contrato.objects.update_or_create(id=pk, defaults=fields)
+            summary['contratos'] = len(contratos)
+            
+            return Response({
+                "message": "Data sync completed successfully",
+                "summary": summary
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
