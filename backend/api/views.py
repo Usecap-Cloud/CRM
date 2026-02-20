@@ -964,10 +964,15 @@ class ForceDataSyncView(APIView):
             
             summary = {}
             
+            def filter_model_fields(model, fields_dict):
+                """Keep only fields that exist in the model"""
+                valid_fields = {f.name for f in model._meta.get_fields()}
+                return {k: v for k, v in fields_dict.items() if k in valid_fields}
+
             # 1. Load Roles
             roles_data = [obj for obj in data if obj['model'] == 'api.rol']
             for r in roles_data:
-                Rol.objects.update_or_create(id=r['pk'], defaults=r['fields'])
+                Rol.objects.update_or_create(id=r['pk'], defaults=filter_model_fields(Rol, r['fields']))
             summary['roles'] = len(roles_data)
             
             # 2. Load Users
@@ -998,7 +1003,7 @@ class ForceDataSyncView(APIView):
                 if rol_id:
                     fields['rol'] = Rol.objects.get(id=rol_id)
                 
-                Ejecutivo.objects.update_or_create(id=ej['pk'], defaults=fields)
+                Ejecutivo.objects.update_or_create(id=ej['pk'], defaults=filter_model_fields(Ejecutivo, fields))
             summary['ejecutivos'] = len(ej_data)
             
             # 4. Load Clientes
@@ -1010,7 +1015,11 @@ class ForceDataSyncView(APIView):
                 ej_id = fields.pop('ejecutivo', None)
                 if ej_id: fields['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
                 
-                Cliente.objects.update_or_create(id=cli['pk'], defaults=fields)
+                # Special mapping for renamed/stale fields
+                if 'telefono' in fields and 'telefono_empresarial' not in fields:
+                    fields['telefono_empresarial'] = fields['telefono']
+
+                Cliente.objects.update_or_create(id=cli['pk'], defaults=filter_model_fields(Cliente, fields))
             
             # Update parent clients
             for cli in cli_data:
@@ -1027,13 +1036,13 @@ class ForceDataSyncView(APIView):
                 if cli_id: f['cliente'] = Cliente.objects.filter(id=cli_id).first()
                 ej_id = f.pop('ejecutivo', None)
                 if ej_id: f['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
-                Coordinador.objects.update_or_create(id=pk, defaults=f)
+                Coordinador.objects.update_or_create(id=pk, defaults=filter_model_fields(Coordinador, f))
             summary['coordinadores'] = len(coord_data)
             
             # 6. Load Cursos
             cursos_data = [obj for obj in data if obj['model'] == 'api.curso']
             for cur in cursos_data:
-                Curso.objects.update_or_create(id=cur['pk'], defaults=cur['fields'])
+                Curso.objects.update_or_create(id=cur['pk'], defaults=filter_model_fields(Curso, cur['fields']))
             summary['cursos'] = len(cursos_data)
             
             # 7. Load Contratos
@@ -1046,14 +1055,11 @@ class ForceDataSyncView(APIView):
                 if ej_id: f['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
                 coord_id = f.pop('coordinador', None)
                 if coord_id: f['coordinador'] = Coordinador.objects.filter(id=coord_id).first()
-                Contrato.objects.update_or_create(id=pk, defaults=f)
+                Contrato.objects.update_or_create(id=pk, defaults=filter_model_fields(Contrato, f))
             summary['contratos'] = len(contratos_data)
             
-            # 8. Load Related Items (ContratoCurso, etc if exist in JSON)
-            # Add logic if they are in the JSON... (currently they seem to be missing or I didn't see them)
-            
             return Response({
-                "message": "Full Data Sync completed successfully",
+                "message": "Full Data Sync completed successfully (with field filtering)",
                 "summary": summary
             })
         except Exception as e:
