@@ -148,11 +148,10 @@
                 <tr>
                     <th>Tipo</th>
                     <th>Empresa</th>
-                    <th>Estado</th>
-                    <th>Fecha recepción</th>
-                    <th>Fecha emisión</th>
-                    <th>Fecha inicio</th>
-                    <th>Fecha vencimiento</th>
+                    <th>Recepción</th>
+                    <th>Emisión</th>
+                    <th>Inicio</th>
+                    <th>Vencimiento</th>
                     <th>Subtotal</th>
                     <th></th>
                 </tr>
@@ -270,9 +269,15 @@
                     const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     return `
                     <tr>
-                        <td>${clean(c.tipo_registro)}</td>
-                        <td>${clean(c.empresa_nombre || c.empresa)}</td>
-                        <td><span class="status-badge active">${clean(c.estado)}</span></td>
+                        <td><span class="status-badge info">${clean(c.tipo_registro)}</span></td>
+                        <td>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
+                            </div>
+                        </td>
                         <td>${clean(c.fecha_recepcion)}</td>
                         <td>${clean(c.fecha_emision)}</td>
                         <td>${clean(c.fecha_inicio)}</td>

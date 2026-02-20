@@ -138,10 +138,8 @@
         <table class="proveedores-table" id="proveedores-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>RUT</th>
-                    <th>Nombre</th>
-                    <th>Contacto</th>
-                    <th>Email</th>
+                    <th>Proveedor</th>
+                    <th>Contacto Directo</th>
                     <th>Tipo</th>
                     <th></th>
                 </tr>
@@ -261,10 +259,20 @@
                     };
                     return `
                     <tr>
-                        <td>${clean(p.rut_proveedor)}</td>
-                        <td>${clean(p.nombre)}</td>
-                        <td>${clean(p.contacto)}</td>
-                        <td>${clean(p.email)}</td>
+                        <td>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">${clean(p.nombre)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <span class="status-badge ${p.estado && p.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(p.estado || 'Activo')}</span>
+                                <span class="td-sub" style="margin:0">${clean(p.rut_proveedor)}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(p.contacto)}</span>
+                            <span class="td-sub">${clean(p.email)}</span>
+                            <span class="td-sub">📞 ${clean(p.telefono)}</span>
+                        </td>
                         <td><span class="status-badge info">${clean(p.tipo)}</span></td>
                         <td>
                             <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>

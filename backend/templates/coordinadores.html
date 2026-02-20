@@ -138,15 +138,10 @@
         <table class="data-table" id="data-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>RUT</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
+                    <th>Coordinador</th>
+                    <th>Contacto</th>
                     <th>Cargo</th>
-                    <th>Área</th>
                     <th>Cliente</th>
-                    <th>Ejecutivo</th>
-                    <th>Estado</th>
                     <th></th>
                 </tr>
             </thead>
@@ -306,16 +301,28 @@
                         return val;
                     };
                     return `  
-                    <tr>  
-                        <td>${clean(co.rut_coordinador)}</td>  
-                        <td>${clean(co.nombre)}</td>  
-                        <td>${clean(co.email)}</td>  
-                        <td>${clean(co.telefono)}</td>  
-                        <td>${clean(co.cargo)}</td>  
-                        <td>${clean(co.area)}</td>  
-                        <td>${clean(co.cliente_nombre || co.cliente)}</td>  
-                        <td>${clean(co.ejecutivo_nombre || '-')}</td>  
-                        <td><span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span></td>  
+                    <tr>
+                        <td>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">${clean(co.nombre)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span>
+                                <span class="td-sub" style="margin:0">${clean(co.rut_coordinador)}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="td-main" style="font-size: 0.85rem;">${clean(co.email)}</span>
+                            <span class="td-sub">📞 ${clean(co.telefono)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(co.cargo)}</span>
+                            <span class="td-sub">${clean(co.area)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(co.cliente_nombre || co.cliente)}</span>
+                            <span class="td-sub">Ej: ${clean(co.ejecutivo_nombre || '-')}</span>
+                        </td>
                         <td>  
                             <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>  
                             <button class="pill-btn delete" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
