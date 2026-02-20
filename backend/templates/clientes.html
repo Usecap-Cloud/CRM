@@ -160,11 +160,11 @@
         <table class="clients-table" id="clients-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Empresa</th>
-                    <th>Ejecutivo / Estado</th>
+                    <th>Empresa / Estado</th>
+                    <th>Ejecutivo</th>
                     <th>Ubicación</th>
-                    <th>Operación</th>
-                    <th>Relaciones / Holding</th>
+                    <th>Convenio y Dotación</th>
+                    <th>Estructura y Contacto</th>
                     <th></th>
                 </tr>
             </thead>
@@ -371,13 +371,17 @@
                     return `
                     <tr>
                         <td>
-                            <span class="td-main">${clean(client.razon_social)}</span>
-                            <span class="td-sub">${clean(client.rut_empresa)}</span>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">${clean(client.razon_social)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
+                                <span class="td-sub" style="margin:0">${clean(client.rut_empresa)}</span>
+                            </div>
                             ${client.nombre ? `<span class="td-sub" style="font-style: italic;">"${client.nombre}"</span>` : ''}
                         </td>
                         <td>
                             <span class="td-main">${clean(client.ejecutivo_nombre)}</span>
-                            <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
                         </td>
                         <td>
                             <span class="td-main">${clean(client.direccion)}</span>
@@ -395,14 +399,14 @@
                         </td>
                         <td>
                             <div style="margin-bottom: 8px;">
-                                <span class="td-sub">Holding:</span>
-                                ${client.cliente_padre_nombre ? `<span class="td-main" style="font-size: 0.8rem;">${clean(client.cliente_padre_nombre)}</span>` : '-'}
+                                <span class="td-sub">Estructura Corporativa:</span>
+                                ${client.cliente_padre_nombre ? `<span class="td-main" style="font-size: 0.8rem;">${clean(client.cliente_padre_nombre)}</span>` : '<span class="td-sub">Independiente</span>'}
                                 ${client.filiales_count > 0 ? `<div style="font-size: 0.65rem; color: #3b82f6; font-weight: 600;">&#x1F3E2; ${client.filiales_count} filiales</div>` : ''}
                             </div>
                             <div>
-                                <span class="td-sub">Contacto:</span>
+                                <span class="td-sub">Contacto Directo:</span>
                                 <span class="td-main" style="font-size: 0.8rem;">${clean(client.contacto_nombre)}</span>
-                                <span class="td-sub">${clean(client.contacto_email)}</span>
+                                <span class="td-sub" style="font-size: 0.7rem;">${clean(client.contacto_email)}</span>
                             </div>
                         </td>
                         <td>
