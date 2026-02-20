@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 import re
 
-# Abreviaciones empresariales/geográficas que permanecen en MAYÚSCULAS
+# Abreviaciones que permanecen en MAYÚSCULAS
 _UPPERCASE_ABBR = {
     'S.A.', 'SPA', 'S.P.A.', 'LTDA.', 'LTDA', 'EIRL', 'E.I.R.L.',
     'S.A.C.', 'SRL', 'SAC', 'SA', 'AG', 'LLC', 'INC', 'S.A.S.',
@@ -170,6 +170,7 @@ class Ejecutivo(models.Model):
 class Cliente(models.Model):
     rut_empresa = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     razon_social = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
@@ -180,7 +181,7 @@ class Cliente(models.Model):
     comuna = models.CharField(max_length=50, blank=True, null=True)
     origen_referencia = models.CharField(max_length=50, blank=True, null=True)
     telefono_empresarial = models.CharField(max_length=20, blank=True, null=True)
-    nombre = models.CharField(max_length=100, blank=True, null=True)
+    fecha_creacion = models.DateField(blank=True, null=True)
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
         max_length=20, 
@@ -190,7 +191,7 @@ class Cliente(models.Model):
     cantidad_sucursales = models.IntegerField(default=1)
     observaciones = models.TextField(blank=True, null=True)
     
-    # Relaciones
+    # Relaciones (Esenciales para el funcionamiento)
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     contacto_principal = models.ForeignKey(
