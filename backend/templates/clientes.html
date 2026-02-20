@@ -163,8 +163,8 @@
                     <th>Empresa / Estado</th>
                     <th>Ejecutivo</th>
                     <th>Ubicación</th>
-                    <th>Convenio y Dotación</th>
-                    <th>Estructura y Contacto</th>
+                    <th>Empresa</th>
+                    <th>Contacto</th>
                     <th></th>
                 </tr>
             </thead>
@@ -391,20 +391,18 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
                             </div>
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px;">
                                 <span class="op-pill" title="Colaboradores">👥 ${client.numero_colaboradores || 0}</span>
                                 <span class="op-pill" title="Sucursales">🏢 ${client.cantidad_sucursales || 1}</span>
+                                ${client.filiales_count > 0 ? `<span class="op-pill" style="background: #e0f2fe; color: #0369a1;" title="Filiales">&#x1F3E2; ${client.filiales_count}</span>` : ''}
                             </div>
-                            <span class="td-sub" style="margin-top: 5px;">📞 ${clean(client.telefono_empresarial)}</span>
+                            <span class="td-sub">📞 ${clean(client.telefono_empresarial)}</span>
                         </td>
                         <td>
                             <div style="margin-bottom: 8px;">
-                                <span class="td-sub">Estructura Corporativa:</span>
                                 ${client.cliente_padre_nombre ? `<span class="td-main" style="font-size: 0.8rem;">${clean(client.cliente_padre_nombre)}</span>` : '<span class="td-sub">Independiente</span>'}
-                                ${client.filiales_count > 0 ? `<div style="font-size: 0.65rem; color: #3b82f6; font-weight: 600;">&#x1F3E2; ${client.filiales_count} filiales</div>` : ''}
                             </div>
                             <div>
-                                <span class="td-sub">Contacto Directo:</span>
                                 <span class="td-main" style="font-size: 0.8rem;">${clean(client.contacto_nombre)}</span>
                                 <span class="td-sub" style="font-size: 0.7rem;">${clean(client.contacto_email)}</span>
                             </div>
