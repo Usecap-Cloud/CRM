@@ -668,7 +668,7 @@ class UniversalImportView(APIView):
                 "message": f"Proceso finalizado. Creados: {created_count}, Errores: {len(errors)}",
                 "created_count": created_count,
                 "error_count": len(errors),
-                "errors": errors if len(errors) < 20 else errors[:20] + ["... y más errores no mostrados."]
+                "errors": errors[:20] if len(errors) >= 20 else errors
             }, status=200 if (created_count > 0 or not errors) else 400)
         except Exception as e:
             return Response({"error": f"Error fatal en importación: {str(e)}"}, status=500)

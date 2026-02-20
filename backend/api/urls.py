@@ -32,11 +32,11 @@ from .views import (
 )
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('force-data-sync/', ForceDataSyncView.as_view(), name='force-data-sync'),
     path('sidebar-alerts/', SidebarAlertsView.as_view(), name='sidebar-alerts'),
     path('importar-universal/', UniversalImportView.as_view(), name='importar-universal'),
     path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+    path('', include(router.urls)),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('portfolio-data/', PortfolioAPIView.as_view(), name='portfolio-data'),
     path('portfolio/', portfolio_view, name='portfolio'),
