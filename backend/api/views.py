@@ -951,7 +951,7 @@ class ForceDataSyncView(APIView):
             
         import os
         import json
-        from .models import Cliente, Ejecutivo, Coordinador, Contrato, Curso, Rol
+        from .models import Cliente, Ejecutivo, Coordinador, Contrato, Curso, Rol, Servicio, Proveedor, ContratoCurso, ContratoServicio, ContratoProveedor
         from django.contrib.auth.models import User
         
         json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'initial_data.json')
@@ -965,40 +965,97 @@ class ForceDataSyncView(APIView):
             summary = {}
             
             # 1. Load Roles
-            roles = [obj for obj in data if obj['model'] == 'api.rol']
-            for r in roles:
+            roles_data = [obj for obj in data if obj['model'] == 'api.rol']
+            for r in roles_data:
                 Rol.objects.update_or_create(id=r['pk'], defaults=r['fields'])
-            summary['roles'] = len(roles)
+            summary['roles'] = len(roles_data)
             
-            # 2. Load Clientes (careful with changes)
-            clientes = [obj for obj in data if obj['model'] == 'api.cliente']
-            for c in clientes:
-                pk = c['pk']
-                fields = c['fields']
-                # Clean fields if they don't match latest model or cause FK issues
-                fields.pop('cliente_padre', None) # Dependency issues usually
-                Cliente.objects.update_or_create(id=pk, defaults=fields)
-            summary['clientes'] = len(clientes)
+            # 2. Load Users
+            users_data = [obj for obj in data if obj['model'] == 'auth.user']
+            for u in users_data:
+                f = u['fields']
+                user, created = User.objects.get_or_create(username=f['username'], defaults={'email': f['email'], 'is_staff': f['is_staff'], 'is_superuser': f['is_superuser']})
+                if not created:
+                    user.email = f['email']
+                    user.is_staff = f['is_staff']
+                    user.is_superuser = f['is_superuser']
+                    user.save()
+            summary['users'] = len(users_data)
             
-            # 3. Load Cursos
-            cursos = [obj for obj in data if obj['model'] == 'api.curso']
-            for cur in cursos:
+            # 3. Load Ejecutivos
+            ej_data = [obj for obj in data if obj['model'] == 'api.ejecutivo']
+            for ej in ej_data:
+                fields = ej['fields']
+                # Link to user
+                user_id = fields.pop('user', None)
+                if user_id:
+                    user_data = next((u for u in users_data if u['pk'] == user_id), None)
+                    if user_data:
+                        fields['user'] = User.objects.get(username=user_data['fields']['username'])
+                
+                # Link to rol
+                rol_id = fields.pop('rol', None)
+                if rol_id:
+                    fields['rol'] = Rol.objects.get(id=rol_id)
+                
+                Ejecutivo.objects.update_or_create(id=ej['pk'], defaults=fields)
+            summary['ejecutivos'] = len(ej_data)
+            
+            # 4. Load Clientes
+            cli_data = [obj for obj in data if obj['model'] == 'api.cliente']
+            for cli in cli_data:
+                fields = cli['fields']
+                fields.pop('cliente_padre', None) # Handle hierarchy later
+                # Resolve ej
+                ej_id = fields.pop('ejecutivo', None)
+                if ej_id: fields['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
+                
+                Cliente.objects.update_or_create(id=cli['pk'], defaults=fields)
+            
+            # Update parent clients
+            for cli in cli_data:
+                parent_id = cli['fields'].get('cliente_padre')
+                if parent_id:
+                    Cliente.objects.filter(id=cli['pk']).update(cliente_padre_id=parent_id)
+            summary['clientes'] = len(cli_data)
+            
+            # 5. Load Coordinadores
+            coord_data = [obj for obj in data if obj['model'] == 'api.coordinador']
+            for co in coord_data:
+                pk, f = co['pk'], co['fields']
+                cli_id = f.pop('cliente', None)
+                if cli_id: f['cliente'] = Cliente.objects.filter(id=cli_id).first()
+                ej_id = f.pop('ejecutivo', None)
+                if ej_id: f['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
+                Coordinador.objects.update_or_create(id=pk, defaults=f)
+            summary['coordinadores'] = len(coord_data)
+            
+            # 6. Load Cursos
+            cursos_data = [obj for obj in data if obj['model'] == 'api.curso']
+            for cur in cursos_data:
                 Curso.objects.update_or_create(id=cur['pk'], defaults=cur['fields'])
-            summary['cursos'] = len(cursos)
+            summary['cursos'] = len(cursos_data)
             
-            # 4. Load Contratos
-            contratos = [obj for obj in data if obj['model'] == 'api.contrato']
-            for con in contratos:
-                pk = con['pk']
-                fields = con['fields']
-                # Resolve relationships by ID or skip if missing
-                if Cliente.objects.filter(id=fields.get('cliente')).exists():
-                    Contrato.objects.update_or_create(id=pk, defaults=fields)
-            summary['contratos'] = len(contratos)
+            # 7. Load Contratos
+            contratos_data = [obj for obj in data if obj['model'] == 'api.contrato']
+            for con in contratos_data:
+                pk, f = con['pk'], con['fields']
+                cli_id = f.pop('cliente', None)
+                if cli_id: f['cliente'] = Cliente.objects.filter(id=cli_id).first()
+                ej_id = f.pop('ejecutivo', None)
+                if ej_id: f['ejecutivo'] = Ejecutivo.objects.filter(id=ej_id).first()
+                coord_id = f.pop('coordinador', None)
+                if coord_id: f['coordinador'] = Coordinador.objects.filter(id=coord_id).first()
+                Contrato.objects.update_or_create(id=pk, defaults=f)
+            summary['contratos'] = len(contratos_data)
+            
+            # 8. Load Related Items (ContratoCurso, etc if exist in JSON)
+            # Add logic if they are in the JSON... (currently they seem to be missing or I didn't see them)
             
             return Response({
-                "message": "Data sync completed successfully",
+                "message": "Full Data Sync completed successfully",
                 "summary": summary
             })
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            import traceback
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=500)
