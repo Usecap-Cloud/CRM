@@ -400,9 +400,11 @@
                         </td>
                         <td>
                             <div style="margin-bottom: 8px;">
-                                ${client.cliente_padre_nombre ? `<span class="td-main" style="font-size: 0.8rem;">${clean(client.cliente_padre_nombre)}</span>` : '<span class="td-sub">Independiente</span>'}
+                                <span class="td-sub" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8;">Holding:</span>
+                                <span class="td-main" style="font-size: 0.8rem;">${client.cliente_padre_nombre ? clean(client.cliente_padre_nombre) : '-'}</span>
                             </div>
-                            <div>
+                            <div style="border-top: 1px solid #f1f5f9; padding-top: 5px;">
+                                <span class="td-sub" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8;">Contacto:</span>
                                 <span class="td-main" style="font-size: 0.8rem;">${clean(client.contacto_nombre)}</span>
                                 <span class="td-sub" style="font-size: 0.7rem;">${clean(client.contacto_email)}</span>
                             </div>
