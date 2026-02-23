@@ -9,7 +9,7 @@ import re
 _UPPERCASE_ABBR = {
     'S.A.', 'SPA', 'S.P.A.', 'LTDA.', 'LTDA', 'EIRL', 'E.I.R.L.',
     'S.A.C.', 'SRL', 'SAC', 'SA', 'AG', 'LLC', 'INC', 'S.A.S.',
-    'RRHH', 'TI', 'RM',
+    'RRHH', 'TI', 'RM', 'OTEC', 'SENCE', 'OTECH',
 }
 
 def normalize_text(value):
@@ -40,6 +40,7 @@ def normalize_estado(value):
         'finalizado': 'Finalizado', 'firmado': 'Firmado',
         'en proceso': 'En Proceso', 'por cerrar': 'Por Cerrar',
         'pendiente': 'Pendiente', 'completado': 'Completado',
+        'particular': 'Particular', 'sence': 'SENCE', 'otech': 'OTEC', 'otec': 'OTEC',
     }
     return mapping.get(value.strip().lower(), value.strip().capitalize())
 
@@ -108,6 +109,11 @@ class Rol(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        self.nombre = normalize_text(self.nombre)
+        self.estado = normalize_estado(self.estado)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.nombre
 
@@ -125,7 +131,7 @@ class Ejecutivo(models.Model):
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
-    area_departamento = models.CharField(
+    departamento = models.CharField(
         max_length=50,
         blank=True,
         null=True,
@@ -143,8 +149,6 @@ class Ejecutivo(models.Model):
             ("otro", "Otro")
         ]
     )
-    region = models.CharField(max_length=50, blank=True, null=True)
-    comuna = models.CharField(max_length=50, blank=True, null=True)
     especialidad_tipo_clientes = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
@@ -156,8 +160,11 @@ class Ejecutivo(models.Model):
         self.nombre = normalize_text(self.nombre)
         if self.email:
             self.email = self.email.strip().lower()
-        self.region = normalize_text(self.region)
-        self.comuna = normalize_text(self.comuna)
+        if self.telefono:
+            self.telefono = self.telefono.strip()
+        self.estado = normalize_estado(self.estado)
+        self.departamento = normalize_text(self.departamento)
+        self.especialidad_tipo_clientes = normalize_text(self.especialidad_tipo_clientes)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -205,12 +212,16 @@ class Cliente(models.Model):
     def save(self, *args, **kwargs):
         self.rut_empresa = normalize_rut_str(self.rut_empresa)
         self.razon_social = normalize_text(self.razon_social)
+        self.nombre = normalize_text(self.nombre)
+        self.estado = normalize_estado(self.estado)
         self.sector_industria = normalize_text(self.sector_industria)
         self.direccion = normalize_text(self.direccion)
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
         self.origen_referencia = normalize_text(self.origen_referencia)
-        self.nombre = normalize_text(self.nombre)
+        self.tipo_convenio = normalize_estado(self.tipo_convenio)
+        if self.telefono_empresarial:
+            self.telefono_empresarial = self.telefono_empresarial.strip()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -227,7 +238,7 @@ class Coordinador(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     cargo = models.CharField(max_length=50, blank=True, null=True)
     fecha_cumpleanos = models.DateField(blank=True, null=True)
-    area = models.CharField(max_length=100, blank=True, null=True)
+    departamento = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
@@ -243,8 +254,11 @@ class Coordinador(models.Model):
         self.nombre = normalize_text(self.nombre)
         if self.email:
             self.email = self.email.strip().lower()
+        if self.telefono:
+            self.telefono = self.telefono.strip()
         self.cargo = normalize_text(self.cargo)
-        self.area = normalize_text(self.area)
+        self.departamento = normalize_text(self.departamento)
+        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -269,6 +283,7 @@ class Servicio(models.Model):
         self.nombre = normalize_text(self.nombre)
         self.tipo = normalize_text(self.tipo)
         self.rubro = normalize_text(self.rubro)
+        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -302,9 +317,13 @@ class Proveedor(models.Model):
         self.contacto = normalize_text(self.contacto)
         if self.email:
             self.email = self.email.strip().lower()
+        if self.telefono:
+            self.telefono = self.telefono.strip()
+        self.direccion = normalize_text(self.direccion)
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
         self.rubro = normalize_text(self.rubro)
+        self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -359,6 +378,12 @@ class Contrato(models.Model):
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        self.empresa = normalize_text(self.empresa)
+        self.tipo_registro = normalize_text(self.tipo_registro)
+        self.estado = normalize_estado(self.estado)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Contrato {self.id} - {self.empresa}"
 
@@ -387,6 +412,12 @@ class ContratoCurso(models.Model):
     # Relaciones
     contrato = models.ForeignKey(Contrato, on_delete=models.CASCADE)
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.tipo_curso = normalize_text(self.tipo_curso)
+        self.relator = normalize_text(self.relator)
+        self.modalidad = normalize_text(self.modalidad)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.tipo_curso} - Contrato {self.contrato.id}"
@@ -464,6 +495,12 @@ class Seguimiento(models.Model):
     coordinador = models.ForeignKey("Coordinador", on_delete=models.CASCADE)
     ejecutivo = models.ForeignKey("Ejecutivo", on_delete=models.CASCADE)
     cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE, null=True)
+
+    def save(self, *args, **kwargs):
+        self.tipo = normalize_text(self.tipo)
+        self.accion = normalize_text(self.accion)
+        self.estado = normalize_estado(self.estado)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Seguimiento {self.id} - Contrato {self.contrato_id}"
