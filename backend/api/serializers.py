@@ -78,7 +78,11 @@ class ProveedorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_rut_proveedor(self, value):
-        if Proveedor.objects.filter(rut_proveedor=value).exists():
+        instance = self.instance
+        qs = Proveedor.objects.filter(rut_proveedor=value)
+        if instance:
+            qs = qs.exclude(pk=instance.pk)
+        if qs.exists():
             raise serializers.ValidationError("Este RUT ya está registrado como proveedor.")
         return value
 

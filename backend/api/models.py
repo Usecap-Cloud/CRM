@@ -468,31 +468,6 @@ class ContratoCurso(models.Model):
 
 
 # =========================
-# Tabla Contratos_Servicios
-# =========================
-class ContratoServicio(models.Model):
-    cantidad = models.IntegerField(blank=True, null=True)
-    precio_unidad = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    detalle = models.TextField(blank=True, null=True)
-    duracion_horas = models.IntegerField(blank=True, null=True)
-    costo_negociado = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-
-    # fechas y horas
-    fecha_inicio = models.DateField(blank=True, null=True)
-    hora_inicio = models.TimeField(blank=True, null=True)
-    fecha_fin = models.DateField(blank=True, null=True)
-    hora_fin = models.TimeField(blank=True, null=True)
-
-    # Relaciones
-    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
-    servicio = models.ForeignKey("Servicio", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Servicio {self.servicio} en Contrato {self.contrato_id}"
-
-
-# =========================
 # Tabla Contratos_Proveedores
 # =========================
 class ContratoProveedor(models.Model):

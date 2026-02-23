@@ -5,20 +5,13 @@
 
 {% block extra_styles %}
 <style>
-    /* Premium Styles for Proveedores Page */
-    .page-actions {
-        display: flex;
-        gap: 12px;
-    }
-
-
+    .page-actions { display: flex; gap: 12px; }
 
     .proveedores-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
-
     .proveedores-table th {
         color: #888;
         font-weight: 500;
@@ -26,23 +19,19 @@
         padding: 15px;
         text-align: left;
     }
-
     .proveedores-table td {
         padding: 15px;
         border-bottom: 1px solid var(--border-color);
+        vertical-align: top;
     }
 
-    /* Form Page Styles */
     #form-view {
         display: none;
         background: var(--bg-color);
-        max-width: 900px;
+        max-width: 960px;
         margin: 0 auto;
     }
-
-    #form-view.active {
-        display: block;
-    }
+    #form-view.active { display: block; }
 
     .form-header {
         margin-bottom: 30px;
@@ -52,20 +41,15 @@
         padding-bottom: 20px;
         border-bottom: 1px solid var(--border-color);
     }
-
     .form-header .back-btn {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
         color: var(--text-color);
-        width: 40px;
-        height: 40px;
+        width: 40px; height: 40px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         cursor: pointer;
     }
-
     .form-body {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
@@ -73,25 +57,16 @@
         padding: 40px;
         backdrop-filter: blur(10px);
     }
-
-    .form-row {
-        display: flex;
-        gap: 24px;
-        margin-bottom: 24px;
+    .form-section-label {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.9rem; font-weight: 600; color: var(--text-color);
+        margin: 28px 0 18px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
     }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        flex: 1;
-    }
-
-    .form-group label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-
+    .form-row { display: flex; gap: 24px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -101,9 +76,11 @@
         padding: 12px 16px;
         color: var(--text-color);
         width: 100%;
+        font-size: 0.9rem;
     }
-
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
         border-color: #1e90ff;
         outline: none;
     }
@@ -114,9 +91,7 @@
 <!-- List View -->
 <div id="list-view">
     <div class="page-header">
-        <div class="header-title">
-            <h1>Proveedores</h1>
-        </div>
+        <div class="header-title"><h1>Proveedores</h1></div>
         <div class="page-actions">
             <div class="pill-nav">
                 <button class="pill-btn primary" onclick="showForm()"><span>&#x002B;</span> Nuevo Proveedor</button>
@@ -124,22 +99,25 @@
         </div>
     </div>
 
-
+    <div id="alert" class="alert" style="display:none; padding:15px; border-radius:8px; margin-bottom:20px;"></div>
 
     <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Buscar por RUT, Nombre, Contacto, Tipo..." onkeyup="filterTable('search-input', 'proveedores-table')">
+        <input type="text" id="search-input" class="search-input"
+               placeholder="Buscar por RUT, Nombre, Contacto, Tipo, Rubro..."
+               onkeyup="filterTable('search-input', 'proveedores-table')">
     </div>
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Proveedores...</div>
-        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
-            disponible</div>
-        <table class="proveedores-table" id="proveedores-table" style="display: none;">
+        <div id="loading" style="text-align:center; padding:50px; color:#888;">Buscando Proveedores...</div>
+        <div id="no-data" style="text-align:center; padding:50px; color:#888; display:none;">No hay información disponible</div>
+        <table class="proveedores-table" id="proveedores-table" style="display:none;">
             <thead>
                 <tr>
                     <th>Proveedor</th>
                     <th>Contacto</th>
+                    <th>Ubicación</th>
                     <th>Tipo</th>
+                    <th>Rubro</th>
                     <th></th>
                 </tr>
             </thead>
@@ -157,46 +135,83 @@
     <div class="form-body">
         <form id="proveedor-form" onsubmit="saveProveedor(event)">
             <input type="hidden" name="id" id="proveedor-id">
+
+            <!-- Identificación -->
+            <div class="form-section-label">&#x1F3E2; Identificación</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>RUT Proveedor</label>
+                    <label>RUT Proveedor *</label>
                     <input type="text" name="rut" id="form-rut" placeholder="77.123.456-7" required
-                        oninput="this.value = formatRut(this.value)">
+                           oninput="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
-                    <label>Nombre del Proveedor</label>
+                    <label>Nombre del Proveedor *</label>
                     <input type="text" name="nombre" id="form-nombre" placeholder="Servicios Industriales SpA" required>
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
-                    <label>Nombre de Contacto</label>
-                    <input type="text" name="contacto" id="form-contacto" placeholder="Juan Perez" required>
+                    <label>Tipo</label>
+                    <input type="text" name="tipo" id="form-tipo" placeholder="Ej: Certificación, Consultoría...">
                 </div>
                 <div class="form-group">
-                    <label>Email de Contacto</label>
-                    <input type="email" name="email" id="form-email" placeholder="contacto@proveedor.cl" required>
+                    <label>Rubro</label>
+                    <input type="text" name="rubro" id="form-rubro" placeholder="Ej: Tecnología, RRHH...">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
                 </div>
             </div>
 
+            <!-- Contacto -->
+            <div class="form-section-label">&#x1F4DE; Contacto</div>
             <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre de Contacto</label>
+                    <input type="text" name="contacto" id="form-contacto" placeholder="Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" id="form-email" placeholder="contacto@proveedor.cl">
+                </div>
                 <div class="form-group">
                     <label>Teléfono</label>
                     <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 ...">
                 </div>
             </div>
 
+            <!-- Ubicación -->
+            <div class="form-section-label">&#x1F4CD; Ubicación</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Tipo de Servicio</label>
-                    <input type="text" name="tipo" id="form-tipo" placeholder="Ej: Certificación, Consultoría..."
-                        required>
+                    <label>Dirección</label>
+                    <input type="text" name="direccion" id="form-direccion" placeholder="Av. Principal 1234">
+                </div>
+                <div class="form-group">
+                    <label>Región</label>
+                    <input type="text" name="region" id="form-region" placeholder="Metropolitana">
+                </div>
+                <div class="form-group">
+                    <label>Comuna</label>
+                    <input type="text" name="comuna" id="form-comuna" placeholder="Santiago">
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="form-section-label">&#x1F4DD; Observaciones</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <textarea name="observaciones" id="form-observaciones" rows="3"
+                              placeholder="Notas adicionales sobre el proveedor..."></textarea>
                 </div>
             </div>
 
             <div class="form-actions"
-                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
+                 style="display:flex; gap:15px; justify-content:flex-end; margin-top:30px; padding-top:30px; border-top:1px solid var(--border-color);">
                 <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="submit-btn">Guardar Proveedor</button>
             </div>
@@ -212,16 +227,23 @@
     function showForm(data = null) {
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('form-view').classList.add('active');
+
         if (data) {
             document.getElementById('form-title').textContent = 'Editar Proveedor';
             document.getElementById('proveedor-id').value = data.id;
             document.getElementById('form-rut').value = data.rut_proveedor;
             document.getElementById('form-rut').readOnly = true;
-            document.getElementById('form-nombre').value = data.nombre;
-            document.getElementById('form-contacto').value = data.contacto;
-            document.getElementById('form-email').value = data.email;
+            document.getElementById('form-nombre').value = data.nombre || '';
+            document.getElementById('form-tipo').value = data.tipo || '';
+            document.getElementById('form-rubro').value = data.rubro || '';
+            document.getElementById('form-estado').value = data.estado || 'activo';
+            document.getElementById('form-contacto').value = data.contacto || '';
+            document.getElementById('form-email').value = data.email || '';
             document.getElementById('form-telefono').value = data.telefono || '';
-            document.getElementById('form-tipo').value = data.tipo;
+            document.getElementById('form-direccion').value = data.direccion || '';
+            document.getElementById('form-region').value = data.region || '';
+            document.getElementById('form-comuna').value = data.comuna || '';
+            document.getElementById('form-observaciones').value = data.observaciones || '';
             document.getElementById('submit-btn').textContent = 'Actualizar Proveedor';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Proveedor';
@@ -241,7 +263,8 @@
     async function loadProveedores() {
         try {
             const response = await fetch('/api/proveedores/');
-            currentProveedores = await response.json();
+            const raw = await response.json();
+            currentProveedores = Array.isArray(raw) ? raw : (raw.results || []);
             document.getElementById('loading').style.display = 'none';
 
             if (currentProveedores.length === 0) {
@@ -252,40 +275,47 @@
                 document.getElementById('proveedores-table').style.display = 'table';
                 const tbody = document.getElementById('proveedores-body');
                 tbody.innerHTML = currentProveedores.map(p => {
-                    const clean = (val) => {
-                        if (!val || val === 'nan' || val === 'None') return '-';
-                        return val;
-                    };
+                    const clean = v => (!v || v === 'nan' || v === 'None') ? '-' : v;
+                    const estadoClass = p.estado && p.estado.toLowerCase().includes('activo') ? 'active' : 'inactive';
+                    const ubicacion = [clean(p.region), clean(p.comuna)].filter(x => x !== '-').join(' · ') || '-';
                     return `
                     <tr>
                         <td>
-                            <div style="margin-bottom: 5px;">
+                            <div style="margin-bottom:5px;">
                                 <span class="td-main">${clean(p.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="status-badge active">Activo</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="status-badge ${estadoClass}">${clean(p.estado)}</span>
                                 <span class="td-sub" style="margin:0">${clean(p.rut_proveedor)}</span>
                             </div>
                         </td>
                         <td>
-                            <div style="margin-bottom: 5px;">
-                                <span class="td-main" style="font-size: 0.85rem;">${clean(p.email)}</span>
-                            </div>
+                            <span class="td-main" style="font-size:0.85rem;">${clean(p.contacto)}</span><br>
+                            <span class="td-sub">${clean(p.email)}</span><br>
                             <span class="td-sub">${clean(p.telefono)}</span>
                         </td>
                         <td>
-                            <span class="status-badge info">${clean(p.tipo)}</span>
+                            <span class="td-sub">${clean(p.direccion)}</span><br>
+                            <span class="td-sub">${ubicacion}</span>
                         </td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <span class="td-main">${clean(p.tipo)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(p.rubro)}</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:5px;">
                                 <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteProveedor(${p.id})'>Eliminar</button>
                             </div>
                         </td>
-                    </tr>
-                `}).join('');
+                    </tr>`;
+                }).join('');
             }
-        } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
+        } catch (error) {
+            document.getElementById('loading').textContent = 'Error cargando datos';
+        }
     }
 
     function editProveedor(id) {
@@ -297,16 +327,14 @@
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('proveedor-id').value;
-
         const rut = form.rut.value;
         const phone = form.telefono.value;
 
         if (!validateRut(rut)) {
-            showAlert('RUT Proveedor inválido', 'error');
+            showAlert('RUT Proveedor inválido. Ingrese su RUT con dígito verificador', 'error');
             return;
         }
-
-        if (!validatePhone(phone)) {
+        if (phone && !validatePhone(phone)) {
             showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
             return;
         }
@@ -314,17 +342,23 @@
         const data = {
             rut_proveedor: rut,
             nombre: form.nombre.value,
-            contacto: form.contacto.value,
-            email: form.email.value,
-            telefono: phone,
             tipo: form.tipo.value,
-            estado: 'activo'
+            rubro: form.rubro.value,
+            estado: form.estado.value,
+            contacto: form.contacto.value,
+            email: form.email.value || null,
+            telefono: phone || null,
+            direccion: form.direccion.value,
+            region: form.region.value,
+            comuna: form.comuna.value,
+            observaciones: form.observaciones.value
         };
+
         try {
             const url = id ? `/api/proveedores/${id}/` : '/api/proveedores/';
             const method = id ? 'PATCH' : 'POST';
             const response = await fetch(url, {
-                method: method,
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
@@ -332,7 +366,6 @@
                 body: JSON.stringify(data)
             });
             const result = await response.json().catch(() => ({}));
-
             if (response.ok) {
                 showAlert(id ? 'Proveedor actualizado' : 'Proveedor creado', 'success');
                 hideForm();
@@ -344,19 +377,17 @@
                 }
                 showAlert(errorMsg, 'error');
             }
-        } catch (error) { showAlert('Error de conexión con el servidor', 'error'); }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
     }
-
-
 
     async function deleteProveedor(id) {
         if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) return;
         try {
             const response = await fetch(`/api/proveedores/${id}/`, {
                 method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
             });
             if (response.ok) {
                 showAlert('Proveedor eliminado correctamente', 'success');
@@ -367,6 +398,14 @@
         } catch (error) {
             showAlert('Error de conexión con el servidor', 'error');
         }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+        alert.style.background = type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(255,0,0,0.2)';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
     }
 
     function getCookie(name) {
@@ -383,6 +422,7 @@
         }
         return cookieValue;
     }
+
     loadProveedores();
 </script>
 {% endblock %}
