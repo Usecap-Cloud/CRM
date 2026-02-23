@@ -21,7 +21,6 @@ class Command(BaseCommand):
         # 1. Roles
         rol_admin, _ = Rol.objects.get_or_create(nombre='Administrador', defaults={'estado': 'activo'})
         rol_ventas, _ = Rol.objects.get_or_create(nombre='Vendedor', defaults={'estado': 'activo'})
-        rol_coord, _ = Rol.objects.get_or_create(nombre='Coordinador', defaults={'estado': 'activo'})
 
         # 2. Ejecutivos
         user1, _ = User.objects.get_or_create(username='ejecutivo1', defaults={'email': 'ejecutivo1@usecap.cl'})

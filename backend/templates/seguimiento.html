@@ -199,20 +199,39 @@
 
         // 2. Prepare Calendar Events
         const events = [];
+        const todayStr = new Date().toISOString().split('T')[0];
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
         // Add Seguimientos (actions)
         seguimientos.forEach(s => {
+            // Base Color Logic
+            let eventColor = '#1e90ff'; // Blue (Future)
+            
+            if (s.cerrado) {
+                eventColor = '#444'; // Gray (Closed)
+            } else {
+                const eventDate = s.fecha_seguimiento || s.fecha;
+                if (eventDate < todayStr) {
+                    eventColor = '#ff6b6b'; // Red (Overdue)
+                } else if (eventDate === todayStr || eventDate === tomorrowStr) {
+                    eventColor = '#ff9f43'; // Yellow/Orange (Today/Tomorrow)
+                }
+            }
+
             events.push({
-                title: 'Acción: ' + s.tipo_seguimiento,
+                title: 'Acción: ' + s.tipo,
                 start: s.fecha,
-                color: s.cerrado ? '#444' : '#1e90ff',
+                color: s.cerrado ? '#444' : eventColor,
                 extendedProps: { type: 'seguimiento', id: s.id }
             });
-            if (s.fecha_proxima_accion) {
+
+            if (s.fecha_seguimiento) {
                 events.push({
-                    title: 'Prox Acción: ' + s.tipo_seguimiento,
-                    start: s.fecha_proxima_accion,
-                    color: '#059669',
+                    title: 'Prox Acción: ' + s.tipo,
+                    start: s.fecha_seguimiento,
+                    color: s.cerrado ? '#444' : eventColor,
                     extendedProps: { type: 'proxima', id: s.id }
                 });
             }
@@ -258,8 +277,8 @@
         nextWeek.setDate(today.getDate() + 7);
 
         const imminentActions = seguimientos.filter(s => {
-            const d = new Date(s.fecha_proxima_accion);
-            return !s.cerrado && s.fecha_proxima_accion && d >= today && d <= nextWeek;
+            const d = new Date(s.fecha_seguimiento);
+            return !s.cerrado && s.fecha_seguimiento && d >= today && d <= nextWeek;
         });
 
         const imminentClosures = contratos.filter(c => {
@@ -274,8 +293,8 @@
             const card = document.createElement('div');
             card.className = 'alert-card urgent';
             card.innerHTML = `
-                <div class="alert-date">Próxima acción: ${s.fecha_proxima_accion}</div>
-                <div class="alert-desc">${s.tipo_seguimiento} - Contrato #${s.contrato}</div>
+                <div class="alert-date">Próxima acción: ${s.fecha_seguimiento}</div>
+                <div class="alert-desc">${s.tipo} - Contrato #${s.contrato}</div>
                 <a href="/api/contratos-page/" class="alert-link">Ver Contrato</a>
             `;
             alertsList.appendChild(card);

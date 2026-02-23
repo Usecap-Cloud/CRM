@@ -125,7 +125,7 @@ class DashboardStatsView(APIView):
             recent_activity.append({
                 "id": s.id,
                 "cliente": s.contrato.cliente.razon_social if s.contrato and s.contrato.cliente else "N/A",
-                "tipo": s.tipo_seguimiento,
+                "tipo": s.tipo,
                 "fecha": s.fecha,
                 "estado": s.estado
             })
