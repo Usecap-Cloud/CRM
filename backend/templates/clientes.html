@@ -383,24 +383,30 @@
                             <span class="td-sub">${clean(client.comuna)}, ${clean(client.region)}</span>
                         </td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div style="margin-bottom: 2px;">
-                                    <span class="td-main">� ${clean(client.telefono_empresarial)}</span>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div>
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Holding:</div>
+                                    <span class="td-main" style="font-size: 0.85rem;">${clean(client.cliente_padre_nombre)}</span>
                                 </div>
-                                <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
+                                <div>
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Convenio:</div>
+                                    <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-size: 0.8rem;">
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Tel. Empresa:</div>
+                                <div class="td-main">📞 ${clean(client.telefono_empresarial)}</div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                                <div style="color: #1e90ff; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Encargado:</div>
+                                <div class="td-main" style="margin-bottom: 2px;">${clean(client.contacto_nombre)}</div>
+                                <div class="td-sub">📞 ${clean(client.contacto_telefono || '-')}</div>
+                                <div class="td-sub" style="font-size: 0.7rem; color: #1e90ff;">✉️ ${clean(client.contacto_email || '-')}</div>
                             </div>
                         </td>
 
-                        <td style="font-size: 0.8rem;">
-                            <div style="margin-bottom: 8px;">
-                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Holding:</div>
-                                <div class="td-main">${clean(client.cliente_padre_nombre)}</div>
-                            </div>
-                            <div>
-                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Contacto:</div>
-                                <div class="td-main">${clean(client.contacto_nombre)}</div>
-                            </div>
-                        </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
