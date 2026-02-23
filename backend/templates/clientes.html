@@ -157,8 +157,7 @@
             <thead>
                 <tr>
                     <th>Empresa</th>
-                    <th>Tipo Convenio</th>
-                    <th>Teléfono</th>
+                    <th>Información</th>
                     <th></th>
                 </tr>
             </thead>
@@ -371,10 +370,10 @@
                             <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
                         </td>
                         <td>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">📞 ${clean(client.telefono_empresarial)}</span>
+                            </div>
                             <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
-                        </td>
-                        <td>
-                            <span class="td-main">📞 ${clean(client.telefono_empresarial)}</span>
                         </td>
                         <td>
                             <div style="display: flex; gap: 8px;">
