@@ -139,9 +139,8 @@
                 <tr>
                     <th>Encargado</th>
                     <th>Contacto</th>
-                    <th>Cargo</th>
-                    <th>Cliente</th>
-                    <th></th>
+                    <th>Cargo / Área</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="data-body"></tbody>
@@ -305,10 +304,7 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(co.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span>
-                                <span class="td-sub" style="margin:0">${clean(co.rut_coordinador)}</span>
-                            </div>
+                            <span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span>
                         </td>
                         <td>
                             <span class="td-main" style="font-size: 0.85rem;">${clean(co.email)}</span>
@@ -319,14 +315,12 @@
                             <span class="td-sub">${clean(co.area)}</span>
                         </td>
                         <td>
-                            <span class="td-main">${clean(co.cliente_nombre || co.cliente)}</span>
-                            <span class="td-sub">Ej: ${clean(co.ejecutivo_nombre || '-')}</span>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
+                            </div>
                         </td>
-                        <td>  
-                            <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>  
-                            <button class="pill-btn delete" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
-                        </td>  
-                    </tr>  
+                    </tr>
                 `}).join('');
             }
         } catch (error) {

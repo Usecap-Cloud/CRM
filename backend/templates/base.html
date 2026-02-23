@@ -200,6 +200,8 @@
         }
 
 
+
+
         /* Notification Badge - Proactive Alerts */
         .nav-badge {
             background: #ff6b6b;
@@ -558,6 +560,7 @@
             </a>
             {% endif %}
         </nav>
+
         <div class="user-profile">
             <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
             <div class="user-info">
@@ -571,6 +574,7 @@
     </aside>
 
     <main class="main-content">
+
         <div id="alert" class="alert"
             style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px; position: sticky; top: 0; z-index: 1000;">
         </div>

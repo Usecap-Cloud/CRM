@@ -143,9 +143,9 @@
             <thead>
                 <tr>
                     <th>Ejecutivo</th>
-                    <th>Contacto</th>
                     <th>Rol</th>
-                    <th></th>
+                    <th>Contacto</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="data-body"></tbody>
@@ -305,19 +305,18 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(ej.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span>
-                                <span class="td-sub" style="margin:0">${clean(ej.rut_ejecutivo)}</span>
-                            </div>
+                            <span class="status-badge ${ej.estado && ej.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(ej.estado)}</span>
                         </td>
+                        <td>${clean(ej.rol_nombre)}</td>
                         <td>
                             <span class="td-main" style="font-size: 0.85rem;">${clean(ej.email)}</span>
                             <span class="td-sub">📞 ${clean(ej.telefono)}</span>
                         </td>
-                        <td>${clean(ej.rol_nombre)}</td>
                         <td>
-                            <button class="pill-btn edit" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteEjecutivo(${ej.id})'>Eliminar</button>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button class="pill-btn edit" onclick='editEjecutivo("${ej.rut_ejecutivo}")'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteEjecutivo(${ej.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');
