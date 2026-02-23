@@ -155,7 +155,7 @@
                     <th>Servicio</th>
                     <th>Tipo</th>
                     <th>Rubro</th>
-                    <th>Proveedores</th>
+                    <th>Proveedor</th>
                     <th></th>
                 </tr>
             </thead>
@@ -217,11 +217,11 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Proveedores que ofrecen este servicio</label>
-                    <select name="proveedores" id="form-proveedores" multiple style="height: 100px;">
+                    <label>Proveedor que ofrece este servicio</label>
+                    <select name="proveedor" id="form-proveedor">
+                        <option value="">Seleccione un proveedor...</option>
                         <!-- Populate dynamically -->
                     </select>
-                    <small style="color: #1e90ff; font-size: 0.75rem; margin-top: 5px;">Mantenga presionado Ctrl (o Cmd) para seleccionar varios</small>
                 </div>
             </div>
 
@@ -254,18 +254,14 @@
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-descripcion').value = data.descripcion || '';
             
-            // Set selected providers
-            const provSelect = document.getElementById('form-proveedores');
-            Array.from(provSelect.options).forEach(opt => {
-                opt.selected = data.proveedores && data.proveedores.includes(parseInt(opt.value));
-            });
+            // Set selected provider
+            document.getElementById('form-proveedor').value = data.proveedor || '';
 
             document.getElementById('submit-btn').textContent = 'Actualizar Servicio';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Servicio';
             document.getElementById('servicios-id').value = '';
             document.getElementById('service-form').reset();
-            document.getElementById('form-proveedores').querySelectorAll('option').forEach(o => o.selected = false);
             document.getElementById('submit-btn').textContent = 'Guardar Servicio';
         }
     }
@@ -323,11 +319,7 @@
                             <span class="td-main">${clean(servicio.rubro)}</span>
                         </td>
                         <td>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 250px;">
-                                ${servicio.proveedores_info && servicio.proveedores_info.length > 0 
-                                    ? servicio.proveedores_info.map(p => `<span style="background: rgba(30, 144, 255, 0.1); color: #1e90ff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">${p}</span>`).join('')
-                                    : '<span style="color: #888; font-size: 0.75rem;">Sin proveedores</span>'}
-                            </div>
+                            <span class="td-main" style="color: #1e90ff; font-weight: 600;">${clean(servicio.proveedor_nombre)}</span>
                         </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -354,16 +346,13 @@
         const form = e.target;
         const id = document.getElementById('servicios-id').value;
 
-        const providersSelect = document.getElementById('form-proveedores');
-        const selectedProviders = Array.from(providersSelect.selectedOptions).map(opt => parseInt(opt.value));
-
         const data = {
             nombre: form.nombre.value,
             tipo: form.tipo.value,
             rubro: form.rubro.value,
             estado: form.estado.value,
             descripcion: form.descripcion.value,
-            proveedores: selectedProviders
+            proveedor: form.proveedor.value || null
         };
 
         try {
@@ -439,8 +428,12 @@
             const response = await fetch('/api/proveedores/');
             const data = await response.json();
             const providers = Array.isArray(data) ? data : (data.results || []);
-            const select = document.getElementById('form-proveedores');
+            const select = document.getElementById('form-proveedor');
+            // Keep first option
+            const firstOpt = select.options[0];
             select.innerHTML = '';
+            select.appendChild(firstOpt);
+            
             providers.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
