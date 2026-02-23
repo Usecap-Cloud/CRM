@@ -78,7 +78,6 @@
         color: var(--success-green);
         border: 1px solid var(--success-green);
     }
- Sands for #059669.
     .status-msg.error {
         background: rgba(255, 107, 107, 0.1);
         color: #ff6b6b;
@@ -153,8 +152,8 @@
             <li><strong>RUTs:</strong> Deben incluir dígito verificador.</li>
             <li><strong>Teléfonos:</strong> Use solo números, <code>+</code>.</li>
             <li><strong>Clientes:</strong> Requiere RUT de la empresa y razón social (nombre completo).</li>
-            <li><strong>Ejecutivos:</strong> Requiere datos personales del ejecutivo y rol ("Ejecutivo Comercial" o el ID 2).</li>
-            <li><strong>Coordinadores:</strong> Requiere <code>rut_coordinador</code>, <code>rut_cliente</code> para vincular, <code>fecha_cumpleanos</code>, <code>cargo</code>.</li>
+            <li><strong>Ejecutivos:</strong> Requiere datos personales, rol y <code>departamento</code>.</li>
+            <li><strong>Coordinadores:</strong> Requiere vinculación con cliente vía RUT, <code>cargo</code> y <code>departamento</code>.</li>
             <li><strong>Importante:</strong> El sistema detectará duplicados y te avisará en qué fila están.</li>
         </ul>
     </div>

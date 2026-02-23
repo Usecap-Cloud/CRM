@@ -494,9 +494,7 @@ class UniversalImportView(APIView):
                             email=user_email,
                             telefono=clean_val(row.get(mapping.get('telefono'))),
                             estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
-                            area_departamento=clean_val(row.get(mapping.get('area'))),
-                            region=clean_val(row.get(mapping.get('region'))),
-                            comuna=clean_val(row.get(mapping.get('comuna'))),
+                            departamento=clean_val(row.get(mapping.get('area')) or row.get(mapping.get('departamento'))),
                             especialidad_tipo_clientes=clean_val(row.get(mapping.get('especialidad'))),
                             observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             rol=rol
@@ -577,7 +575,7 @@ class UniversalImportView(APIView):
                             cliente=cliente,
                             estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
                             cargo=str(row.get(mapping.get('cargo'), '')).strip(),
-                            area=str(row.get(mapping.get('area'), '')).strip(),
+                            departamento=str(row.get(mapping.get('area'), '') or row.get(mapping.get('departamento'), '')).strip(),
                             fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None,
                             ejecutivo=ejecutivo
                         )

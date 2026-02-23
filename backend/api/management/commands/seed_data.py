@@ -60,7 +60,7 @@ class Command(BaseCommand):
             defaults={
                 'nombre': 'Carlos Ruiz',
                 'email': 'cruiz@empresatest.cl',
-                'telefono': '+5695554433',
+                'telefono': '+56955544332',
                 'cargo': 'Gerente RRHH',
                 'estado': 'activo',
                 'cliente': c1,

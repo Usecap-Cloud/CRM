@@ -100,6 +100,50 @@ def validate_rut(value):
         raise ValidationError("Ingrese su RUT con dígito verificador.")
     return value
 
+# --- UTILIDADES DE TELÉFONO ---
+
+def normalize_phone(value):
+    """
+    Normaliza números chilenos a formato +56 9 XXXX XXXX
+    Si no tiene código de país, asume +56.
+    """
+    if not value or not isinstance(value, str):
+        return value
+    
+    # Limpiar todo lo que no sea dígito
+    clean = re.sub(r'\D', '', value)
+    
+    if not clean:
+        return value
+
+    # Si empieza con 56, quitarlo temporalmente para estandarizar
+    if clean.startswith('56') and len(clean) > 9:
+        clean = clean[2:]
+    
+    # Si tiene menos de 9 dígitos (ej: 91234567), le falta el 9 o el código de área
+    if len(clean) < 9:
+        return value
+
+    # Tomar los últimos 9 dígitos
+    clean = clean[-9:]
+    
+    # Formatear: +56 9 1234 5678
+    return f"+56 {clean[0]} {clean[1:5]} {clean[5:]}"
+
+def validate_phone(value):
+    """
+    Valida que el teléfono tenga el largo corregido de un número chileno (9 dígitos sin contar +56)
+    """
+    if not value:
+        return value
+    clean = re.sub(r'\D', '', str(value))
+    if clean.startswith('56') and len(clean) > 9:
+        clean = clean[2:]
+    
+    if len(clean) != 9:
+        raise ValidationError("El número telefónico debe tener 9 dígitos (ej: 9 1234 5678).")
+    return value
+
 # =========================
 # Tabla Roles
 # =========================
@@ -126,7 +170,7 @@ class Ejecutivo(models.Model):
     rut_ejecutivo = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     estado = models.CharField(
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
@@ -161,7 +205,7 @@ class Ejecutivo(models.Model):
         if self.email:
             self.email = self.email.strip().lower()
         if self.telefono:
-            self.telefono = self.telefono.strip()
+            self.telefono = normalize_phone(self.telefono)
         self.estado = normalize_estado(self.estado)
         self.departamento = normalize_text(self.departamento)
         self.especialidad_tipo_clientes = normalize_text(self.especialidad_tipo_clientes)
@@ -187,7 +231,7 @@ class Cliente(models.Model):
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
     origen_referencia = models.CharField(max_length=50, blank=True, null=True)
-    telefono_empresarial = models.CharField(max_length=20, blank=True, null=True)
+    telefono_empresarial = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     fecha_creacion = models.DateField(blank=True, null=True)
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
@@ -221,7 +265,7 @@ class Cliente(models.Model):
         self.origen_referencia = normalize_text(self.origen_referencia)
         self.tipo_convenio = normalize_estado(self.tipo_convenio)
         if self.telefono_empresarial:
-            self.telefono_empresarial = self.telefono_empresarial.strip()
+            self.telefono_empresarial = normalize_phone(self.telefono_empresarial)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -235,7 +279,7 @@ class Coordinador(models.Model):
     rut_coordinador = models.CharField(max_length=12, unique=True, validators=[validate_rut])
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     cargo = models.CharField(max_length=50, blank=True, null=True)
     fecha_cumpleanos = models.DateField(blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
@@ -255,7 +299,7 @@ class Coordinador(models.Model):
         if self.email:
             self.email = self.email.strip().lower()
         if self.telefono:
-            self.telefono = self.telefono.strip()
+            self.telefono = normalize_phone(self.telefono)
         self.cargo = normalize_text(self.cargo)
         self.departamento = normalize_text(self.departamento)
         self.estado = normalize_estado(self.estado)
@@ -303,7 +347,7 @@ class Proveedor(models.Model):
     )
     contacto = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(blank=True, null=True, unique=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     direccion = models.CharField(max_length=150, blank=True, null=True)
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
@@ -318,7 +362,7 @@ class Proveedor(models.Model):
         if self.email:
             self.email = self.email.strip().lower()
         if self.telefono:
-            self.telefono = self.telefono.strip()
+            self.telefono = normalize_phone(self.telefono)
         self.direccion = normalize_text(self.direccion)
         self.region = normalize_text(self.region)
         self.comuna = normalize_text(self.comuna)
