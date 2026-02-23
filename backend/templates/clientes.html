@@ -146,7 +146,6 @@
     </div>
 
     <div class="search-container">
-        <span class="search-icon">&#x1F50D;</span>
         <input type="text" id="search-input" class="search-input" placeholder="Buscar por RUT, Razón Social, Ejecutivo..." onkeyup="filterTable('search-input', 'clients-table')">
     </div>
 
@@ -158,11 +157,9 @@
             <thead>
                 <tr>
                     <th>Empresa</th>
-                    <th>Ejecutivo</th>
-                    <th>Ubicación</th>
-                    <th>Empresa</th>
-                    <th>Contacto</th>
-                    <th></th>
+                    <th>Tipo Convenio</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="clients-body"></tbody>
@@ -371,40 +368,13 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(client.razon_social)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
-                                <span class="td-sub" style="margin:0">${clean(client.rut_empresa)}</span>
-                            </div>
-                            ${client.nombre ? `<span class="td-sub" style="font-style: italic;">"${client.nombre}"</span>` : ''}
+                            <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
                         </td>
                         <td>
-                            <span class="td-main">${clean(client.ejecutivo_nombre)}</span>
+                            <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
                         </td>
                         <td>
-                            <span class="td-main">${clean(client.direccion)}</span>
-                            <span class="td-sub">${clean(client.comuna)}, ${clean(client.region)}</span>
-                        </td>
-                        <td>
-                            <div style="margin-bottom: 5px;">
-                                <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
-                            </div>
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px;">
-                                <span class="op-pill" title="Colaboradores">👥 ${client.numero_colaboradores || 0}</span>
-                                <span class="op-pill" title="Sucursales">🏢 ${client.cantidad_sucursales || 1}</span>
-                                ${client.filiales_count > 0 ? `<span class="op-pill" style="background: #e0f2fe; color: #0369a1;" title="Filiales">&#x1F3E2; ${client.filiales_count}</span>` : ''}
-                            </div>
-                            <span class="td-sub">📞 ${clean(client.telefono_empresarial)}</span>
-                        </td>
-                        <td>
-                            <div style="margin-bottom: 8px;">
-                                <span class="td-sub" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8;">Holding:</span>
-                                <span class="td-main" style="font-size: 0.8rem;">${client.cliente_padre_nombre ? clean(client.cliente_padre_nombre) : '-'}</span>
-                            </div>
-                            <div style="border-top: 1px solid #f1f5f9; padding-top: 5px;">
-                                <span class="td-sub" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8;">Contacto:</span>
-                                <span class="td-main" style="font-size: 0.8rem;">${clean(client.contacto_nombre)}</span>
-                                <span class="td-sub" style="font-size: 0.7rem;">${clean(client.contacto_email)}</span>
-                            </div>
+                            <span class="td-main">📞 ${clean(client.telefono_empresarial)}</span>
                         </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">

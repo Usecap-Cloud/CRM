@@ -191,7 +191,7 @@ class Cliente(models.Model):
     cantidad_sucursales = models.IntegerField(default=1)
     observaciones = models.TextField(blank=True, null=True)
     
-    # Relaciones (Esenciales para el funcionamiento)
+    # Relaciones
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     contacto_principal = models.ForeignKey(
