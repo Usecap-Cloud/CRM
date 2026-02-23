@@ -159,7 +159,7 @@
                     <th>Empresa</th>
                     <th>Tipo Convenio</th>
                     <th>Teléfono</th>
-                    <th>Acciones</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="clients-body"></tbody>
@@ -377,13 +377,14 @@
                             <span class="td-main">📞 ${clean(client.telefono_empresarial)}</span>
                         </td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; gap: 8px;">
                                 <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteClient(${client.id})'>Eliminar</button>
                             </div>
                         </td>
                     </tr>
-                `}).join('');
+                `
+}).join('');
             }
         } catch (error) {
             console.error(error);
@@ -461,10 +462,16 @@
         const data = {
             rut_empresa: rut,
             razon_social: form.razon_social.value,
+            nombre: form.nombre.value || '',
+            telefono_empresarial: form.telefono_empresarial.value || '',
+            numero_colaboradores: parseInt(form.numero_colaboradores.value) || 0,
+            cantidad_sucursales: parseInt(form.cantidad_sucursales.value) || 1,
+            tipo_convenio: form.tipo_convenio.value,
             estado: form.estado.value,
             ejecutivo: parseInt(form.ejecutivo.value),
             contacto_principal: form.contacto_principal.value || null
         };
+
         try {
             const url = id ? `/api/clientes/${id}/` : '/api/clientes/';
             const method = id ? 'PATCH' : 'POST';
