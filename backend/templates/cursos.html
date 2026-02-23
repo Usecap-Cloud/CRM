@@ -265,7 +265,7 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="status-badge ${c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado') || c.estado.toLowerCase().includes('completado')) ? 'active' : ''}">${clean(c.estado)}</span>
                                 <span class="td-sub" style="margin:0">${clean(c.codigo)}</span>
                             </div>
@@ -273,8 +273,10 @@
                         <td>${clean(c.categoria)}</td>
                         <td>${clean(c.codigo_sence)}</td>
                         <td>
-                            <button class="pill-btn edit" onclick='editCurso(${c.id})'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteCurso(${c.id})'>Eliminar</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="pill-btn edit" onclick='editCurso(${c.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteCurso(${c.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');

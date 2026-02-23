@@ -139,8 +139,9 @@
                 <tr>
                     <th>Encargado</th>
                     <th>Contacto</th>
-                    <th>Cargo / Área</th>
-                    <th>Acciones</th>
+                    <th>Cargo</th>
+                    <th>Cliente</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="data-body"></tbody>
@@ -304,10 +305,15 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(co.nombre)}</span>
                             </div>
-                            <span class="status-badge ${co.estado && co.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(co.estado)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="status-badge ${co.estado && co.estado.toLowerCase().includes('activo') ? 'active' : ''}">${clean(co.estado)}</span>
+                                <span class="td-sub" style="margin:0">${clean(co.rut_coordinador)}</span>
+                            </div>
                         </td>
                         <td>
-                            <span class="td-main" style="font-size: 0.85rem;">${clean(co.email)}</span>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main" style="font-size: 0.85rem;">${clean(co.email)}</span>
+                            </div>
                             <span class="td-sub">📞 ${clean(co.telefono)}</span>
                         </td>
                         <td>
@@ -315,7 +321,13 @@
                             <span class="td-sub">${clean(co.area)}</span>
                         </td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main">${clean(co.cliente_nombre)}</span>
+                            </div>
+                            <span class="td-sub" style="font-size: 0.75rem;">Ej: ${clean(co.ejecutivo_nombre)}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
                                 <button class="pill-btn edit" onclick='editCoordinador(${co.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteCoordinador(${co.id})'>Eliminar</button>
                             </div>

@@ -145,13 +145,10 @@
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Empresa</th>
+                    <th>Empresa / Contrato</th>
                     <th>Estado</th>
-                    <th>Recepción</th>
-                    <th>Emisión</th>
-                    <th>Inicio</th>
-                    <th>Vencimiento</th>
-                    <th>Subtotal</th>
+                    <th>Fechas</th>
+                    <th>Monto</th>
                     <th></th>
                 </tr>
             </thead>
@@ -272,19 +269,25 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
-                            <span class="td-sub"><span class="status-badge info">${clean(c.tipo_registro)}</span></span>
+                            <span class="status-badge info">${clean(c.tipo_registro)}</span>
                         </td>
                         <td>
                             <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
                         </td>
-                        <td>${clean(c.fecha_recepcion)}</td>
-                        <td>${clean(c.fecha_emision)}</td>
-                        <td>${clean(c.fecha_inicio)}</td>
-                        <td>${clean(c.fecha_vencimiento)}</td>
-                        <td style="font-weight: 600; color: var(--primary-blue);">${subtotal}</td>
+                        <td style="font-size: 0.8rem;">
+                            <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">
+                                <span style="color: #888; font-weight: 700;">REC:</span> <span>${clean(c.fecha_recepcion)}</span>
+                                <span style="color: #888; font-weight: 700;">EMI:</span> <span>${clean(c.fecha_emision)}</span>
+                                <span style="font-weight: 700; color: #1e90ff;">INI:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
+                                <span style="font-weight: 700; color: #ef4444;">VEN:</span> <span style="font-weight: 600;">${clean(c.fecha_vencimiento)}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 700; color: #1e90ff; font-size: 1rem;">${subtotal}</td>
                         <td>
-                            <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');

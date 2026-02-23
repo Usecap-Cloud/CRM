@@ -292,8 +292,8 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(servicio.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${servicio.estado && servicio.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(servicio.estado)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="status-badge ${servicio.estado && (servicio.estado.toLowerCase().includes('activo')) ? 'active' : ''}">${clean(servicio.estado)}</span>
                             </div>
                         </td>
                         <td>
@@ -301,8 +301,10 @@
                             <span class="td-sub">${clean(servicio.rubro)}</span>
                         </td>
                         <td>
-                            <button class="pill-btn edit" onclick='editService(${servicio.id})'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteService(${servicio.id})'>Eliminar</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="pill-btn edit" onclick='editService(${servicio.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteService(${servicio.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');

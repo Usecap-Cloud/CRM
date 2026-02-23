@@ -262,20 +262,25 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(p.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                                <span class="status-badge ${p.estado && p.estado.toLowerCase() === 'activo' ? 'active' : ''}">${clean(p.estado || 'Activo')}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="status-badge active">Activo</span>
                                 <span class="td-sub" style="margin:0">${clean(p.rut_proveedor)}</span>
                             </div>
                         </td>
                         <td>
-                            <span class="td-main">${clean(p.contacto)}</span>
-                            <span class="td-sub">${clean(p.email)}</span>
+                            <div style="margin-bottom: 5px;">
+                                <span class="td-main" style="font-size: 0.85rem;">${clean(p.email)}</span>
+                            </div>
                             <span class="td-sub">📞 ${clean(p.telefono)}</span>
                         </td>
-                        <td><span class="status-badge info">${clean(p.tipo)}</span></td>
                         <td>
-                            <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>
-                            <button class="pill-btn delete" onclick='deleteProveedor(${p.id})'>Eliminar</button>
+                            <span class="status-badge info">${clean(p.tipo)}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteProveedor(${p.id})'>Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `}).join('');
