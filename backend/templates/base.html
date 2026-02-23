@@ -316,12 +316,21 @@
             color: #1e90ff;
         }
 
-        .pill-btn.edit:hover {
-            background: #1e90ff;
+        .pill-btn.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .pill-btn.edit:hover, .pill-btn.success:hover {
+            background: currentColor;
             color: #fff;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
+        /* Re-apply currentColor for hover properly */
+        .pill-btn.edit:hover { background: #1e90ff; }
+        .pill-btn.success:hover { background: #10b981; }
 
         .pill-btn.delete {
             background: rgba(230, 57, 70, 0.15);
@@ -481,9 +490,14 @@
             text-transform: capitalize;
         }
 
-        .status-badge.active {
+        .status-badge.active, .status-badge.success {
             background: var(--success-green-bg);
             color: var(--success-green);
+        }
+
+        .status-badge.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
 
         .status-badge.info {

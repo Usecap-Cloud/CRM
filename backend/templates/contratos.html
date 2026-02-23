@@ -269,17 +269,17 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
-                            <span class="status-badge info">${clean(c.tipo_registro)}</span>
+                            <span class="status-badge success">${clean(c.tipo_registro)}</span>
                         </td>
                         <td>
                             <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
                         </td>
                         <td style="font-size: 0.8rem;">
                             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">
-                                <span style="color: #888; font-weight: 700;">REC:</span> <span>${clean(c.fecha_recepcion)}</span>
-                                <span style="color: #888; font-weight: 700;">EMI:</span> <span>${clean(c.fecha_emision)}</span>
-                                <span style="font-weight: 700; color: #1e90ff;">INI:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
-                                <span style="font-weight: 700; color: #ef4444;">VEN:</span> <span style="font-weight: 600;">${clean(c.fecha_vencimiento)}</span>
+                                <span style="color: #888; font-weight: 700;">Recepción:</span> <span>${clean(c.fecha_recepcion)}</span>
+                                <span style="color: #888; font-weight: 700;">Emisión:</span> <span>${clean(c.fecha_emision)}</span>
+                                <span style="font-weight: 700; color: #1e90ff;">Inicio:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
+                                <span style="font-weight: 700; color: #ef4444;">Vencimiento:</span> <span style="font-weight: 600;">${clean(c.fecha_vencimiento)}</span>
                             </div>
                         </td>
                         <td style="font-weight: 700; color: #1e90ff; font-size: 1rem;">${subtotal}</td>
