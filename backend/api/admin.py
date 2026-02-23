@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Rol, Ejecutivo, Cliente, Coordinador, Servicio, Proveedor, Curso, Contrato, ContratoCurso, ContratoServicio, ContratoProveedor, Seguimiento
+from .models import Rol, Ejecutivo, Cliente, Coordinador, Servicio, Proveedor, Curso, Contrato, ContratoCurso, ContratoProveedor, Seguimiento
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
@@ -23,4 +23,4 @@ class ClienteAdmin(admin.ModelAdmin):
                 kwargs["disabled"] = True
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-admin.site.register([Rol, Ejecutivo, Coordinador, Servicio, Proveedor, Curso, Contrato, ContratoCurso, ContratoServicio, ContratoProveedor, Seguimiento])
+admin.site.register([Rol, Ejecutivo, Coordinador, Servicio, Proveedor, Curso, Contrato, ContratoCurso, ContratoProveedor, Seguimiento])

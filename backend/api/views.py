@@ -11,7 +11,7 @@ import datetime
 from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
-    ContratoServicio, ContratoProveedor,Seguimiento, ImportHistory,
+    ContratoProveedor, Seguimiento, ImportHistory,
     AuditLog, normalize_rut_str
 )
 from django.http import HttpResponse
@@ -19,7 +19,7 @@ import io
 from .serializers import (
     RolSerializer, EjecutivoSerializer, ClienteSerializer, CoordinadorSerializer,
     ServicioSerializer, ProveedorSerializer, CursoSerializer, ContratoSerializer,
-    ContratoCursoSerializer, ContratoServicioSerializer, ContratoProveedorSerializer, SeguimientoSerializer, AuditLogSerializer
+    ContratoCursoSerializer, ContratoProveedorSerializer, SeguimientoSerializer, AuditLogSerializer
 )
 
 # Create your views here.
@@ -93,10 +93,6 @@ class ContratoViewSet(AuditMixin, viewsets.ModelViewSet):
 class ContratoCursoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoCurso.objects.all()
     serializer_class = ContratoCursoSerializer
-
-class ContratoServicioViewSet(AuditMixin, viewsets.ModelViewSet):
-    queryset = ContratoServicio.objects.all()
-    serializer_class = ContratoServicioSerializer
 
 class ContratoProveedorViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoProveedor.objects.all()
@@ -949,7 +945,7 @@ class ForceDataSyncView(APIView):
             
         import os
         import json
-        from .models import Cliente, Ejecutivo, Coordinador, Contrato, Curso, Rol, Servicio, Proveedor, ContratoCurso, ContratoServicio, ContratoProveedor
+        from .models import Cliente, Ejecutivo, Coordinador, Contrato, Curso, Rol, Servicio, Proveedor, ContratoCurso, ContratoProveedor
         from django.contrib.auth.models import User
         
         json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'initial_data.json')

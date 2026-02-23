@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Rol, Ejecutivo, Cliente, Coordinador, Servicio,
     Proveedor, Curso, Contrato, ContratoCurso,
-    ContratoServicio, ContratoProveedor,
+    ContratoProveedor,
     Seguimiento, ImportHistory, AuditLog
 )
 
@@ -96,14 +96,8 @@ class ContratoCursoSerializer(serializers.ModelSerializer):
         model = ContratoCurso
         exclude = ['contrato']
 
-class ContratoServicioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContratoServicio
-        exclude = ['contrato']
-
 class ContratoSerializer(serializers.ModelSerializer):
     cursos_asociados = ContratoCursoSerializer(many=True, required=False, write_only=True)
-    servicios_asociados = ContratoServicioSerializer(many=True, required=False, write_only=True)
     empresa_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
 
@@ -113,16 +107,9 @@ class ContratoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         cursos_data = validated_data.pop('cursos_asociados', [])
-        servicios_data = validated_data.pop('servicios_asociados', [])
-        
         contrato = Contrato.objects.create(**validated_data)
-        
         for curso_item in cursos_data:
             ContratoCurso.objects.create(contrato=contrato, **curso_item)
-            
-        for servicio_item in servicios_data:
-            ContratoServicio.objects.create(contrato=contrato, **servicio_item)
-            
         return contrato
 
 
