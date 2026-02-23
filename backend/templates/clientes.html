@@ -157,7 +157,10 @@
             <thead>
                 <tr>
                     <th>Empresa</th>
+                    <th>Ejecutivo</th>
+                    <th>Ubicación</th>
                     <th>Información</th>
+                    <th>Contacto</th>
                     <th></th>
                 </tr>
             </thead>
@@ -367,22 +370,45 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(client.razon_social)}</span>
                             </div>
-                            <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
-                        </td>
-                        <td>
-                            <div style="margin-bottom: 5px;">
-                                <span class="td-main">📞 ${clean(client.telefono_empresarial)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
+                                <span class="td-sub" style="margin:0">${clean(client.rut_empresa)}</span>
                             </div>
-                            <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
                         </td>
                         <td>
-                            <div style="display: flex; gap: 8px;">
+                            <span class="td-main">${clean(client.ejecutivo_nombre)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(client.direccion)}</span>
+                            <span class="td-sub">${clean(client.comuna)}, ${clean(client.region)}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <div style="margin-bottom: 2px;">
+                                    <span class="td-main">� ${clean(client.telefono_empresarial)}</span>
+                                </div>
+                                <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
+                            </div>
+                        </td>
+
+                        <td style="font-size: 0.8rem;">
+                            <div style="margin-bottom: 8px;">
+                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Holding:</div>
+                                <div class="td-main">${clean(client.cliente_padre_nombre)}</div>
+                            </div>
+                            <div>
+                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Contacto:</div>
+                                <div class="td-main">${clean(client.contacto_nombre)}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <button class="pill-btn edit" onclick='editClient(${client.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteClient(${client.id})'>Eliminar</button>
                             </div>
                         </td>
                     </tr>
-                `
+                `;
 }).join('');
             }
         } catch (error) {
