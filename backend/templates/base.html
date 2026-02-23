@@ -488,27 +488,28 @@
             font-weight: 700;
             display: inline-block;
             text-transform: capitalize;
+            background: rgba(120, 120, 120, 0.12); /* Default Gray */
+            color: #6b7280;
         }
 
         .status-badge.active, .status-badge.success {
-            background: var(--success-green-bg);
-            color: var(--success-green);
-        }
-
-        .status-badge.danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            background: var(--success-green-bg) !important;
+            color: var(--success-green) !important;
         }
 
         .status-badge.info {
-            background: rgba(30, 144, 255, 0.15);
-            color: #1e90ff;
+            background: rgba(30, 144, 255, 0.15) !important;
+            color: #1e90ff !important;
         }
 
-        /* Default badge for inactive, finalizado, and any unclassified state */
-        .status-badge:not(.active):not(.info) {
-            background: rgba(120, 120, 120, 0.12);
-            color: #6b7280;
+        .status-badge.danger {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+        }
+
+        .status-badge.warning {
+            background: rgba(255, 159, 67, 0.15) !important;
+            color: #ff9f43 !important;
         }
 
         .td-main { font-weight: 600; color: var(--text-color); display: block; }

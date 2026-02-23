@@ -263,16 +263,20 @@
                         return val;
                     };
                     const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
+                    const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 'info';
+                    const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
+                                      (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
+                    
                     return `
                     <tr>
                         <td>
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
-                            <span class="status-badge success">${clean(c.tipo_registro)}</span>
+                            <span class="status-badge ${tipoClass}">${clean(c.tipo_registro)}</span>
                         </td>
                         <td>
-                            <span class="status-badge ${c.estado && (c.estado.toLowerCase() === 'activo' || c.estado.toLowerCase() === 'firmado') ? 'active' : ''}">${clean(c.estado)}</span>
+                            <span class="status-badge ${estadoClass}">${clean(c.state || c.estado)}</span>
                         </td>
                         <td style="font-size: 0.8rem;">
                             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">
