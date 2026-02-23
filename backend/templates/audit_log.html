@@ -108,7 +108,7 @@
                         <td style="font-weight: 600;">${log.usuario_nombre || 'Sistema'}</td>
                         <td><span class="action-badge ${actionClass}">${log.accion}</span></td>
                         <td>${log.modelo}</td>
-                        <td><strong>${log.objeto_repr}</strong> <small>(ID: ${log.objeto_id})</small></td>
+                        <td><strong title="ID Interno: ${log.objeto_id}">${log.objeto_repr}</strong></td>
                         <td class="audit-detail" title="${log.detalle}">${log.detalle}</td>
                     </tr>
                 `}).join('');
