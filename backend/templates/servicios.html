@@ -155,6 +155,7 @@
                     <th>Servicio</th>
                     <th>Tipo</th>
                     <th>Rubro</th>
+                    <th>Proveedores</th>
                     <th></th>
                 </tr>
             </thead>
@@ -210,7 +211,17 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Descripción</label>
-                    <textarea name="descripcion" id="form-descripcion" rows="3"></textarea>
+                    <textarea name="descripcion" id="form-descripcion" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Proveedores que ofrecen este servicio</label>
+                    <select name="proveedores" id="form-proveedores" multiple style="height: 100px;">
+                        <!-- Populate dynamically -->
+                    </select>
+                    <small style="color: #1e90ff; font-size: 0.75rem; margin-top: 5px;">Mantenga presionado Ctrl (o Cmd) para seleccionar varios</small>
                 </div>
             </div>
 
@@ -242,11 +253,19 @@
             document.getElementById('form-rubro').value = data.rubro || '';
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-descripcion').value = data.descripcion || '';
+            
+            // Set selected providers
+            const provSelect = document.getElementById('form-proveedores');
+            Array.from(provSelect.options).forEach(opt => {
+                opt.selected = data.proveedores && data.proveedores.includes(parseInt(opt.value));
+            });
+
             document.getElementById('submit-btn').textContent = 'Actualizar Servicio';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Servicio';
             document.getElementById('servicios-id').value = '';
             document.getElementById('service-form').reset();
+            document.getElementById('form-proveedores').querySelectorAll('option').forEach(o => o.selected = false);
             document.getElementById('submit-btn').textContent = 'Guardar Servicio';
         }
     }
@@ -304,6 +323,13 @@
                             <span class="td-main">${clean(servicio.rubro)}</span>
                         </td>
                         <td>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 250px;">
+                                ${servicio.proveedores_info && servicio.proveedores_info.length > 0 
+                                    ? servicio.proveedores_info.map(p => `<span style="background: rgba(30, 144, 255, 0.1); color: #1e90ff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">${p}</span>`).join('')
+                                    : '<span style="color: #888; font-size: 0.75rem;">Sin proveedores</span>'}
+                            </div>
+                        </td>
+                        <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <button class="pill-btn edit" onclick='editService(${servicio.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteService(${servicio.id})'>Eliminar</button>
@@ -328,12 +354,16 @@
         const form = e.target;
         const id = document.getElementById('servicios-id').value;
 
+        const providersSelect = document.getElementById('form-proveedores');
+        const selectedProviders = Array.from(providersSelect.selectedOptions).map(opt => parseInt(opt.value));
+
         const data = {
             nombre: form.nombre.value,
             tipo: form.tipo.value,
             rubro: form.rubro.value,
             estado: form.estado.value,
-            descripcion: form.descripcion.value
+            descripcion: form.descripcion.value,
+            proveedores: selectedProviders
         };
 
         try {
@@ -404,7 +434,28 @@
         return cookieValue;
     }
 
+    async function loadAllProviders() {
+        try {
+            const response = await fetch('/api/proveedores/');
+            const data = await response.json();
+            const providers = Array.isArray(data) ? data : (data.results || []);
+            const select = document.getElementById('form-proveedores');
+            select.innerHTML = '';
+            providers.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) {
+            console.error('Error cargando proveedores:', error);
+        }
+    }
+
     // Initial Load
-    document.addEventListener('DOMContentLoaded', loadServicios);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadServicios();
+        loadAllProviders();
+    });
 </script>
 {% endblock %}

@@ -68,9 +68,14 @@ class CoordinadorSerializer(serializers.ModelSerializer):
         return value
 
 class ServicioSerializer(serializers.ModelSerializer):
+    proveedores_info = serializers.SerializerMethodField()
+
     class Meta:
         model = Servicio
         fields = '__all__'
+
+    def get_proveedores_info(self, obj):
+        return [p.nombre for p in obj.proveedores.all()]
 
 class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:

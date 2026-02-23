@@ -65,16 +65,6 @@ def load_contracts():
         except: pass
     print(f"Loaded ContratoCursos.")
 
-    # Load ContratoServicio
-    items_data = [obj for obj in data if obj['model'] == 'api.contratoservicio']
-    for obj_dict in items_data:
-        pk, fields = obj_dict['pk'], obj_dict['fields']
-        try:
-            if Contrato.objects.filter(id=fields['contrato']).exists() and Servicio.objects.filter(id=fields['servicio']).exists():
-                ContratoServicio.objects.update_or_create(id=pk, defaults=fields)
-        except: pass
-    print(f"Loaded ContratoServicios.")
-
     # Load ContratoProveedor
     items_data = [obj for obj in data if obj['model'] == 'api.contratoproveedor']
     for obj_dict in items_data:
