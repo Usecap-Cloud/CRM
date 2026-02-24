@@ -106,6 +106,15 @@ class ContratoProveedorSerializer(serializers.ModelSerializer):
         model = ContratoProveedor
         fields = '__all__'
 
+class SeguimientoSerializer(serializers.ModelSerializer):
+    empresa_nombre = serializers.ReadOnlyField(source='contrato.cliente.razon_social')
+    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
+    coordinador_nombre = serializers.ReadOnlyField(source='coordinador.nombre')
+
+    class Meta:
+        model = Seguimiento
+        fields = '__all__'
+
 class ContratoSerializer(serializers.ModelSerializer):
     empresa_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
@@ -127,16 +136,6 @@ class ContratoSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
-
-
-class SeguimientoSerializer(serializers.ModelSerializer):
-    empresa_nombre = serializers.ReadOnlyField(source='contrato.cliente.razon_social')
-    ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
-    coordinador_nombre = serializers.ReadOnlyField(source='coordinador.nombre')
-
-    class Meta:
-        model = Seguimiento
-        fields = '__all__'
 
 class ImportHistorySerializer(serializers.ModelSerializer):
     class Meta:
