@@ -155,7 +155,7 @@
                     <th>Servicio</th>
                     <th>Tipo</th>
                     <th>Rubro</th>
-                    <th>Proveedor</th>
+                    <th>Estado</th>
                     <th></th>
                 </tr>
             </thead>
@@ -305,9 +305,6 @@
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(servicio.nombre)}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="status-badge ${servicio.estado && (servicio.estado.toLowerCase().includes('activo')) ? 'active' : ''}">${clean(servicio.estado)}</span>
-                            </div>
                         </td>
                         <td>
                             <span class="td-main">${clean(servicio.tipo)}</span>
@@ -316,7 +313,7 @@
                             <span class="td-main">${clean(servicio.rubro)}</span>
                         </td>
                         <td>
-                            <span class="td-main" style="color: #1e90ff; font-weight: 600;">${clean(servicio.proveedor_nombre)}</span>
+                            <span class="status-badge ${servicio.estado && (servicio.estado.toLowerCase().includes('activo')) ? 'active' : ''}">${clean(servicio.estado)}</span>
                         </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">

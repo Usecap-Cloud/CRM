@@ -110,14 +110,15 @@
     <div class="card">
         <div id="loading" style="text-align:center; padding:50px; color:#888;">Buscando Proveedores...</div>
         <div id="no-data" style="text-align:center; padding:50px; color:#888; display:none;">No hay información disponible</div>
-        <table class="proveedores-table" id="proveedores-table" style="display:none;">
+        <table class="proveedores-table" id="proveedores-table" style="display: none;">
             <thead>
                 <tr>
                     <th>Proveedor</th>
-                    <th>Contacto</th>
                     <th>Ubicación</th>
                     <th>Tipo</th>
                     <th>Rubro</th>
+                    <th>Estado</th>
+                    <th>Contacto</th>
                     <th></th>
                 </tr>
             </thead>
@@ -130,34 +131,41 @@
 <div class="form-page" id="form-view">
     <div class="form-header">
         <button class="back-btn" onclick="hideForm()">&#x2190;</button>
-        <h2 id="form-title">Registro de Proveedor</h2>
+        <h2 id="form-title">Nuevo Proveedor</h2>
     </div>
     <div class="form-body">
-        <form id="proveedor-form" onsubmit="saveProveedor(event)">
+        <form id="provider-form" onsubmit="saveProvider(event)">
             <input type="hidden" name="id" id="proveedor-id">
+            <div class="form-section" style="margin-bottom: 25px;">
+                <div class="form-section-title">NUEVA FICHA</div>
+                <div class="form-section-subtitle">Datos Identificatorios</div>
+                <div class="form-section-desc">Complete la información legal y de contacto del proveedor.</div>
+            </div>
 
-            <!-- Identificación -->
-            <div class="form-section-label">Identificación</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>RUT Proveedor *</label>
-                    <input type="text" name="rut" id="form-rut" placeholder="77.123.456-7" required
-                           oninput="this.value = formatRut(this.value)">
+                    <label>RUT Proveedor</label>
+                    <input type="text" name="rut_proveedor" id="form-rut" placeholder="12.345.678-9" required
+                        onblur="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
-                    <label>Nombre del Proveedor *</label>
-                    <input type="text" name="nombre" id="form-nombre" placeholder="Servicios Industriales SpA" required>
+                    <label>Nombre / Razón Social</label>
+                    <input type="text" name="nombre" id="form-nombre" placeholder="Proveedor S.A." required>
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Tipo</label>
-                    <input type="text" name="tipo" id="form-tipo" placeholder="Ej: Certificación, Consultoría...">
+                    <input type="text" name="tipo" id="form-tipo" placeholder="Externo / Interno">
                 </div>
                 <div class="form-group">
                     <label>Rubro</label>
-                    <input type="text" name="rubro" id="form-rubro" placeholder="Ej: Tecnología, RRHH...">
+                    <input type="text" name="rubro" id="form-rubro" placeholder="Capacitación / Logística">
                 </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
@@ -165,53 +173,32 @@
                         <option value="inactivo">Inactivo</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Contacto -->
-            <div class="form-section-label">Contacto</div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Nombre de Contacto</label>
-                    <input type="text" name="contacto" id="form-contacto" placeholder="Juan Pérez">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" id="form-email" placeholder="contacto@proveedor.cl">
-                </div>
                 <div class="form-group">
                     <label>Teléfono</label>
                     <input type="text" name="telefono" id="form-telefono" placeholder="+56 9 ...">
                 </div>
             </div>
 
-            <!-- Ubicación -->
-            <div class="form-section-label">Ubicación</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Dirección</label>
-                    <input type="text" name="direccion" id="form-direccion" placeholder="Av. Principal 1234">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="email" id="form-email" placeholder="contacto@proveedor.cl">
                 </div>
                 <div class="form-group">
-                    <label>Región</label>
-                    <input type="text" name="region" id="form-region" placeholder="Metropolitana">
-                </div>
-                <div class="form-group">
-                    <label>Comuna</label>
-                    <input type="text" name="comuna" id="form-comuna" placeholder="Santiago">
+                    <label>Dirección / Ciudad</label>
+                    <input type="text" name="direccion" id="form-direccion" placeholder="Av. Principal 123, Santiago">
                 </div>
             </div>
 
-            <!-- Observaciones -->
-            <div class="form-section-label">Observaciones</div>
             <div class="form-row">
                 <div class="form-group">
-                    <textarea name="observaciones" id="form-observaciones" rows="3"
-                              placeholder="Notas adicionales sobre el proveedor..."></textarea>
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" id="form-observaciones" rows="2"></textarea>
                 </div>
             </div>
 
             <div class="form-actions"
-                 style="display:flex; gap:15px; justify-content:flex-end; margin-top:30px; padding-top:30px; border-top:1px solid var(--border-color);">
+                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
                 <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="submit-btn">Guardar Proveedor</button>
             </div>
@@ -227,29 +214,25 @@
     function showForm(data = null) {
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('form-view').classList.add('active');
+        document.getElementById('btn-nuevo').classList.add('active');
 
         if (data) {
             document.getElementById('form-title').textContent = 'Editar Proveedor';
             document.getElementById('proveedor-id').value = data.id;
             document.getElementById('form-rut').value = data.rut_proveedor;
-            document.getElementById('form-rut').readOnly = true;
-            document.getElementById('form-nombre').value = data.nombre || '';
+            document.getElementById('form-nombre').value = data.nombre;
             document.getElementById('form-tipo').value = data.tipo || '';
             document.getElementById('form-rubro').value = data.rubro || '';
-            document.getElementById('form-estado').value = data.estado || 'activo';
-            document.getElementById('form-contacto').value = data.contacto || '';
-            document.getElementById('form-email').value = data.email || '';
+            document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-telefono').value = data.telefono || '';
+            document.getElementById('form-email').value = data.email || '';
             document.getElementById('form-direccion').value = data.direccion || '';
-            document.getElementById('form-region').value = data.region || '';
-            document.getElementById('form-comuna').value = data.comuna || '';
             document.getElementById('form-observaciones').value = data.observaciones || '';
             document.getElementById('submit-btn').textContent = 'Actualizar Proveedor';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Proveedor';
             document.getElementById('proveedor-id').value = '';
-            document.getElementById('form-rut').readOnly = false;
-            document.getElementById('proveedor-form').reset();
+            document.getElementById('provider-form').reset();
             document.getElementById('submit-btn').textContent = 'Guardar Proveedor';
         }
     }
@@ -257,14 +240,16 @@
     function hideForm() {
         document.getElementById('list-view').style.display = 'block';
         document.getElementById('form-view').classList.remove('active');
-        document.getElementById('proveedor-form').reset();
+        document.getElementById('btn-nuevo').classList.remove('active');
+        document.getElementById('provider-form').reset();
     }
 
     async function loadProveedores() {
         try {
             const response = await fetch('/api/proveedores/');
-            const raw = await response.json();
-            currentProveedores = Array.isArray(raw) ? raw : (raw.results || []);
+            const data = await response.json();
+            currentProveedores = Array.isArray(data) ? data : (data.results || []);
+
             document.getElementById('loading').style.display = 'none';
 
             if (currentProveedores.length === 0) {
@@ -275,28 +260,24 @@
                 document.getElementById('proveedores-table').style.display = 'table';
                 const tbody = document.getElementById('proveedores-body');
                 tbody.innerHTML = currentProveedores.map(p => {
-                    const clean = v => (!v || v === 'nan' || v === 'None') ? '-' : v;
-                    const estadoClass = p.estado && p.estado.toLowerCase().includes('activo') ? 'active' : 'inactive';
-                    const ubicacion = [clean(p.region), clean(p.comuna)].filter(x => x !== '-').join(' · ') || '-';
+                    const clean = (val) => {
+                        if (!val || val === 'nan' || val === 'None') return '-';
+                        return val;
+                    };
+                    const estadoClass = p.estado && (p.estado.toLowerCase().includes('activo')) ? 'active' : '';
+                    
                     return `
                     <tr>
                         <td>
-                            <div style="margin-bottom:5px;">
+                            <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(p.nombre)}</span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span class="status-badge ${estadoClass}">${clean(p.estado)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="td-sub" style="margin:0">${clean(p.rut_proveedor)}</span>
                             </div>
                         </td>
                         <td>
-                            <span class="td-main" style="font-size:0.85rem;">${clean(p.contacto)}</span><br>
-                            <span class="td-sub">${clean(p.email)}</span><br>
-                            <span class="td-sub">${clean(p.telefono)}</span>
-                        </td>
-                        <td>
-                            <span class="td-sub">${clean(p.direccion)}</span><br>
-                            <span class="td-sub">${ubicacion}</span>
+                            <span class="td-main">${clean(p.direccion)}</span>
                         </td>
                         <td>
                             <span class="td-main">${clean(p.tipo)}</span>
@@ -305,92 +286,86 @@
                             <span class="td-main">${clean(p.rubro)}</span>
                         </td>
                         <td>
-                            <div style="display:flex; flex-direction:column; gap:5px;">
-                                <button class="pill-btn edit" onclick='editProveedor(${p.id})'>Editar</button>
-                                <button class="pill-btn delete" onclick='deleteProveedor(${p.id})'>Eliminar</button>
+                            <span class="status-badge ${estadoClass}">${clean(p.estado)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main">${clean(p.email)}</span>
+                            <span class="td-sub">${clean(p.telefono)}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button class="pill-btn edit" onclick='editProvider(${p.id})'>Editar</button>
+                                <button class="pill-btn delete" onclick='deleteProvider(${p.id})'>Eliminar</button>
                             </div>
                         </td>
-                    </tr>`;
-                }).join('');
+                    </tr>
+                `}).join('');
             }
-        } catch (error) {
-            document.getElementById('loading').textContent = 'Error cargando datos';
-        }
+        } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
     }
 
-    function editProveedor(id) {
-        const p = currentProveedores.find(x => x.id === id);
-        if (p) showForm(p);
+    function editProvider(id) {
+        const provider = currentProveedores.find(p => p.id === id);
+        if (provider) showForm(provider);
     }
 
-    async function saveProveedor(e) {
+    async function saveProvider(e) {
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('proveedor-id').value;
-        const rut = form.rut.value;
-        const phone = form.telefono.value;
 
-        if (!validateRut(rut)) {
-            showAlert('RUT Proveedor inválido. Ingrese su RUT con dígito verificador', 'error');
-            return;
-        }
-        if (phone && !validatePhone(phone)) {
-            showAlert('El teléfono solo debe contener números, +, - o espacios', 'error');
+        if (form.rut_proveedor.value && !validateRut(form.rut_proveedor.value)) {
+            showAlert('RUT inválido. Ingrese RUT con dígito verificador.', 'error');
             return;
         }
 
         const data = {
-            rut_proveedor: rut,
+            rut_proveedor: form.rut_proveedor.value,
             nombre: form.nombre.value,
             tipo: form.tipo.value,
             rubro: form.rubro.value,
             estado: form.estado.value,
-            contacto: form.contacto.value,
-            email: form.email.value || null,
-            telefono: phone || null,
+            telefono: form.telefono.value,
+            email: form.email.value,
             direccion: form.direccion.value,
-            region: form.region.value,
-            comuna: form.comuna.value,
             observaciones: form.observaciones.value
         };
 
         try {
             const url = id ? `/api/proveedores/${id}/` : '/api/proveedores/';
             const method = id ? 'PATCH' : 'POST';
+
             const response = await fetch(url, {
-                method,
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify(data)
             });
-            const result = await response.json().catch(() => ({}));
             if (response.ok) {
                 showAlert(id ? 'Proveedor actualizado' : 'Proveedor creado', 'success');
                 hideForm();
                 loadProveedores();
             } else {
-                let errorMsg = result.error || 'Error al guardar proveedor';
-                if (typeof result === 'object' && !result.error) {
-                    errorMsg = Object.values(result).flat().join(' ');
-                }
-                showAlert(errorMsg, 'error');
+                const errData = await response.json();
+                const msg = errData.rut_proveedor ? errData.rut_proveedor[0] : 'Error al guardar proveedor';
+                showAlert(msg, 'error');
             }
-        } catch (error) {
-            showAlert('Error de conexión con el servidor', 'error');
-        }
+        } catch (error) { showAlert('Error de conexion', 'error'); }
     }
 
-    async function deleteProveedor(id) {
+    async function deleteProvider(id) {
         if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) return;
         try {
             const response = await fetch(`/api/proveedores/${id}/`, {
                 method: 'DELETE',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
             });
             if (response.ok) {
-                showAlert('Proveedor eliminado correctamente', 'success');
+                showAlert('Proveedor eliminado correctly', 'success');
                 loadProveedores();
             } else {
                 showAlert('Error al eliminar proveedor.', 'error');

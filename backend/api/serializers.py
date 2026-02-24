@@ -98,10 +98,22 @@ class ContratoCursoSerializer(serializers.ModelSerializer):
         model = ContratoCurso
         exclude = ['contrato']
 
+class ContratoProveedorSerializer(serializers.ModelSerializer):
+    proveedor_nombre = serializers.ReadOnlyField(source='proveedor.nombre')
+    servicio_nombre = serializers.ReadOnlyField(source='servicio.nombre')
+
+    class Meta:
+        model = ContratoProveedor
+        fields = '__all__'
+
 class ContratoSerializer(serializers.ModelSerializer):
     cursos_asociados = ContratoCursoSerializer(many=True, required=False, write_only=True)
+    proveedores_asociados = ContratoProveedorSerializer(many=True, required=False, write_only=True)
     empresa_nombre = serializers.ReadOnlyField(source='cliente.razon_social')
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
+    
+    # Simple list for reading
+    prov_serv = ContratoProveedorSerializer(source='contratoproveedor_set', many=True, read_only=True)
 
     class Meta:
         model = Contrato
@@ -109,16 +121,39 @@ class ContratoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         cursos_data = validated_data.pop('cursos_asociados', [])
+        proveedores_data = validated_data.pop('proveedores_asociados', [])
+        
         contrato = Contrato.objects.create(**validated_data)
+        
         for curso_item in cursos_data:
             ContratoCurso.objects.create(contrato=contrato, **curso_item)
+            
+        for prov_item in proveedores_data:
+            ContratoProveedor.objects.create(contrato=contrato, **prov_item)
+            
         return contrato
 
+    def update(self, instance, validated_data):
+        cursos_data = validated_data.pop('cursos_asociados', None)
+        proveedores_data = validated_data.pop('proveedores_asociados', None)
 
-class ContratoProveedorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContratoProveedor
-        fields = '__all__'
+        # Standard update
+        instance = super().update(instance, validated_data)
+
+        if cursos_data is not None:
+            # Simple approach: clear and recreat (can be optimized)
+            ContratoCurso.objects.filter(contrato=instance).delete()
+            for curso_item in cursos_data:
+                ContratoCurso.objects.create(contrato=instance, **curso_item)
+
+        if proveedores_data is not None:
+            ContratoProveedor.objects.filter(contrato=instance).delete()
+            for prov_item in proveedores_data:
+                ContratoProveedor.objects.create(contrato=instance, **prov_item)
+
+        return instance
+
+
 
 class SeguimientoSerializer(serializers.ModelSerializer):
     empresa_nombre = serializers.ReadOnlyField(source='contrato.cliente.razon_social')

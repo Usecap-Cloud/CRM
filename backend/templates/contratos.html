@@ -145,7 +145,7 @@
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Empresa / Contrato</th>
+                    <th>Empresa</th>
                     <th>Estado</th>
                     <th>Fechas</th>
                     <th>Monto</th>
@@ -204,6 +204,21 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Servicio</label>
+                    <select name="servicio" id="servicio-select" required>
+                        <option value="">Seleccionar servicio...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select name="proveedor" id="proveedor-select" required>
+                        <option value="">Seleccionar proveedor...</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-actions"
                 style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
                 <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
@@ -229,6 +244,13 @@
             document.getElementById('form-fecha_inicio').value = data.fecha_inicio;
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-subtotal').value = data.subtotal;
+            
+            // Set service and provider if available (this assumes the API returns them or we fetch them)
+            if (data.prov_serv && data.prov_serv.length > 0) {
+                document.getElementById('servicio-select').value = data.prov_serv[0].servicio;
+                document.getElementById('proveedor-select').value = data.prov_serv[0].proveedor;
+            }
+
             document.getElementById('submit-btn').textContent = 'Actualizar Contrato';
         } else {
             document.getElementById('form-title').textContent = 'Nuevo Contrato';
@@ -318,6 +340,34 @@
         } catch (error) { console.error('Error loading empresas'); }
     }
 
+    async function loadServicios() {
+        try {
+            const response = await fetch('/api/servicios/');
+            const data = await response.json();
+            const select = document.getElementById('servicio-select');
+            data.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading servicios'); }
+    }
+
+    async function loadProveedores() {
+        try {
+            const response = await fetch('/api/proveedores/');
+            const data = await response.json();
+            const select = document.getElementById('proveedor-select');
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading proveedores'); }
+    }
+
     async function saveContrato(e) {
         e.preventDefault();
         const form = e.target;
@@ -328,7 +378,11 @@
             empresa: form.empresa.options[form.empresa.selectedIndex].text,
             fecha_inicio: form.fecha_inicio.value,
             estado: form.estado.value,
-            subtotal: parseFloat(form.subtotal.value)
+            subtotal: parseFloat(form.subtotal.value),
+            proveedores_asociados: [{
+                servicio: parseInt(form.servicio.value),
+                proveedor: parseInt(form.proveedor.value)
+            }]
         };
         try {
             const url = id ? `/api/contratos/${id}/` : '/api/contratos/';
@@ -393,5 +447,7 @@
     }
     loadContratos();
     loadEmpresas();
+    loadServicios();
+    loadProveedores();
 </script>
 {% endblock %}
