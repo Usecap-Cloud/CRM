@@ -62,9 +62,11 @@ El sistema cuenta con un motor de normalización automática en el archivo `mode
 *   Gestión de estados: Pendiente, Firmado, Por Cerrar, etc.
 
 ### Importación Masiva (Excel)
-*   Motor de carga universal que soporta todos los módulos.
-*   **Lógica de Mapeo**: Permite cargar datos aunque las columnas del Excel no tengan el nombre exacto del sistema.
-*   **Validación Preventiva**: Antes de cargar, valida que no existan duplicados y que los RUTs sean correctos.
+El sistema cuenta con un motor de carga universal (`UniversalImportView`) diseñado para ser inteligente y autodetectable.
+*   **Prioridad de Campos del Modelo**: El importador está optimizado para reconocer automáticamente los nombres técnicos definidos en `models.py`. Si tu Excel tiene columnas como `rut_coordinador`, `rut_empresa`, `cliente_rut` o `rut_ejecutivo`, el sistema las mapeará de forma instantánea y precisa.
+*   **Lógica de Mapeo Inteligente (Fuzzy Logic)**: Si no se encuentran los nombres exactos, el sistema aplica un algoritmo de normalización para buscar variaciones comunes (ej: mapeará "RUT Empresa" o "Empresa RUT" automáticamente a `rut_empresa`).
+*   **Validación de Columnas Requeridas**: El sistema exige columnas mínimas según el módulo (ej: `rut_coordinador` para Encargados). Si falta una, el error te indicará exactamente el nombre del campo que el modelo de base de datos espera recibir.
+*   **Detección de Duplicados**: Antes de procesar, se verifica contra la base de datos para evitar registros repetidos (basado en el RUT).
 
 ---
 
