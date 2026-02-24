@@ -325,11 +325,12 @@ class UniversalImportView(APIView):
                 elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
                 elif norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
                 elif norm in ['telefonoempresarial', 'telefnotrabajo', 'fonoempresa']: mapping['telefono_empresarial'] = col
-                elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'mailempresa']: mapping['email_empresa'] = col
+                elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'mailempresa', 'emailempresarial']: mapping['email_empresa'] = col
                 elif norm in ['nombrefantasia', 'nombrecomercial', 'fantasia']: mapping['nombre_fantasia'] = col
                 elif norm in ['numerocolaboradores', 'colaboradores', 'empleados', 'dotacion']: mapping['numero_colaboradores'] = col
                 elif norm in ['tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
                 elif norm in ['cantidadsucursales', 'sucursales']: mapping['cantidad_sucursales'] = col
+                elif norm in ['rutcoordinador', 'coordinadorrut', 'contacto']: mapping['rut_coordinador'] = col
                 
                 # Contract specific mapping
                 elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
@@ -420,7 +421,7 @@ class UniversalImportView(APIView):
                             rut_padre_fmt = format_rut_chile(rut_padre_raw)
                             cliente_padre = Cliente.objects.filter(rut_empresa=rut_padre_fmt).first()
 
-                        Cliente.objects.create(
+                        cliente = Cliente.objects.create(
                             rut_empresa=rut,
                             razon_social=razon_social,
                             estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
@@ -440,6 +441,22 @@ class UniversalImportView(APIView):
                             cantidad_sucursales=int(row.get(mapping.get('cantidad_sucursales'), 1)) if not pd.isna(row.get(mapping.get('cantidad_sucursales'), 1)) else 1,
                             tipo_convenio=str(row.get(mapping.get('tipo_convenio'), 'particular')).strip().lower()
                         )
+
+                        # Extra relationships logic
+                        rut_coordinador = clean_val(row.get(mapping.get('rut_coordinador')))
+                        if rut_coordinador:
+                            coord = Coordinador.objects.filter(rut_coordinador=rut_coordinador).first()
+                            if coord:
+                                cliente.contacto_principal = coord
+                        
+                        rut_padre = clean_val(row.get(mapping.get('rut_cliente_parent')))
+                        if rut_padre:
+                            padre = Cliente.objects.filter(rut_empresa=rut_padre).first()
+                            if padre:
+                                cliente.cliente_padre = padre
+                        
+                        cliente.save() # Commit relationships
+                        
                         created_count += 1
                         
                     elif model_type == 'ejecutivo':
