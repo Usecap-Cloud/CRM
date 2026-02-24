@@ -145,10 +145,12 @@
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
+                    <th>Folio</th>
                     <th>Empresa</th>
                     <th>Estado</th>
                     <th>Fechas</th>
-                    <th>Monto</th>
+                    <th>Finanzas</th>
+                    <th>Detalle (Serv/Prov/Cursos)</th>
                     <th></th>
                 </tr>
             </thead>
@@ -188,6 +190,13 @@
                     <input type="date" name="fecha_inicio" id="form-fecha_inicio" required>
                 </div>
                 <div class="form-group">
+                    <label>Fecha de Vencimiento</label>
+                    <input type="date" name="fecha_vencimiento" id="form-fecha_vencimiento">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
                     <label>Estado Inicial</label>
                     <select name="estado" id="form-estado" required>
                         <option value="activo">Activo</option>
@@ -195,26 +204,46 @@
                         <option value="finalizado">Finalizado</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Encargado (Contacto)</label>
+                    <select name="encargado" id="encargado-select">
+                        <option value="">Seleccionar encargado...</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Subtotal (Neto)</label>
-                    <input type="number" name="subtotal" id="form-subtotal" placeholder="1000000" required>
+                    <input type="number" name="subtotal" id="form-subtotal" placeholder="1000000" required oninput="calculateFinances()">
+                </div>
+                <div class="form-group">
+                    <label>IVA (19%)</label>
+                    <input type="number" id="form-iva" readonly style="background: rgba(255,255,255,0.05);">
+                </div>
+                <div class="form-group">
+                    <label>Total</label>
+                    <input type="number" id="form-total" readonly style="background: rgba(255,255,255,0.05); font-weight: 800; color: #1e90ff;">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Servicio</label>
-                    <select name="servicio" id="servicio-select" required>
-                        <option value="">Seleccionar servicio...</option>
+                    <label>Servicios</label>
+                    <select name="servicios" id="servicios-select" multiple style="height: 100px;">
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Proveedor</label>
-                    <select name="proveedor" id="proveedor-select" required>
-                        <option value="">Seleccionar proveedor...</option>
+                    <label>Proveedores</label>
+                    <select name="proveedores" id="proveedores-select" multiple style="height: 100px;">
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cursos</label>
+                    <select name="cursos" id="cursos-select" multiple style="height: 100px;">
                     </select>
                 </div>
             </div>
@@ -233,22 +262,57 @@
 <script>
     let currentContratos = [];
 
+    function calculateFinances() {
+        const subtotal = parseFloat(document.getElementById('form-subtotal').value) || 0;
+        const iva = subtotal * 0.19;
+        const total = subtotal + iva;
+        document.getElementById('form-iva').value = Math.round(iva);
+        document.getElementById('form-total').value = Math.round(total);
+    }
+
     function showForm(data = null) {
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('form-view').classList.add('active');
+        
+        // Reset multi-selects
+        ['servicios-select', 'proveedores-select', 'cursos-select'].forEach(id => {
+            const select = document.getElementById(id);
+            if (select) {
+                Array.from(select.options).forEach(opt => opt.selected = false);
+            }
+        });
+
         if (data) {
             document.getElementById('form-title').textContent = 'Editar Contrato';
             document.getElementById('contrato-id').value = data.id;
-            document.getElementById('empresa-select').value = data.cliente; // Use client ID
+            document.getElementById('empresa-select').value = data.cliente;
             document.getElementById('form-tipo_registro').value = data.tipo_registro || 'Contrato';
             document.getElementById('form-fecha_inicio').value = data.fecha_inicio;
+            document.getElementById('form-fecha_vencimiento').value = data.fecha_vencimiento || '';
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-subtotal').value = data.subtotal;
+            document.getElementById('coordinador-select').value = data.coordinador || '';
             
-            // Set service and provider if available (this assumes the API returns them or we fetch them)
-            if (data.prov_serv && data.prov_serv.length > 0) {
-                document.getElementById('servicio-select').value = data.prov_serv[0].servicio;
-                document.getElementById('proveedor-select').value = data.prov_serv[0].proveedor;
+            calculateFinances();
+
+            // Handle Multi-selects
+            if (data.servicios) {
+                data.servicios.forEach(id => {
+                    const opt = document.querySelector(`#servicios-select option[value="${id}"]`);
+                    if (opt) opt.selected = true;
+                });
+            }
+            if (data.proveedores) {
+                data.proveedores.forEach(id => {
+                    const opt = document.querySelector(`#proveedores-select option[value="${id}"]`);
+                    if (opt) opt.selected = true;
+                });
+            }
+            if (data.cursos) {
+                data.cursos.forEach(id => {
+                    const opt = document.querySelector(`#cursos-select option[value="${id}"]`);
+                    if (opt) opt.selected = true;
+                });
             }
 
             document.getElementById('submit-btn').textContent = 'Actualizar Contrato';
@@ -256,6 +320,8 @@
             document.getElementById('form-title').textContent = 'Nuevo Contrato';
             document.getElementById('contrato-id').value = '';
             document.getElementById('contrato-form').reset();
+            document.getElementById('form-iva').value = '';
+            document.getElementById('form-total').value = '';
             document.getElementById('submit-btn').textContent = 'Crear Contrato';
         }
     }
@@ -289,14 +355,20 @@
                         const s = val.trim();
                         return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
-                    const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
+                    const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
+                    
+                    const subtotal = fmtCur(c.subtotal);
+                    const iva = fmtCur(c.iva);
+                    const total = fmtCur(c.total);
+                    
                     const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 'info';
                     const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
                                       (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
                     
                     return `
                     <tr>
-                        <td>
+                        <td style="font-weight: 800; color: #1e90ff;">${clean(c.folio)}</td>
+                        <td style="width: 180px;">
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
@@ -305,17 +377,29 @@
                         <td>
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="font-size: 0.8rem;">
+                        <td style="font-size: 0.8rem; width: 180px;">
                             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">
                                 <span style="color: #888; font-weight: 700;">Recepción:</span> <span>${clean(c.fecha_recepcion)}</span>
-                                <span style="color: #888; font-weight: 700;">Emisión:</span> <span>${clean(c.fecha_emision)}</span>
-                                <span style="font-weight: 700; color: #1e90ff;">Inicio:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
+                                <span style="color: #888; font-weight: 700;">Inicio:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
                                 <span style="font-weight: 700; color: #ef4444;">Vencimiento:</span> <span style="font-weight: 600;">${clean(c.fecha_vencimiento)}</span>
                             </div>
                         </td>
-                        <td style="font-weight: 700; color: #1e90ff; font-size: 1rem;">${subtotal}</td>
+                        <td style="font-size: 0.85rem;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color:#888;">Neto: ${subtotal}</span>
+                                <span style="color:#888;">IVA: ${iva}</span>
+                                <span style="font-weight: 800; color: #1e90ff; border-top: 1px solid var(--border-color); margin-top: 4px;">Total: ${total}</span>
+                            </div>
+                        </td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="max-width: 250px; font-size: 0.75rem; color: #888; line-height: 1.4;">
+                                <strong>Servicios:</strong> ${c.servicios_info && c.servicios_info.length > 0 ? c.servicios_info.map(s => s.nombre).join(', ') : '-'}<br>
+                                <strong>Proveedores:</strong> ${c.proveedores_info && c.proveedores_info.length > 0 ? c.proveedores_info.map(p => p.nombre).join(', ') : '-'}<br>
+                                <strong>Cursos:</strong> ${c.cursos_info && c.cursos_info.length > 0 ? c.cursos_info.map(cu => cu.nombre).join(', ') : '-'}
+                            </div>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
                                 <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
                                 <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
                             </div>
@@ -336,7 +420,8 @@
             const response = await fetch('/api/clientes/');
             const data = await response.json();
             const select = document.getElementById('empresa-select');
-            data.forEach(e => {
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id;
                 opt.textContent = e.razon_social;
@@ -349,8 +434,9 @@
         try {
             const response = await fetch('/api/servicios/');
             const data = await response.json();
-            const select = document.getElementById('servicio-select');
-            data.forEach(s => {
+            const select = document.getElementById('servicios-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
                 opt.textContent = s.nombre;
@@ -363,8 +449,9 @@
         try {
             const response = await fetch('/api/proveedores/');
             const data = await response.json();
-            const select = document.getElementById('proveedor-select');
-            data.forEach(p => {
+            const select = document.getElementById('proveedores-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
                 opt.textContent = p.nombre;
@@ -373,22 +460,61 @@
         } catch (error) { console.error('Error loading proveedores'); }
     }
 
+    async function loadCursos() {
+        try {
+            const response = await fetch('/api/cursos/');
+            const data = await response.json();
+            const select = document.getElementById('cursos-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading cursos'); }
+    }
+
+    async function loadEncargados() {
+        try {
+            const response = await fetch('/api/coordinadores/');
+            const data = await response.json();
+            const select = document.getElementById('encargado-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading encargados'); }
+    }
+
     async function saveContrato(e) {
         e.preventDefault();
         const form = e.target;
         const id = document.getElementById('contrato-id').value;
+
+        // Get multi-select values
+        const getSelected = (id) => {
+            const select = document.getElementById(id);
+            return Array.from(select.options).filter(opt => opt.selected).map(opt => parseInt(opt.value));
+        };
+
         const data = {
             cliente: parseInt(form.empresa.value),
             tipo_registro: form.tipo_registro.value,
             empresa: form.empresa.options[form.empresa.selectedIndex].text,
             fecha_inicio: form.fecha_inicio.value,
+            fecha_vencimiento: form.fecha_vencimiento.value || null,
             estado: form.estado.value,
             subtotal: parseFloat(form.subtotal.value),
-            proveedores_asociados: [{
-                servicio: parseInt(form.servicio.value),
-                proveedor: parseInt(form.proveedor.value)
-            }]
+            coordinador: form.encargado.value ? parseInt(form.encargado.value) : null,
+            servicios: getSelected('servicios-select'),
+            proveedores: getSelected('proveedores-select'),
+            cursos: getSelected('cursos-select')
         };
+
         try {
             const url = id ? `/api/contratos/${id}/` : '/api/contratos/';
             const method = id ? 'PATCH' : 'POST';
@@ -404,7 +530,10 @@
                 showAlert(id ? 'Contrato actualizado' : 'Contrato creado', 'success');
                 hideForm();
                 loadContratos();
-            } else { showAlert('Error al guardar contrato', 'error'); }
+            } else { 
+                const err = await response.json();
+                showAlert('Error: ' + JSON.stringify(err), 'error'); 
+            }
         } catch (error) { showAlert('Error de conexion', 'error'); }
     }
 
@@ -454,5 +583,7 @@
     loadEmpresas();
     loadServicios();
     loadProveedores();
+    loadCursos();
+    loadEncargados();
 </script>
 {% endblock %}
