@@ -146,8 +146,8 @@ class DashboardStatsView(APIView):
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
             "contratos": Contrato.objects.count(),
-            "contratos_activos": Contrato.objects.filter(tipo_registro='Contrato').exclude(estado__iexact='finalizado').count(),
-            "propuestas_activas": Contrato.objects.filter(tipo_registro='Propuesta').exclude(estado__iexact='finalizado').count(),
+            "contratos_activos": Contrato.objects.filter(tipo_registro='Contrato').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
+            "propuestas_activas": Contrato.objects.filter(tipo_registro='Propuesta').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
             "seguimientos_pendientes": Seguimiento.objects.filter(cerrado=False).count(),
             "recent_activity": recent_activity,
             "agenda": agenda
