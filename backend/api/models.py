@@ -413,7 +413,11 @@ class Curso(models.Model):
 # Tabla Contratos
 # =========================
 class Contrato(models.Model):
-    tipo_registro = models.CharField(max_length=20)
+    tipo_registro = models.CharField(
+        max_length=20,
+        choices=[("Contrato", "Contrato"), ("Propuesta", "Propuesta")],
+        default="Contrato"
+    )
     empresa = models.CharField(max_length=100)
     fecha_recepcion = models.DateField(blank=True, null=True)
     fecha_emision = models.DateField(blank=True, null=True)
