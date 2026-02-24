@@ -353,6 +353,13 @@
                     const iva = fmtCur(c.iva);
                     const total = fmtCur(c.total);
                     
+                    // Calcular próximo seguimiento pendiente
+                    const pendingSegs = (c.seguimientos_info || []).filter(s => !s.cerrado);
+                    const nextSeg = pendingSegs.length > 0 
+                        ? pendingSegs.sort((a,b) => new Date(a.fecha_seguimiento || a.fecha) - new Date(b.fecha_seguimiento || b.fecha))[0]
+                        : null;
+                    const nextSegDate = nextSeg ? (nextSeg.fecha_seguimiento || nextSeg.fecha) : '-';
+                    
                     const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 
                                      (c.tipo_registro && c.tipo_registro.toLowerCase().includes('propuesta') ? 'warning' : 'info');
                     const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
@@ -385,12 +392,14 @@
                             <div style="max-width: 250px; font-size: 0.75rem; color: #888; line-height: 1.4;">
                                 <strong>Servicios:</strong> ${c.servicios_info && c.servicios_info.length > 0 ? c.servicios_info.map(s => s.nombre).join(', ') : '-'}<br>
                                 <strong>Proveedores:</strong> ${c.proveedores_info && c.proveedores_info.length > 0 ? c.proveedores_info.map(p => p.nombre).join(', ') : '-'}<br>
-                                <strong>Cursos:</strong> ${c.cursos_info && c.cursos_info.length > 0 ? c.cursos_info.map(cu => cu.nombre).join(', ') : '-'}
+                                <strong>Cursos:</strong> ${c.cursos_info && c.cursos_info.length > 0 ? c.cursos_info.map(cu => cu.nombre).join(', ') : '-'}<br>
+                                <strong style="color: #ff9f43;">Próx. Seguimiento:</strong> ${nextSegDate}
                             </div>
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
                                 <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
+                                <a href="/api/seguimiento/" class="pill-btn info" style="text-decoration: none; text-align: center; font-size: 0.75rem;">Seguimiento</a>
                                 <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
                             </div>
                         </td>

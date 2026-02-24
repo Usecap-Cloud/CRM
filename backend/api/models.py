@@ -553,7 +553,7 @@ class Seguimiento(models.Model):
     observaciones = models.TextField(blank=True, null=True)
 
     # Relaciones
-    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE)
+    contrato = models.ForeignKey("Contrato", on_delete=models.CASCADE, related_name="seguimientos")
     coordinador = models.ForeignKey("Coordinador", on_delete=models.CASCADE)
     ejecutivo = models.ForeignKey("Ejecutivo", on_delete=models.CASCADE)
     cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE, null=True)
