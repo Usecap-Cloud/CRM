@@ -419,10 +419,7 @@ class Contrato(models.Model):
         default="Contrato"
     )
     empresa = models.CharField(max_length=100)
-    fecha_recepcion = models.DateField(blank=True, null=True)
-    fecha_emision = models.DateField(blank=True, null=True)
-    fecha_inicio = models.DateField(blank=True, null=True)
-    fecha_vencimiento = models.DateField(blank=True, null=True)
+    fecha = models.DateField(blank=True, null=True)
     
     # Identificación y Finanzas
     folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
@@ -453,11 +450,6 @@ class Contrato(models.Model):
         self.empresa = normalize_text(self.empresa)
         self.tipo_registro = normalize_text(self.tipo_registro)
         self.estado = normalize_estado(self.estado)
-
-        # Validación de fechas
-        if self.fecha_inicio and self.fecha_vencimiento:
-            if self.fecha_vencimiento < self.fecha_inicio:
-                raise ValidationError("La fecha de vencimiento no puede ser anterior a la de inicio.")
 
         # Cálculos Financieros
         self.iva = float(self.subtotal) * 0.19
