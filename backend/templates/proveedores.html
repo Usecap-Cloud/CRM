@@ -57,12 +57,12 @@
         padding: 40px;
         backdrop-filter: blur(10px);
     }
-    .form-section-title {
+    .form-section-title { text-transform: uppercase; margin-bottom: 12px;
         font-size: 0.8rem;
         color: #1e90ff;
         font-weight: 800;
         letter-spacing: 2px;
-        text-transform: uppercase;
+        
     }
 
     .form-section-subtitle {
@@ -273,8 +273,13 @@
                 const tbody = document.getElementById('proveedores-body');
                 tbody.innerHTML = currentProveedores.map(p => {
                     const clean = (val) => {
-                        if (!val || val === 'nan' || val === 'None') return '-';
+                        if (!val || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
                         return val;
+                    };
+                    const cap = (val) => {
+                        if (!val || typeof val !== 'string') return val;
+                        const s = val.trim();
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     const estadoClass = p.estado && (p.estado.toLowerCase().includes('activo')) ? 'active' : '';
                     
@@ -298,7 +303,7 @@
                             <span class="td-main">${clean(p.rubro)}</span>
                         </td>
                         <td>
-                            <span class="status-badge ${estadoClass}">${clean(p.estado)}</span>
+                            <span class="status-badge ${estadoClass}">${cap(clean(p.estado))}</span>
                         </td>
                         <td>
                             <span class="td-main">${clean(p.email)}</span>

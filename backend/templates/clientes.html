@@ -72,12 +72,11 @@
         backdrop-filter: blur(8px);
     }
 
-    .form-section-title {
+    .form-section-title { text-transform: uppercase; margin-bottom: 12px;
         font-size: 0.8rem;
         color: #1e90ff;
         font-weight: 800;
         letter-spacing: 2px;
-        text-transform: uppercase;
     }
 
     .form-section-subtitle {
@@ -119,7 +118,7 @@
         border-color: #1e90ff;
         outline: none;
     }
-    .convenio-pill { padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .convenio-pill { text-transform: capitalize; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
     .convenio-otech { background: #e0f2fe; color: #0369a1; }
     .convenio-sence { background: #fef3c7; color: #92400e; }
     .convenio-particular { background: #f1f5f9; color: #475569; }
@@ -139,7 +138,7 @@
             <div class="pill-nav">
                 <button class="pill-btn primary" onclick="showForm()" id="btn-nuevo"><span>&#x002B;</span> Nuevo
                     Cliente</button>
-                <a href="/api/importar-page/" class="pill-btn success" id="btn-importar"
+                <a href="/api/importar-page/" class="pill-btn" id="btn-importar"
                     style="text-decoration: none;"><span>&#x1F4E5;</span> Importar Excel</a>
             </div>
         </div>
@@ -179,7 +178,7 @@
         <form id="client-form" onsubmit="saveClient(event)">
             <input type="hidden" name="id" id="client-id">
             <div class="form-section" style="margin-bottom: 25px;">
-                <div class="form-section-title">NUEVA FICHA</div>
+                <div class="form-section-title" style="margin-bottom: 12px;">NUEVA FICHA</div>
                 <div class="form-section-subtitle">Datos Corporativos</div>
                 <div class="form-section-desc" style="color: #888;">Complete la información de la empresa.</div>
             </div>
@@ -364,8 +363,13 @@
                 const tbody = document.getElementById('clients-body');
                 tbody.innerHTML = currentClients.map(client => {
                     const clean = (val) => {
-                        if (!val || val === 'nan' || val === 'None') return '-';
+                        if (!val || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
                         return val;
+                    };
+                    const cap = (val) => {
+                        if (!val || typeof val !== 'string') return val;
+                        const s = val.trim();
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     return `
                     <tr>
@@ -374,7 +378,7 @@
                                 <span class="td-main">${clean(client.razon_social)}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="status-badge ${client.estado === 'activo' ? 'active' : ''}">${clean(client.estado)}</span>
+                                <span class="status-badge ${client.estado && client.estado.toLowerCase().includes('activo') ? 'active' : ''}">${cap(clean(client.estado))}</span>
                                 <span class="td-sub" style="margin:0">${clean(client.rut_empresa)}</span>
                             </div>
                         </td>
@@ -388,26 +392,26 @@
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <div>
-                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Holding</div>
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px;">Holding</div>
                                     <span class="td-main" style="font-size: 0.85rem;">${clean(client.cliente_padre_nombre)}</span>
                                 </div>
                                 <div>
-                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Convenio</div>
-                                    <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px;">Convenio</div>
+                                    <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${cap(clean(client.tipo_convenio || 'Particular'))}</span>
                                 </div>
                                 <div style="margin-top: 5px;">
-                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Email Empresarial</div>
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px;">Email Empresarial</div>
                                     <span class="td-main" style="font-size: 0.85rem; color: #1e90ff;">${clean(client.email_empresa)}</span>
                                 </div>
                             </div>
                         </td>
                         <td style="font-size: 0.8rem;">
                             <div style="margin-bottom: 10px;">
-                                <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Empresa</div>
+                                <div style="color: #888; font-size: 0.7rem; font-weight: 700;">Empresa</div>
                                 <div class="td-main">${clean(client.telefono_empresarial)}</div>
                             </div>
                             <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-                                <div style="color: #1e90ff; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Encargado</div>
+                                <div style="color: #1e90ff; font-size: 0.7rem; font-weight: 700;">Encargado</div>
                                 <div class="td-main" style="margin-bottom: 2px;">${clean(client.contacto_nombre)}</div>
                                 <div class="td-sub">${clean(client.contacto_telefono || '-')}</div>
                                 <div class="td-sub" style="font-size: 0.7rem; color: #1e90ff;">${clean(client.contacto_email || '-')}</div>
