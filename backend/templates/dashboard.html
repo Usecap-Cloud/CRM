@@ -194,10 +194,12 @@
             <span class="badge" style="background: rgba(30, 144, 255, 0.1); color: #1e90ff;">En Tiempo</span>
             <div class="icon-box">&#x1F4DD;</div>
             <div class="label">Contratos Activos</div>
-            <div class="number" id="contratos-count">0</div>
-            <div style="font-size: 0.8rem; color: #888; margin-top: 10px; display: flex; justify-content: space-between;">
-                <span>Contratos: <b id="contratos-count-detail">0</b></span>
-                <span>Propuestas: <b id="propuestas-count-detail">0</b></span>
+            <div style="display: flex; align-items: baseline; gap: 20px; margin-top: 10px;">
+                <div class="number" id="contratos-count" style="line-height: 1;">0</div>
+                <div style="font-size: 0.8rem; color: #888; display: flex; flex-direction: column; gap: 2px;">
+                    <span>Contratos: <b id="contratos-count-detail" style="color: var(--logo-main-color);">0</b></span>
+                    <span>Propuestas: <b id="propuestas-count-detail" style="color: var(--accent-blue);">0</b></span>
+                </div>
             </div>
         </div>
     </div>
