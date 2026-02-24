@@ -129,22 +129,23 @@ class DashboardStatsView(APIView):
         # Agenda (Contracts expiring soon)
         agenda = []
         today = datetime.date.today()
-        # Filter contracts that are active or 'por cerrar' and have a future expiration date
+        # Filter contracts that have a future date
         contratos = Contrato.objects.filter(
-            fecha_vencimiento__gte=today
-        ).exclude(estado__iexact='finalizado').order_by('fecha_vencimiento')[:5]
+            fecha__gte=today
+        ).exclude(estado__iexact='finalizado').order_by('fecha')[:5]
         
         for c in contratos:
             agenda.append({
                 "id": c.id,
                 "titulo": c.empresa, # Using company name as title
-                "fecha": c.fecha_vencimiento
+                "fecha": c.fecha
             })
 
         stats = {
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
             "contratos": Contrato.objects.count(),
+            "contratos_cerrar": Contrato.objects.filter(fecha__gte=today).count(),
             "seguimientos_pendientes": Seguimiento.objects.filter(cerrado=False).count(),
             "recent_activity": recent_activity,
             "agenda": agenda
