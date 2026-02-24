@@ -3,6 +3,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+from django.utils import timezone
 import re
 
 # Abreviaciones que permanecen en MAYÚSCULAS
@@ -418,24 +419,62 @@ class Contrato(models.Model):
     fecha_emision = models.DateField(blank=True, null=True)
     fecha_inicio = models.DateField(blank=True, null=True)
     fecha_vencimiento = models.DateField(blank=True, null=True)
+    # Identificación y Finanzas
+    folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(
         max_length=20,
-        choices=[("activo", "Activo"), ("inactivo", "Inactivo"), ("finalizado", "Finalizado")]
+        choices=[("activo", "Activo"), ("inactivo", "Inactivo"), ("finalizado", "Finalizado")],
+        default="activo"
     )
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     
+    # Trazabilidad
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
+    servicios = models.ManyToManyField('Servicio', blank=True)
+    cursos = models.ManyToManyField('Curso', blank=True)
+    proveedores = models.ManyToManyField('Proveedor', blank=True)
 
     def save(self, *args, **kwargs):
+        # Normalización
         self.empresa = normalize_text(self.empresa)
         self.tipo_registro = normalize_text(self.tipo_registro)
         self.estado = normalize_estado(self.estado)
+
+        # Validación de fechas
+        if self.fecha_inicio and self.fecha_vencimiento:
+            if self.fecha_vencimiento < self.fecha_inicio:
+                raise ValidationError("La fecha de vencimiento no puede ser anterior a la de inicio.")
+
+        # Cálculos Financieros
+        self.iva = float(self.subtotal) * 0.19
+        self.total = float(self.subtotal) + self.iva
+
+        # Generación de Folio (si está vacío)
+        if not self.folio:
+            year = timezone.now().year
+            # Intento simple de generar un correlativo si es la primera vez (en el primer save)
+            # Para folios más complejos se suele requerir que el objeto ya tenga ID
+            # Por ahora dejaremos un placeholder que se puede perfeccionar después del super().save()
+            pass
+
         super().save(*args, **kwargs)
+
+        # Si aún no tiene folio (nuevo registro), lo generamos ahora que tenemos ID
+        if not self.folio:
+            year = timezone.now().year
+            self.folio = f"CON-{year}-{self.id:04d}"
+            super().save(update_fields=['folio'])
 
     def __str__(self):
         return f"Contrato {self.id} - {self.empresa}"
