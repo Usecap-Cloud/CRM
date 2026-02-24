@@ -73,12 +73,12 @@
         backdrop-filter: blur(10px);
     }
 
-    .form-section-title {
+    .form-section-title { text-transform: uppercase; margin-bottom: 12px;
         font-size: 0.8rem;
         color: #1e90ff;
         font-weight: 800;
         letter-spacing: 2px;
-        text-transform: uppercase;
+        
     }
 
     .form-section-subtitle {
@@ -296,8 +296,13 @@
                 const tbody = document.getElementById('servicios-body');
                 tbody.innerHTML = currentServicios.map(servicio => {
                     const clean = (val) => {
-                        if (!val || val === 'nan' || val === 'None') return '-';
+                        if (!val || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
                         return val;
+                    };
+                    const cap = (val) => {
+                        if (!val || typeof val !== 'string') return val;
+                        const s = val.trim();
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     return `
                     <tr>
@@ -313,7 +318,7 @@
                             <span class="td-main">${clean(servicio.rubro)}</span>
                         </td>
                         <td>
-                            <span class="status-badge ${servicio.estado && (servicio.estado.toLowerCase().includes('activo')) ? 'active' : ''}">${clean(servicio.estado)}</span>
+                            <span class="status-badge ${servicio.estado && (servicio.estado.toLowerCase().includes('activo')) ? 'active' : ''}">${cap(clean(servicio.estado))}</span>
                         </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">

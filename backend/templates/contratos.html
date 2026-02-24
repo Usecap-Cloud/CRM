@@ -281,8 +281,13 @@
                 const tbody = document.getElementById('contratos-body');
                 tbody.innerHTML = currentContratos.map(c => {
                     const clean = (val) => {
-                        if (!val || val === 'nan' || val === 'None') return '-';
+                        if (!val || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
                         return val;
+                    };
+                    const cap = (val) => {
+                        if (!val || typeof val !== 'string') return val;
+                        const s = val.trim();
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     const subtotal = c.subtotal ? `$${parseFloat(c.subtotal).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 'info';
@@ -298,7 +303,7 @@
                             <span class="status-badge ${tipoClass}">${clean(c.tipo_registro)}</span>
                         </td>
                         <td>
-                            <span class="status-badge ${estadoClass}">${clean(c.state || c.estado)}</span>
+                            <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
                         <td style="font-size: 0.8rem;">
                             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">

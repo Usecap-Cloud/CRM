@@ -32,9 +32,14 @@ def normalize_text(value):
     return ' '.join(result)
 
 def normalize_estado(value):
-    """Normaliza estados a Title Case consistente."""
+    """Normaliza estados a Title Case consistente, manejando ruidos de datos."""
     if not value or not isinstance(value, str):
-        return value
+        return "Activo" # Default sensible
+    
+    val_clean = value.strip().lower()
+    if val_clean in ['nan', 'none', '', 'null', 'n/a']:
+        return "Activo" # Asumimos Activo para data ruidosa
+        
     mapping = {
         'activo': 'Activo', 'inactivo': 'Inactivo',
         'finalizado': 'Finalizado', 'firmado': 'Firmado',
@@ -42,7 +47,7 @@ def normalize_estado(value):
         'pendiente': 'Pendiente', 'completado': 'Completado',
         'particular': 'Particular', 'sence': 'SENCE', 'otech': 'OTEC', 'otec': 'OTEC',
     }
-    return mapping.get(value.strip().lower(), value.strip().capitalize())
+    return mapping.get(val_clean, value.strip().capitalize())
 
 
 def normalize_rut_str(value):
@@ -230,9 +235,9 @@ class Cliente(models.Model):
     direccion = models.CharField(max_length=150, blank=True, null=True)
     region = models.CharField(max_length=50, blank=True, null=True)
     comuna = models.CharField(max_length=50, blank=True, null=True)
-    origen_referencia = models.CharField(max_length=50, blank=True, null=True)
     telefono_empresarial = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
-    email_empresa = models.EmailField(blank=True, null=True)
+    email_empresa = models.EmailField(max_length=254, blank=True, null=True)
+    origen_referencia = models.CharField(max_length=50, blank=True, null=True)
     fecha_creacion = models.DateField(blank=True, null=True)
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
