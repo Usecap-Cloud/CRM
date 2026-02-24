@@ -115,6 +115,7 @@ class ContratoSerializer(serializers.ModelSerializer):
     servicios_info = ServicioSerializer(source='servicios', many=True, read_only=True)
     cursos_info = CursoSerializer(source='cursos', many=True, read_only=True)
     proveedores_info = ProveedorSerializer(source='proveedores', many=True, read_only=True)
+    seguimientos_info = SeguimientoSerializer(source='seguimientos', many=True, read_only=True)
 
     class Meta:
         model = Contrato
