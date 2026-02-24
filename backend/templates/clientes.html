@@ -325,7 +325,7 @@
         formData.append('file', file);
         showAlert('Procesando archivo...', 'info');
         try {
-            const response = await fetch('/api/importar-clientes-excel/', {
+            const response = await fetch('/api/importar-universal/', {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCookie('csrftoken') },
                 body: formData

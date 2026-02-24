@@ -325,6 +325,7 @@ class UniversalImportView(APIView):
                 elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
                 elif norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
                 elif norm in ['telefonoempresarial', 'telefnotrabajo', 'fonoempresa']: mapping['telefono_empresarial'] = col
+                elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'mailempresa']: mapping['email_empresa'] = col
                 elif norm in ['nombrefantasia', 'nombrecomercial', 'fantasia']: mapping['nombre_fantasia'] = col
                 elif norm in ['numerocolaboradores', 'colaboradores', 'empleados', 'dotacion']: mapping['numero_colaboradores'] = col
                 elif norm in ['tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
@@ -434,6 +435,7 @@ class UniversalImportView(APIView):
                             cliente_padre=cliente_padre,
                             nombre=clean_val(row.get(mapping.get('nombre_fantasia'))),
                             telefono_empresarial=clean_val(row.get(mapping.get('telefono_empresarial'))),
+                            email_empresa=clean_val(row.get(mapping.get('email_empresa'))),
                             numero_colaboradores=int(row.get(mapping.get('numero_colaboradores'), 0)) if not pd.isna(row.get(mapping.get('numero_colaboradores'), 0)) else 0,
                             cantidad_sucursales=int(row.get(mapping.get('cantidad_sucursales'), 1)) if not pd.isna(row.get(mapping.get('cantidad_sucursales'), 1)) else 1,
                             tipo_convenio=str(row.get(mapping.get('tipo_convenio'), 'particular')).strip().lower()
