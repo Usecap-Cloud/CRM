@@ -366,9 +366,18 @@
                                       (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
                     
                     return `
-                    <tr>
-                        <td style="font-weight: 800; color: #1e90ff;">${clean(c.folio)}</td>
-                        <td style="width: 180px;">
+                    <tr style="background: rgba(30,144,255,0.02); border-top: 1px solid var(--border-color);">
+                        <td colspan="6" style="padding: 10px 15px; border-bottom: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 800; color: #1e90ff; font-size: 0.85rem;">FOLIO: ${clean(c.folio)}</span>
+                                <a href="/api/seguimiento/" class="pill-btn" style="background-color: #1e90ff; color: white; text-decoration: none; text-align: center; font-size: 0.75rem; padding: 6px 14px; font-weight: 700; border-radius: 20px;">Seguimiento</a>
+                            </div>
+                        </td>
+                        <td style="border-bottom: none;"></td>
+                    </tr>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <td style="border-top: none;"></td>
+                        <td style="width: 180px; border-top: none;">
                             <div style="margin-bottom: 5px;">
                                 <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
                             </div>
@@ -377,18 +386,18 @@
                                 <span style="font-size: 0.7rem; color: #888; font-weight: 600;">${clean(c.ejecutivo_nombre)}</span>
                             </div>
                         </td>
-                        <td>
+                        <td style="border-top: none;">
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="font-weight: 600; color: #888;">${clean(c.fecha)}</td>
-                        <td style="font-size: 0.85rem;">
+                        <td style="font-weight: 600; color: #888; border-top: none;">${clean(c.fecha)}</td>
+                        <td style="font-size: 0.85rem; border-top: none;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color:#888;">Neto: ${subtotal}</span>
                                 <span style="color:#888;">IVA: ${iva}</span>
                                 <span style="font-weight: 800; color: #1e90ff; border-top: 1px solid var(--border-color); margin-top: 4px;">Total: ${total}</span>
                             </div>
                         </td>
-                        <td>
+                        <td style="border-top: none;">
                             <div style="max-width: 250px; font-size: 0.75rem; color: #888; line-height: 1.4;">
                                 <strong>Servicios:</strong> ${c.servicios_info && c.servicios_info.length > 0 ? c.servicios_info.map(s => s.nombre).join(', ') : '-'}<br>
                                 <strong>Proveedores:</strong> ${c.proveedores_info && c.proveedores_info.length > 0 ? c.proveedores_info.map(p => p.nombre).join(', ') : '-'}<br>
@@ -396,10 +405,9 @@
                                 <strong style="color: #ff9f43;">Próx. Seguimiento:</strong> ${nextSegDate}
                             </div>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; border-top: none;">
                             <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
                                 <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
-                                <a href="/api/seguimiento/" class="pill-btn info" style="text-decoration: none; text-align: center; font-size: 0.75rem;">Seguimiento</a>
                                 <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
                             </div>
                         </td>
