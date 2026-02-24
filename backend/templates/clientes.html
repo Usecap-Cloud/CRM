@@ -207,6 +207,10 @@
                     <label>Teléfono Empresarial</label>
                     <input type="text" name="telefono_empresarial" id="form-telefono-emp" placeholder="+56 9 ...">
                 </div>
+                <div class="form-group">
+                    <label>Email Empresa (Permanente)</label>
+                    <input type="email" name="email_empresa" id="form-email-emp" placeholder="contacto@empresa.cl">
+                </div>
             </div>
 
             <div class="form-row">
@@ -285,6 +289,7 @@
             document.getElementById('form-estado').value = data.estado || 'activo';
             document.getElementById('form-nombre').value = data.nombre || '';
             document.getElementById('form-telefono-emp').value = data.telefono_empresarial || '';
+            document.getElementById('form-email-emp').value = data.email_empresa || '';
             document.getElementById('form-colaboradores').value = data.numero_colaboradores || 0;
             document.getElementById('form-sucursales').value = data.cantidad_sucursales || 1;
             document.getElementById('form-convenio').value = data.tipo_convenio || 'particular';
@@ -392,6 +397,10 @@
                                     <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Convenio</div>
                                     <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${clean(client.tipo_convenio || 'Particular')}</span>
                                 </div>
+                                <div style="margin-top: 5px;">
+                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Email Corporativo</div>
+                                    <span class="td-main" style="font-size: 0.85rem; color: #1e90ff;">${clean(client.email_empresa)}</span>
+                                </div>
                             </div>
                         </td>
                         <td style="font-size: 0.8rem;">
@@ -495,6 +504,7 @@
             razon_social: form.razon_social.value,
             nombre: form.nombre.value || '',
             telefono_empresarial: form.telefono_empresarial.value || '',
+            email_empresa: form.email_empresa.value || '',
             numero_colaboradores: parseInt(form.numero_colaboradores.value) || 0,
             cantidad_sucursales: parseInt(form.cantidad_sucursales.value) || 1,
             tipo_convenio: form.tipo_convenio.value,

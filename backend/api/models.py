@@ -232,6 +232,7 @@ class Cliente(models.Model):
     comuna = models.CharField(max_length=50, blank=True, null=True)
     origen_referencia = models.CharField(max_length=50, blank=True, null=True)
     telefono_empresarial = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
+    email_empresa = models.EmailField(blank=True, null=True)
     fecha_creacion = models.DateField(blank=True, null=True)
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
@@ -264,6 +265,8 @@ class Cliente(models.Model):
         self.comuna = normalize_text(self.comuna)
         self.origen_referencia = normalize_text(self.origen_referencia)
         self.tipo_convenio = normalize_estado(self.tipo_convenio)
+        if self.email_empresa:
+            self.email_empresa = self.email_empresa.strip().lower()
         if self.telefono_empresarial:
             self.telefono_empresarial = normalize_phone(self.telefono_empresarial)
         super().save(*args, **kwargs)
