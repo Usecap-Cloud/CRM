@@ -366,11 +366,11 @@
                                       (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
                     
                     return `
-                    <tr style="background: rgba(30,144,255,0.02); border-top: 1px solid var(--border-color);">
-                        <td colspan="6" style="padding: 10px 15px; border-bottom: none;">
+                    <tr style="background: rgba(30,144,255,0.02); border-top: 2px solid var(--border-color);">
+                        <td colspan="6" style="padding: 12px 15px; border-bottom: none;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-weight: 800; color: #1e90ff; font-size: 0.85rem;">FOLIO: ${clean(c.folio)}</span>
-                                <a href="/api/seguimiento/" class="pill-btn" style="background-color: #1e90ff; color: white; text-decoration: none; text-align: center; font-size: 0.75rem; padding: 6px 14px; font-weight: 700; border-radius: 20px;">Seguimiento</a>
+                                <span style="font-weight: 800; color: #1e90ff; font-size: 0.85rem; letter-spacing: 0.5px;">CONTRATO FOLIO: ${clean(c.folio)}</span>
+                                <a href="/api/seguimiento/" class="pill-btn" style="background-color: #1e90ff; color: white; text-decoration: none; text-align: center; font-size: 0.75rem; padding: 8px 20px; font-weight: 700; border-radius: 20px; box-shadow: 0 4px 10px rgba(30,144,255,0.2);">Seguimiento</a>
                             </div>
                         </td>
                         <td style="border-bottom: none;"></td>
@@ -389,7 +389,7 @@
                         <td style="border-top: none;">
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="font-weight: 600; color: #888; border-top: none;">${clean(c.fecha)}</td>
+                        <td style="font-weight: 600; color: #888; border-top: none; text-align: center;">${clean(c.fecha)}</td>
                         <td style="font-size: 0.85rem; border-top: none;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color:#888;">Neto: ${subtotal}</span>
