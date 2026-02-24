@@ -361,7 +361,8 @@
                     const iva = fmtCur(c.iva);
                     const total = fmtCur(c.total);
                     
-                    const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 'info';
+                    const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 
+                                     (c.tipo_registro && c.tipo_registro.toLowerCase().includes('propuesta') ? 'warning' : 'info');
                     const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
                                       (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
                     
