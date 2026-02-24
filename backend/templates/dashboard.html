@@ -191,10 +191,14 @@
             <div class="number" id="cursos-count">0</div>
         </div>
         <div class="stat-card contratos">
-            <span class="badge critical">Critico</span>
+            <span class="badge" style="background: rgba(30, 144, 255, 0.1); color: #1e90ff;">En Tiempo</span>
             <div class="icon-box">&#x1F4DD;</div>
-            <div class="label">Contratos por Cerrar</div>
+            <div class="label">Contratos Activos</div>
             <div class="number" id="contratos-count">0</div>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 10px; display: flex; justify-content: space-between;">
+                <span>Contratos: <b id="contratos-count-detail">0</b></span>
+                <span>Propuestas: <b id="propuestas-count-detail">0</b></span>
+            </div>
         </div>
     </div>
 
@@ -276,9 +280,14 @@
 
             animateNumber('empresas-count', data.empresas_activas || 0);
             animateNumber('cursos-count', data.cursos_proceso || 0);
-            animateNumber('contratos-count', data.contratos_cerrar || 0);
+            
+            const totalActivos = (data.contratos_activos || 0) + (data.propuestas_activas || 0);
+            animateNumber('contratos-count', totalActivos);
+            
+            document.getElementById('contratos-count-detail').textContent = data.contratos_activos || 0;
+            document.getElementById('propuestas-count-detail').textContent = data.propuestas_activas || 0;
 
-            renderActivity(data.actividad_reciente || []);
+            renderActivity(data.recent_activity || []);
             renderAgenda(data.agenda || []);
 
             setTimeout(() => {

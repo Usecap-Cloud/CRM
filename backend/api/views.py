@@ -141,11 +141,13 @@ class DashboardStatsView(APIView):
                 "fecha": c.fecha
             })
 
+        from django.db.models import Q
         stats = {
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
             "contratos": Contrato.objects.count(),
-            "contratos_cerrar": Contrato.objects.filter(fecha__gte=today).count(),
+            "contratos_activos": Contrato.objects.filter(tipo_registro='Contrato').exclude(estado__iexact='finalizado').count(),
+            "propuestas_activas": Contrato.objects.filter(tipo_registro='Propuesta').exclude(estado__iexact='finalizado').count(),
             "seguimientos_pendientes": Seguimiento.objects.filter(cerrado=False).count(),
             "recent_activity": recent_activity,
             "agenda": agenda

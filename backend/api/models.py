@@ -428,7 +428,7 @@ class Contrato(models.Model):
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(
         max_length=20,
-        choices=[("activo", "Activo"), ("inactivo", "Inactivo"), ("finalizado", "Finalizado")],
+        choices=[("activo", "Activo"), ("cerrado", "Cerrado"), ("finalizado", "Finalizado")],
         default="activo"
     )
     detalle = models.TextField(blank=True, null=True)
