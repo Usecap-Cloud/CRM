@@ -297,28 +297,32 @@ class UniversalImportView(APIView):
             for col in df.columns:
                 norm = normalize_col(col)
                 
-                # 1. Primary Identification (RUT)
-                if norm == 'rut':
-                    mapping['rut'] = col
-                elif model_type == 'cliente' and norm in ['rutempresa', 'empresarut', 'rut_empresa']:
-                    mapping['rut'] = col
-                elif model_type == 'ejecutivo' and norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']:
-                    mapping['rut'] = col
-                elif model_type == 'coordinador' and norm in ['rutcoordinador', 'coordinadorrut', 'rut_coordinador']:
-                    mapping['rut'] = col
-                elif model_type == 'proveedor' and norm in ['rutproveedor', 'proveedorrut', 'rut_proveedor']:
-                    mapping['rut'] = col
-                elif norm in ['id', 'cedula', 'dni'] and 'rut' not in mapping:
-                    mapping['rut'] = col
+                # 1. Primary Identification (Model-Specific Fields)
+                if model_type == 'cliente':
+                    if norm in ['rutempresa', 'empresarut', 'rut_empresa', 'rut']:
+                        mapping['rut_empresa'] = col
+                elif model_type == 'ejecutivo':
+                    if norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo', 'rut']:
+                        mapping['rut_ejecutivo'] = col
+                elif model_type == 'coordinador':
+                    if norm in ['rutcoordinador', 'coordinadorrut', 'rut_coordinador', 'rut']:
+                        mapping['rut_coordinador'] = col
+                elif model_type == 'proveedor':
+                    if norm in ['rutproveedor', 'proveedorrut', 'rut_proveedor', 'rut']:
+                        mapping['rut_proveedor'] = col
                 
+                # Default generic RUT mapping if specific ones weren't found
+                if 'rut' not in mapping and norm in ['rut', 'id', 'cedula', 'dni']:
+                    m_key = f"rut_{model_type}" if model_type != 'curso' else 'rut'
+                    if model_type == 'cliente': m_key = 'rut_empresa'
+                    mapping[m_key] = col
+
                 # 2. Relationship Logic (Foreign Keys)
                 if model_type == 'cliente':
                     if norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'asignadoa', 'rut_ejecutivo']:
                         mapping['ejecutivo_rut'] = col
                     elif norm in ['rutclientepadre', 'clientepadre', 'padre']:
                         mapping['cliente_padre_rut'] = col
-                    elif norm in ['rutcoordinador', 'coordinadorrut', 'contacto']:
-                        mapping['rut_coordinador'] = col
                 elif model_type == 'coordinador':
                     if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']:
                         mapping['cliente_rut'] = col
@@ -327,30 +331,23 @@ class UniversalImportView(APIView):
                 elif model_type == 'contrato':
                     if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']:
                         mapping['cliente_rut'] = col
-                    elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador']:
+                    elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador']:
                         mapping['coordinador_rut'] = col
-                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo']:
-                        mapping['ejecutivo_rut'] = col
 
-                # 3. Common Fields (Always try to map)
+                # 3. Common Fields
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
                 elif norm in ['nombre', 'nom', 'nombrecompleto']: mapping['nombre'] = col
                 elif norm in ['email', 'correo', 'mail']: mapping['email'] = col
                 elif norm in ['telefono', 'fono', 'celular', 'phone', 'tel']: mapping['telefono'] = col
                 elif norm in ['estado', 'status', 'estadocliente', 'estadoejecutivo']: mapping['estado'] = col
-                elif norm in ['codigo', 'code', 'cod']: mapping['codigo'] = col
-                elif norm in ['rubro', 'especialidad', 'sector', 'sectorindustria']: mapping['sector_industria'] = col
                 elif norm in ['direccion', 'address', 'dir']: mapping['direccion'] = col
                 elif norm in ['region']: mapping['region'] = col
                 elif norm in ['comuna']: mapping['comuna'] = col
-                elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
-                elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
+                elif norm in ['fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
                 elif norm in ['telefonoempresarial', 'telefnotrabajo', 'fonoempresa']: mapping['telefono_empresarial'] = col
-                elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'mailempresa', 'emailempresarial']: mapping['email_empresa'] = col
-                elif norm in ['nombrefantasia', 'nombrecomercial', 'fantasia']: mapping['nombre_fantasia'] = col
+                elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'emailempresarial']: mapping['email_empresa'] = col
                 elif norm in ['numerocolaboradores', 'colaboradores', 'empleados', 'dotacion']: mapping['numero_colaboradores'] = col
                 elif norm in ['tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
-                elif norm in ['cantidadsucursales', 'sucursales']: mapping['cantidad_sucursales'] = col
                 elif norm in ['fechacumpleanos', 'cumpleanos', 'fecha_cumpleanos']: mapping['fecha_cumpleanos'] = col
                 elif norm in ['cargo', 'puesto', 'position']: mapping['cargo'] = col
                 elif norm in ['areadepartamento', 'area', 'departamento']: mapping['area'] = col
@@ -376,11 +373,11 @@ class UniversalImportView(APIView):
 
             # Check for mandatory columns depending on model
             mandatory = []
-            if model_type == 'cliente': mandatory = ['rut']
+            if model_type == 'cliente': mandatory = ['rut_empresa']
             elif model_type == 'curso': mandatory = ['nombre']
-            elif model_type == 'proveedor': mandatory = ['rut']
-            elif model_type == 'ejecutivo': mandatory = ['rut']
-            elif model_type == 'coordinador': mandatory = ['rut', 'cliente_rut']
+            elif model_type == 'proveedor': mandatory = ['rut_proveedor']
+            elif model_type == 'ejecutivo': mandatory = ['rut_ejecutivo']
+            elif model_type == 'coordinador': mandatory = ['rut_coordinador', 'cliente_rut']
             
             missing = [m for m in mandatory if m not in mapping]
             if missing:
@@ -393,7 +390,7 @@ class UniversalImportView(APIView):
             for index, row in df.iterrows():
                 try:
                     if model_type == 'cliente':
-                        rut_raw = clean_val(row.get(mapping.get('rut')))
+                        rut_raw = clean_val(row.get(mapping.get('rut_empresa')))
                         if not rut_raw:
                             continue
                         
@@ -475,7 +472,7 @@ class UniversalImportView(APIView):
                         created_count += 1
                         
                     elif model_type == 'ejecutivo':
-                        rut_raw = clean_val(row.get(mapping.get('rut')))
+                        rut_raw = clean_val(row.get(mapping.get('rut_ejecutivo')))
                         if not rut_raw:
                             continue
                             
@@ -531,7 +528,7 @@ class UniversalImportView(APIView):
                         )
                         created_count += 1
                     elif model_type == 'proveedor':
-                        rut_raw = clean_val(row.get(mapping.get('rut')))
+                        rut_raw = clean_val(row.get(mapping.get('rut_proveedor')))
                         if not rut_raw:
                             continue
                             
@@ -554,7 +551,7 @@ class UniversalImportView(APIView):
                         )
                         created_count += 1
                     elif model_type == 'coordinador':
-                        rut_val = row.get(mapping.get('rut'))
+                        rut_val = row.get(mapping.get('rut_coordinador'))
                         rut_raw = str(rut_val).strip() if rut_val is not None else ""
                         if rut_raw.endswith('.0'): rut_raw = rut_raw[:-2]
                         if not rut_raw or rut_raw == 'nan': 
