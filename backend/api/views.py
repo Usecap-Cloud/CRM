@@ -296,20 +296,43 @@ class UniversalImportView(APIView):
             mapping = {}
             for col in df.columns:
                 norm = normalize_col(col)
-                # Main ID (RUT) logic
-                if norm == 'rut': mapping['rut'] = col
-                elif model_type == 'cliente' and norm in ['rutempresa', 'empresarut']: mapping['rut'] = col
-                elif model_type == 'ejecutivo' and norm in ['rutejecutivo', 'ejecutivorut']: mapping['rut'] = col
-                elif norm in ['id', 'cedula'] and 'rut' not in mapping: mapping['rut'] = col
                 
-                # Relationship logic
+                # 1. Primary Identification (RUT)
+                if norm == 'rut':
+                    mapping['rut'] = col
+                elif model_type == 'cliente' and norm in ['rutempresa', 'empresarut', 'rut_empresa']:
+                    mapping['rut'] = col
+                elif model_type == 'ejecutivo' and norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']:
+                    mapping['rut'] = col
+                elif model_type == 'coordinador' and norm in ['rutcoordinador', 'coordinadorrut', 'rut_coordinador']:
+                    mapping['rut'] = col
+                elif model_type == 'proveedor' and norm in ['rutproveedor', 'proveedorrut', 'rut_proveedor']:
+                    mapping['rut'] = col
+                elif norm in ['id', 'cedula', 'dni'] and 'rut' not in mapping:
+                    mapping['rut'] = col
+                
+                # 2. Relationship Logic (Foreign Keys)
                 if model_type == 'cliente':
-                    if norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'asignadoa']:
+                    if norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'asignadoa', 'rut_ejecutivo']:
                         mapping['ejecutivo_rut'] = col
                     elif norm in ['rutclientepadre', 'clientepadre', 'padre']:
                         mapping['cliente_padre_rut'] = col
-                
-                # Common fields
+                    elif norm in ['rutcoordinador', 'coordinadorrut', 'contacto']:
+                        mapping['rut_coordinador'] = col
+                elif model_type == 'coordinador':
+                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']:
+                        mapping['cliente_rut'] = col
+                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
+                        mapping['ejecutivo_rut'] = col
+                elif model_type == 'contrato':
+                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']:
+                        mapping['cliente_rut'] = col
+                    elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador']:
+                        mapping['coordinador_rut'] = col
+                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo']:
+                        mapping['ejecutivo_rut'] = col
+
+                # 3. Common Fields (Always try to map)
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
                 elif norm in ['nombre', 'nom', 'nombrecompleto']: mapping['nombre'] = col
                 elif norm in ['email', 'correo', 'mail']: mapping['email'] = col
@@ -317,38 +340,30 @@ class UniversalImportView(APIView):
                 elif norm in ['estado', 'status', 'estadocliente', 'estadoejecutivo']: mapping['estado'] = col
                 elif norm in ['codigo', 'code', 'cod']: mapping['codigo'] = col
                 elif norm in ['rubro', 'especialidad', 'sector', 'sectorindustria']: mapping['sector_industria'] = col
-                elif norm in ['contacto', 'personacontacto', 'nombrecontacto']: mapping['nombre_contacto'] = col
                 elif norm in ['direccion', 'address', 'dir']: mapping['direccion'] = col
                 elif norm in ['region']: mapping['region'] = col
                 elif norm in ['comuna']: mapping['comuna'] = col
                 elif norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
                 elif norm in ['fechainscripcion', 'fechacreacion', 'inscripcion', 'creacion']: mapping['fecha_creacion'] = col
-                elif norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
                 elif norm in ['telefonoempresarial', 'telefnotrabajo', 'fonoempresa']: mapping['telefono_empresarial'] = col
                 elif norm in ['email_empresa', 'emailempresa', 'emailcorporativo', 'correoempresa', 'mailempresa', 'emailempresarial']: mapping['email_empresa'] = col
                 elif norm in ['nombrefantasia', 'nombrecomercial', 'fantasia']: mapping['nombre_fantasia'] = col
                 elif norm in ['numerocolaboradores', 'colaboradores', 'empleados', 'dotacion']: mapping['numero_colaboradores'] = col
                 elif norm in ['tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
                 elif norm in ['cantidadsucursales', 'sucursales']: mapping['cantidad_sucursales'] = col
-                elif norm in ['rutcoordinador', 'coordinadorrut', 'contacto']: mapping['rut_coordinador'] = col
-                
-                # Contract specific mapping
-                elif model_type == 'contrato' and norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
-                elif model_type == 'contrato' and norm in ['fecharecepcion', 'recepcion']: mapping['fecha_recepcion'] = col
-                elif model_type == 'contrato' and norm in ['fechaemision', 'emision']: mapping['fecha_emision'] = col
-                elif (model_type == 'contrato' or model_type == 'coordinador') and norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']: mapping['cliente_rut'] = col
-                elif model_type == 'contrato' and norm in ['rutcoordinador', 'coordinadorrut', 'coordinador']: mapping['coordinador_rut'] = col
-                elif model_type == 'contrato' and norm in ['fechainicio', 'iniciocontrato', 'fecinicio']: mapping['fecha_inicio'] = col
-                elif model_type == 'contrato' and norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
-                elif model_type == 'contrato' and norm in ['sectorindustria', 'sector']: mapping['sector_industria'] = col
-                elif model_type == 'contrato' and norm in ['origenreferencia', 'origen']: mapping['origen_referencia'] = col
-                elif norm in ['areadepartamento', 'area', 'departamento']: mapping['area'] = col
-                elif norm in ['especialidadtipoclientes', 'especialidad']: mapping['especialidad'] = col
-                elif norm in ['observaciones', 'obs', 'comentarios']: mapping['observaciones'] = col
-                elif norm in ['rol', 'idrol', 'rolnombre']: mapping['rol'] = col
-                elif norm in ['rutcoordinador', 'rut_coordinador']: mapping['rut'] = col
                 elif norm in ['fechacumpleanos', 'cumpleanos', 'fecha_cumpleanos']: mapping['fecha_cumpleanos'] = col
                 elif norm in ['cargo', 'puesto', 'position']: mapping['cargo'] = col
+                elif norm in ['areadepartamento', 'area', 'departamento']: mapping['area'] = col
+                elif norm in ['observaciones', 'obs', 'comentarios']: mapping['observaciones'] = col
+                elif norm in ['rol', 'idrol', 'rolnombre']: mapping['rol'] = col
+
+                # 4. Model-Specific Fields
+                if model_type == 'contrato':
+                    if norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
+                    elif norm in ['fecharecepcion', 'recepcion']: mapping['fecha_recepcion'] = col
+                    elif norm in ['fechaemision', 'emision']: mapping['fecha_emision'] = col
+                    elif norm in ['fechainicio', 'iniciocontrato', 'fecinicio']: mapping['fecha_inicio'] = col
+                    elif norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
 
             created_count = 0
             errors = []
