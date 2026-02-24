@@ -148,8 +148,8 @@
                     <th>Encargado</th>
                     <th>Cargo</th>
                     <th>Cliente</th>
-                    <th></th>
                     <th>Contacto</th>
+                    <th style="min-width: 120px;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="data-body"></tbody>
@@ -332,6 +332,10 @@
                                 <span class="td-main">${clean(co.cliente_nombre)}</span>
                             </div>
                             <span class="td-sub" style="font-size: 0.75rem;">${clean(co.ejecutivo_nombre)}</span>
+                        </td>
+                        <td>
+                            <span class="td-main" style="font-size: 0.85rem; display: block;">${clean(co.email)}</span>
+                            <span class="td-sub">${clean(co.telefono)}</span>
                         </td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
