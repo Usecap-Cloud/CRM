@@ -419,6 +419,7 @@ class Contrato(models.Model):
     fecha_emision = models.DateField(blank=True, null=True)
     fecha_inicio = models.DateField(blank=True, null=True)
     fecha_vencimiento = models.DateField(blank=True, null=True)
+    
     # Identificación y Finanzas
     folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -434,8 +435,6 @@ class Contrato(models.Model):
     
     # Trazabilidad
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
