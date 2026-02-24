@@ -186,16 +186,9 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Fecha de Inicio</label>
-                    <input type="date" name="fecha_inicio" id="form-fecha_inicio">
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" id="form-fecha">
                 </div>
-                <div class="form-group">
-                    <label>Fecha de Vencimiento</label>
-                    <input type="date" name="fecha_vencimiento" id="form-fecha_vencimiento">
-                </div>
-            </div>
-
-            <div class="form-row">
                 <div class="form-group">
                     <label>Estado Inicial</label>
                     <select name="estado" id="form-estado" required>
@@ -287,8 +280,7 @@
             document.getElementById('contrato-id').value = data.id;
             document.getElementById('empresa-select').value = data.cliente;
             document.getElementById('form-tipo_registro').value = data.tipo_registro || 'Contrato';
-            document.getElementById('form-fecha_inicio').value = data.fecha_inicio;
-            document.getElementById('form-fecha_vencimiento').value = data.fecha_vencimiento || '';
+            document.getElementById('form-fecha').value = data.fecha || '';
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-subtotal').value = data.subtotal;
             document.getElementById('coordinador-select').value = data.coordinador || '';
@@ -381,13 +373,7 @@
                         <td>
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="font-size: 0.8rem; width: 180px;">
-                            <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;">
-                                <span style="color: #888; font-weight: 700;">Recepción:</span> <span>${clean(c.fecha_recepcion)}</span>
-                                <span style="color: #888; font-weight: 700;">Inicio:</span> <span style="font-weight: 600;">${clean(c.fecha_inicio)}</span>
-                                <span style="font-weight: 700; color: #ef4444;">Vencimiento:</span> <span style="font-weight: 600;">${clean(c.fecha_vencimiento)}</span>
-                            </div>
-                        </td>
+                        <td style="font-weight: 600; color: #888;">${clean(c.fecha)}</td>
                         <td style="font-size: 0.85rem;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color:#888;">Neto: ${subtotal}</span>
@@ -509,8 +495,7 @@
             cliente: parseInt(form.empresa.value),
             tipo_registro: form.tipo_registro.value,
             empresa: form.empresa.options[form.empresa.selectedIndex].text,
-            fecha_inicio: form.fecha_inicio.value,
-            fecha_vencimiento: form.fecha_vencimiento.value || null,
+            fecha: form.fecha.value || null,
             estado: form.estado.value,
             subtotal: parseFloat(form.subtotal.value),
             coordinador: form.encargado.value ? parseInt(form.encargado.value) : null,
