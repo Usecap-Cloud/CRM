@@ -148,14 +148,48 @@
 
     .fc-col-header-cell-cushion {
         color: var(--text-color) !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        text-transform: capitalize;
     }
 
     .fc-daygrid-day-number {
         color: var(--text-color) !important;
+        padding: 8px !important;
+        font-weight: 500;
+        text-decoration: none !important;
     }
 
     .fc-day-today {
         background: rgba(30, 144, 255, 0.1) !important;
+    }
+
+    /* Executive Selector styled like a button */
+    .pill-selector {
+        background: #1e90ff !important;
+        background: linear-gradient(135deg, #1e90ff 0%, #0072ff 100%) !important;
+        border: none !important;
+        color: white !important;
+        padding: 12px 24px !important;
+        border-radius: 30px !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        cursor: pointer !important;
+        outline: none !important;
+        appearance: none;
+        -webkit-appearance: none;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .pill-selector:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+    }
+    
+    .fc-col-header {
+        background: rgba(255, 255, 255, 0.03) !important;
     }
 </style>
 {% endblock %}
@@ -169,9 +203,8 @@
                 
                 <div style="display: flex; gap: 15px; align-items: center; justify-content: center;">
                     {% if user.is_superuser or user.ejecutivo.rol.nombre == 'Administrador' or user.ejecutivo.rol.nombre == 'Gerencia' %}
-                    <div class="filter-group" style="display: flex; align-items: center; gap: 10px;">
-                        <label style="font-size: 0.85rem; color: #888;">Ver Ejecutivo:</label>
-                        <select id="ejecutivo-filter" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; outline: none; font-size: 0.85rem;">
+                    <div class="filter-group">
+                        <select id="ejecutivo-filter" class="pill-selector">
                             <option value="">Todos los Ejecutivos</option>
                         </select>
                     </div>
