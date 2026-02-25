@@ -565,10 +565,12 @@
             </a>
             {% endif %}
 
+            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
             <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F514;</span> Seguimiento
                 <span id="seguimiento-badge" class="nav-badge" style="display: none;">0</span>
             </a>
+            {% endif %}
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
             <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">

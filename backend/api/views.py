@@ -111,6 +111,8 @@ class SeguimientoViewSet(AuditMixin, viewsets.ModelViewSet):
             ej = getattr(user, 'ejecutivo', None)
             if ej:
                 is_admin = ej.rol.nombre in ['Administrador', 'Gerencia']
+                if ej.rol.nombre == 'Coordinador Académico':
+                    return Seguimiento.objects.none()
         
         queryset = Seguimiento.objects.all()
         
@@ -1009,7 +1011,7 @@ def seguimiento_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
             return redirect('dashboard')
     return render(request, 'seguimiento.html')
 
