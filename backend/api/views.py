@@ -384,16 +384,26 @@ class UniversalImportView(APIView):
                 elif model_type == 'seguimiento':
                     if norm in ['foliocontrato', 'folio', 'contrato']:
                         mapping['contrato_folio'] = col
-                    elif norm in ['fecha', 'fechaseguimiento', 'fecharegistro']:
+                    elif norm in ['fecha', 'fechasoluicitud', 'fecharegistro', 'fecha_solicitud', 'fechasolicitud']:
                         mapping['fecha'] = col
-                    elif norm in ['tipo', 'accion', 'tipoaccion']:
+                    elif norm in ['tipo', 'tipo_contrato', 'tipopropuesta']:
                         mapping['tipo'] = col
-                    elif norm in ['requerimiento', 'solicitud', 'detalle']:
+                    elif norm in ['requerimiento', 'solicitud', 'detalle', 'requirimiento']:
                         mapping['requerimiento'] = col
-                    elif norm in ['estado', 'status']:
+                    elif norm in ['estado', 'status', 'estadosolicitud', 'estado_solicitud']:
                         mapping['estado'] = col
-                    elif norm in ['proxima_fecha', 'proximo_seguimiento', 'fecha_seguimiento']:
+                    elif norm in ['proxima_fecha', 'proximo_seguimiento', 'fecha_seguimiento', 'fechaseguimiento']:
                         mapping['fecha_seguimiento'] = col
+                    elif norm in ['fechaenvio', 'fecha_envio', 'envio']:
+                        mapping['fecha_envio'] = col
+                    elif norm in ['respuesta', 'respuestacliente']:
+                        mapping['respuesta'] = col
+                    elif norm in ['accion', 'accionrealizada', 'tipoacccion']:
+                        mapping['accion'] = col
+                    elif norm in ['cerrado', 'cerradosino', 'closed', 'siono']:
+                        mapping['cerrado'] = col
+                    elif norm in ['respuestaseguimiento', 'respuesta_seguimiento', 'notasseguimiento']:
+                        mapping['respuesta_seguimiento'] = col
 
                 # 3. Common Fields
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
@@ -779,8 +789,17 @@ class UniversalImportView(APIView):
                             try: return pd.to_datetime(val, dayfirst=True).date()
                             except: return None
 
+                        # Parse si/no/true/false/1/0 → boolean
+                        def parse_bool(val):
+                            if val is None: return False
+                            s = str(val).strip().lower()
+                            return s in ['si', 'sí', 'true', '1', 'yes', 'y', 's']
+
                         fecha_seg = parse_date(row.get(mapping.get('fecha')))
                         prox_fecha = parse_date(row.get(mapping.get('fecha_seguimiento')))
+                        fecha_envio_val = parse_date(row.get(mapping.get('fecha_envio')))
+                        cerrado_raw = row.get(mapping.get('cerrado')) if mapping.get('cerrado') else None
+                        cerrado_val = parse_bool(cerrado_raw)
 
                         Seguimiento.objects.create(
                             contrato=contrato,
@@ -790,12 +809,15 @@ class UniversalImportView(APIView):
                             tipo=clean_val(row.get(mapping.get('tipo')), 'General'),
                             fecha=fecha_seg or datetime.date.today(),
                             requerimiento=clean_val(row.get(mapping.get('requerimiento'))),
+                            fecha_envio=fecha_envio_val,
+                            respuesta=clean_val(row.get(mapping.get('respuesta'))),
                             estado=clean_val(row.get(mapping.get('estado')), 'Pendiente'),
                             fecha_seguimiento=prox_fecha,
-                            cerrado=False
+                            accion=clean_val(row.get(mapping.get('accion')), 'Sin Acción'),
+                            respuesta_seguimiento=clean_val(row.get(mapping.get('respuesta_seguimiento'))),
+                            cerrado=cerrado_val
                         )
                         created_count += 1
-                        # Success case for other models moved created_count here
                     elif model_type in ['cliente', 'ejecutivo', 'proveedor', 'coordinador']:
                          # These already have create logic above, they increment their own created_count
                          # Wait, I should move created_count inside each block to be safe.
