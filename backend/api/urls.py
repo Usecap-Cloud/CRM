@@ -19,7 +19,7 @@ router.register(r'contratos-cursos', ContratoCursoViewSet)
 router.register(r'contratos-proveedores', ContratoProveedorViewSet)
 router.register(r'seguimientos', SeguimientoViewSet, basename='seguimiento')
 router.register(r'import-history', ImportHistoryViewSet)
-router.register(r'audit-logs', AuditLogViewSet)
+router.register(r'audit-logs', AuditLogViewSet, basename='auditlog')
 
 from .views import (
     DashboardStatsView, dashboard_view, PortfolioAPIView, portfolio_view, 
