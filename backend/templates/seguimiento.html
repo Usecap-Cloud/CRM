@@ -162,11 +162,22 @@
 
 {% block content %}
 <div class="seguimiento-container">
-    <!-- Wrap calendar and its title to center them together -->
     <div style="display: flex; flex-direction: column; gap: 20px;">
         <div class="page-header" style="text-align: center; margin-bottom: 0;">
-            <div class="header-title">
-                <h1 style="display: block; width: 100%;">Centro de Seguimiento</h1>
+            <div class="header-title" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                <h1 style="margin-bottom: 10px;">Centro de Seguimiento</h1>
+                
+                <div style="display: flex; gap: 15px; align-items: center; justify-content: center;">
+                    {% if user.is_superuser or user.ejecutivo.rol.nombre == 'Administrador' or user.ejecutivo.rol.nombre == 'Gerencia' %}
+                    <div class="filter-group" style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-size: 0.85rem; color: #888;">Ver Ejecutivo:</label>
+                        <select id="ejecutivo-filter" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; outline: none; font-size: 0.85rem;">
+                            <option value="">Todos los Ejecutivos</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    <button class="pill-btn primary" onclick="openNewSegModal()"><span>&#x002B;</span> Nueva Acción</button>
+                </div>
             </div>
         </div>
 
@@ -180,95 +191,183 @@
             <span>&#x26A0;</span> Alertas Próximas
         </div>
         <div id="alerts-list">
-            <div style="color: #888; text-align: center; padding: 20px;">No hay información disponible</div>
+            <div style="color: #888; text-align: center; padding: 20px;">Cargando alertas...</div>
         </div>
+    </div>
+</div>
+
+<!-- Simple Modal for New Seguimiento -->
+<div id="new-seg-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; width: 500px; padding: 30px; position: relative;">
+        <button onclick="closeModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        <h2 style="margin-bottom: 25px;">Registrar Acción</h2>
+        
+        <form id="new-seg-form" onsubmit="saveNewSeguimiento(event)">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block;">Contrato (Folio)</label>
+                    <select id="modal-contrato" required style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 10px;">
+                        <option value="">Seleccionar Contrato...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block;">Tipo / Acción</label>
+                    <input type="text" id="modal-tipo" placeholder="Llamada, Visita, Correo..." required style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 10px;">
+                </div>
+                <div class="form-row" style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block;">Fecha Registro</label>
+                        <input type="date" id="modal-fecha" required style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 10px;">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label style="font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block;">Próximo Seguimiento</label>
+                        <input type="date" id="modal-fecha-seguimiento" style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 10px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block;">Solicitud / Requerimiento</label>
+                    <textarea id="modal-req" style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 10px; height: 80px;"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="closeModal()" class="pill-btn" style="background: rgba(255,255,255,0.05);">Cancelar</button>
+                    <button type="submit" class="pill-btn primary">Guardar Acción</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    let calendar;
+    let allContratos = [];
+
     document.addEventListener('DOMContentLoaded', async function () {
         const calendarEl = document.getElementById('calendar');
-
-        // 1. Load Data
-        const [seguimientos, contratos] = await Promise.all([
-            fetch('/api/seguimientos/').then(r => r.json()),
-            fetch('/api/contratos/').then(r => r.json())
-        ]);
-
-        // 2. Prepare Calendar Events
-        const events = [];
-        const todayStr = new Date().toISOString().split('T')[0];
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-        // Add Seguimientos (actions)
-        seguimientos.forEach(s => {
-            // Base Color Logic
-            let eventColor = '#1e90ff'; // Blue (Future)
-            
-            if (s.cerrado) {
-                eventColor = '#444'; // Gray (Closed)
-            } else {
-                const eventDate = s.fecha_seguimiento || s.fecha;
-                if (eventDate < todayStr) {
-                    eventColor = '#ff6b6b'; // Red (Overdue)
-                } else if (eventDate === todayStr || eventDate === tomorrowStr) {
-                    eventColor = '#ff9f43'; // Yellow/Orange (Today/Tomorrow)
-                }
-            }
-
-            events.push({
-                title: 'Acción: ' + s.tipo,
-                start: s.fecha,
-                color: s.cerrado ? '#444' : eventColor,
-                extendedProps: { type: 'seguimiento', id: s.id }
-            });
-
-            if (s.fecha_seguimiento) {
-                events.push({
-                    title: 'Prox Acción: ' + s.tipo,
-                    start: s.fecha_seguimiento,
-                    color: s.cerrado ? '#444' : eventColor,
-                    extendedProps: { type: 'proxima', id: s.id }
+        
+        // Load filter options if allowed
+        const filterEl = document.getElementById('ejecutivo-filter');
+        if (filterEl) {
+            try {
+                const res = await fetch('/api/ejecutivos/');
+                const data = await res.json();
+                const items = Array.isArray(data) ? data : (data.results || []);
+                items.forEach(ej => {
+                    const opt = document.createElement('option');
+                    opt.value = ej.id;
+                    opt.textContent = ej.nombre;
+                    filterEl.appendChild(opt);
                 });
-            }
-        });
+                
+                filterEl.addEventListener('change', () => loadCalendarData());
+            } catch (e) { console.error('Error loading filter options'); }
+        }
 
-        // Add Contract closures/receptions
-        contratos.forEach(c => {
-            if (c.fecha_emision) {
-                events.push({
-                    title: 'Emisión Contrato: ' + c.empresa_nombre,
-                    start: c.fecha_emision,
-                    color: '#059669',
-                    extendedProps: { type: 'contrato_emision', id: c.id }
-                });
-            }
-        });
-        // 3. Initialize Calendar
-        const calendar = new FullCalendar.Calendar(calendarEl, {
+        // Initialize Calendar once
+        calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'es',
             headerToolbar: {
-                left: 'prev,next,today',
+                left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek'
             },
             titleFormat: { year: 'numeric', month: 'long' },
             themeSystem: 'standard',
-            events: events,
+            height: 'auto',
+            events: [],
             eventClick: function (info) {
                 console.log('Event Clicked:', info.event.extendedProps);
             }
         });
         calendar.render();
 
-        // Title fix removed to prevent accumulation bug
-        // calendar.on('datesSet', fixTitle);
+        // Initial Data Load
+        loadCalendarData();
+        loadAllContratos();
+    });
 
-        // 4. Populate Alerts
+    async function loadAllContratos() {
+        try {
+            const res = await fetch('/api/contratos/');
+            allContratos = await res.json();
+            
+            const modalSelect = document.getElementById('modal-contrato');
+            allContratos.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.folio} - ${c.empresa_nombre}`;
+                modalSelect.appendChild(opt);
+            });
+        } catch (e) { console.error('Error loading contracts'); }
+    }
+
+    async function loadCalendarData() {
+        try {
+            const filterEl = document.getElementById('ejecutivo-filter');
+            const ejecutivoId = filterEl ? filterEl.value : '';
+            const url = `/api/seguimientos/${ejecutivoId ? '?ejecutivo=' + ejecutivoId : ''}`;
+
+            const [seguimientos, contratos] = await Promise.all([
+                fetch(url).then(r => r.json()),
+                fetch('/api/contratos/').then(r => r.json())
+            ]);
+
+            const events = [];
+            const todayStr = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            seguimientos.forEach(s => {
+                let eventColor = '#1e90ff';
+                if (s.cerrado) {
+                    eventColor = '#444';
+                } else {
+                    const eventDate = s.fecha_seguimiento || s.fecha;
+                    if (eventDate < todayStr) eventColor = '#ff6b6b';
+                    else if (eventDate === todayStr || eventDate === tomorrowStr) eventColor = '#ff9f43';
+                }
+
+                events.push({
+                    title: 'Acción: ' + s.tipo,
+                    start: s.fecha,
+                    color: s.cerrado ? '#444' : eventColor,
+                    extendedProps: { type: 'seguimiento', id: s.id }
+                });
+
+                if (s.fecha_seguimiento) {
+                    events.push({
+                        title: 'Prox Acción: ' + s.tipo,
+                        start: s.fecha_seguimiento,
+                        color: s.cerrado ? '#444' : eventColor,
+                        extendedProps: { type: 'proxima', id: s.id }
+                    });
+                }
+            });
+
+            // If not filtering by a specific executive, show emittances
+            if (!ejecutivoId) {
+                contratos.forEach(c => {
+                    if (c.fecha_emision) {
+                        events.push({
+                            title: 'Emisión Contrato: ' + c.empresa_nombre,
+                            start: c.fecha_emision,
+                            color: '#059669',
+                            extendedProps: { type: 'contrato_emision', id: c.id }
+                        });
+                    }
+                });
+            }
+
+            calendar.removeAllEvents();
+            calendar.addEventSource(events);
+            
+            updateAlerts(seguimientos, contratos);
+        } catch (e) { console.error('Error loading calendar data'); }
+    }
+
+    function updateAlerts(seguimientos, contratos) {
         const alertsList = document.getElementById('alerts-list');
         alertsList.innerHTML = '';
 
@@ -277,13 +376,12 @@
         nextWeek.setDate(today.getDate() + 7);
 
         const imminentActions = seguimientos.filter(s => {
+            if (!s.fecha_seguimiento || s.cerrado) return false;
             const d = new Date(s.fecha_seguimiento);
-            return !s.cerrado && s.fecha_seguimiento && d >= today && d <= nextWeek;
+            return d >= today && d <= nextWeek;
         });
 
-        const imminentClosures = contratos.filter(c => {
-            return c.estado === 'Por Cerrar';
-        });
+        const imminentClosures = contratos.filter(c => c.estado && (c.estado.toLowerCase().includes('por cerrar') || c.estado.toLowerCase().includes('activo')));
 
         if (imminentActions.length === 0 && imminentClosures.length === 0) {
             alertsList.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No hay alertas pendientes para los próximos 7 días</div>';
@@ -294,22 +392,60 @@
             card.className = 'alert-card urgent';
             card.innerHTML = `
                 <div class="alert-date">Próxima acción: ${s.fecha_seguimiento}</div>
-                <div class="alert-desc">${s.tipo} - Contrato #${s.contrato}</div>
+                <div class="alert-desc">${s.tipo} - ${s.empresa_nombre}</div>
                 <a href="/api/contratos-page/" class="alert-link">Ver Contrato</a>
             `;
             alertsList.appendChild(card);
         });
+    }
 
-        imminentClosures.forEach(c => {
-            const card = document.createElement('div');
-            card.className = 'alert-card closure';
-            card.innerHTML = `
-                <div class="alert-date">Estado: Por Cerrar</div>
-                <div class="alert-desc">Urgente: ${c.empresa_nombre}</div>
-                <a href="/api/contratos-page/" class="alert-link">Gestionar Cierre</a>
-            `;
-            alertsList.appendChild(card);
-        });
-    });
+    function openNewSegModal() {
+        document.getElementById('new-seg-modal').style.display = 'flex';
+        document.getElementById('modal-fecha').value = new Date().toISOString().split('T')[0];
+    }
+
+    function closeModal() {
+        document.getElementById('new-seg-modal').style.display = 'none';
+        document.getElementById('new-seg-form').reset();
+    }
+
+    async function saveNewSeguimiento(e) {
+        e.preventDefault();
+        const contrattoId = document.getElementById('modal-contrato').value;
+        const contrato = allContratos.find(c => c.id == contrattoId);
+        
+        const data = {
+            contrato: contrattoId,
+            tipo: document.getElementById('modal-tipo').value,
+            fecha: document.getElementById('modal-fecha').value,
+            fecha_seguimiento: document.getElementById('modal-fecha-seguimiento').value || null,
+            requerimiento: document.getElementById('modal-req').value,
+            estado: 'Pendiente',
+            cerrado: false,
+            ejecutivo: contrato ? contrato.ejecutivo : null,
+            coordinador: contrato ? contrato.coordinador : null,
+            cliente: contrato ? contrato.cliente : null
+        };
+
+        try {
+            const res = await fetch('/api/seguimientos/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeModal();
+                loadCalendarData();
+                Swal.fire('Guardado', 'La acción ha sido registrada', 'success');
+            } else {
+                const err = await res.json();
+                Swal.fire('Error', JSON.stringify(err), 'error');
+            }
+        } catch (e) { Swal.fire('Error', 'Error de conexión', 'error'); }
+    }
 </script>
 {% endblock %}

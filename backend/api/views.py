@@ -99,8 +99,35 @@ class ContratoProveedorViewSet(AuditMixin, viewsets.ModelViewSet):
     serializer_class = ContratoProveedorSerializer
 
 class SeguimientoViewSet(AuditMixin, viewsets.ModelViewSet):
-    queryset = Seguimiento.objects.all()
     serializer_class = SeguimientoSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return Seguimiento.objects.none()
+            
+        is_admin = user.is_superuser
+        if not is_admin:
+            ej = getattr(user, 'ejecutivo', None)
+            if ej:
+                is_admin = ej.rol.nombre in ['Administrador', 'Gerencia']
+        
+        queryset = Seguimiento.objects.all()
+        
+        if is_admin:
+            # Permitir filtrar por ejecutivo específico si se pasa por parámetro
+            ejecutivo_id = self.request.query_params.get('ejecutivo')
+            if ejecutivo_id:
+                queryset = queryset.filter(ejecutivo_id=ejecutivo_id)
+        else:
+            # Ejecutivos normales solo ven lo suyo
+            ej = getattr(user, 'ejecutivo', None)
+            if ej:
+                queryset = queryset.filter(ejecutivo=ej)
+            else:
+                queryset = Seguimiento.objects.none()
+                
+        return queryset
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AuditLog.objects.all().order_by('-fecha')
@@ -336,6 +363,21 @@ class UniversalImportView(APIView):
                         mapping['cliente_rut'] = col
                     elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador']:
                         mapping['coordinador_rut'] = col
+                    elif norm in ['folio', 'foliocontrato', 'numerocontrato']:
+                        mapping['folio'] = col
+                elif model_type == 'seguimiento':
+                    if norm in ['foliocontrato', 'folio', 'contrato']:
+                        mapping['contrato_folio'] = col
+                    elif norm in ['fecha', 'fechaseguimiento', 'fecharegistro']:
+                        mapping['fecha'] = col
+                    elif norm in ['tipo', 'accion', 'tipoaccion']:
+                        mapping['tipo'] = col
+                    elif norm in ['requerimiento', 'solicitud', 'detalle']:
+                        mapping['requerimiento'] = col
+                    elif norm in ['estado', 'status']:
+                        mapping['estado'] = col
+                    elif norm in ['proxima_fecha', 'proximo_seguimiento', 'fecha_seguimiento']:
+                        mapping['fecha_seguimiento'] = col
 
                 # 3. Common Fields
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
@@ -628,29 +670,27 @@ class UniversalImportView(APIView):
                         )
                         created_count += 1
                     elif model_type == 'contrato':
+                        folio_val = clean_val(row.get(mapping.get('folio')))
+                        contrato = None
+                        if folio_val:
+                            contrato = Contrato.objects.filter(folio=folio_val).first()
+
                         rut_cli_raw = clean_val(row.get(mapping.get('cliente_rut')))
                         rut_cli = format_rut_chile(rut_cli_raw)
                         
                         cliente = Cliente.objects.filter(rut_empresa=rut_cli).first()
                         if not cliente:
-                            # Try search by clean RUT
                             clean_cli = rut_cli_raw.upper().replace(".","").replace("-","").strip()
                             for c in Cliente.objects.all():
                                 if c.rut_empresa.replace(".","").replace("-","").upper() == clean_cli:
                                     cliente = c
                                     break
-                            
-                        if not cliente:
-                            # Try by razon social if RUT mapping failed or not found
-                            rs_val = clean_val(row.get(mapping.get('razon_social')))
-                            if rs_val:
-                                cliente = Cliente.objects.filter(razon_social__icontains=rs_val).first()
-                        
-                        if not cliente:
-                            errors.append(f"Fila {index + 2}: Cliente no encontrado ({rut_cli_raw})")
+                                    
+                        if not cliente and not contrato:
+                            errors.append(f"Fila {index + 2}: Cliente no encontrado ({rut_cli_raw}) y folio inexistente")
                             continue
 
-                        ejecutivo = cliente.ejecutivo # Default to client's executive
+                        ejecutivo = cliente.ejecutivo if cliente else (contrato.ejecutivo if contrato else None)
                         ej_rut = clean_val(row.get(mapping.get('ejecutivo_rut')))
                         if ej_rut:
                             found_ej = Ejecutivo.objects.filter(rut_ejecutivo=ej_rut).first()
@@ -679,19 +719,64 @@ class UniversalImportView(APIView):
                         except:
                             subtotal = 0
 
-                        Contrato.objects.create(
-                            tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Servicio'),
-                            empresa=cliente.razon_social,
-                            fecha_recepcion=fecha_rec,
-                            fecha_emision=fecha_emi,
-                            fecha_inicio=fecha_ini,
-                            subtotal=subtotal,
-                            estado=clean_val(row.get(mapping.get('estado')), 'Por Cerrar'),
-                            detalle=clean_val(row.get(mapping.get('detalle'))),
-                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
-                            cliente=cliente,
-                            ejecutivo=ejecutivo,
-                            coordinador=coordinador
+                        if contrato:
+                            # Update existing contract
+                            contrato.tipo_registro = clean_val(row.get(mapping.get('tipo_registro')), contrato.tipo_registro)
+                            contrato.fecha_recepcion = fecha_rec or contrato.fecha_recepcion
+                            contrato.fecha_emision = fecha_emi or contrato.fecha_emision
+                            contrato.fecha_inicio = fecha_ini or contrato.fecha_inicio
+                            contrato.subtotal = subtotal if subtotal > 0 else contrato.subtotal
+                            contrato.estado = clean_val(row.get(mapping.get('estado')), contrato.estado)
+                            contrato.save()
+                        else:
+                            # Create new
+                            Contrato.objects.create(
+                                folio=folio_val,
+                                tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Servicio'),
+                                empresa=cliente.razon_social,
+                                fecha_recepcion=fecha_rec,
+                                fecha_emision=fecha_emi,
+                                fecha_inicio=fecha_ini,
+                                subtotal=subtotal,
+                                estado=clean_val(row.get(mapping.get('estado')), 'Por Cerrar'),
+                                detalle=clean_val(row.get(mapping.get('detalle'))),
+                                observaciones=clean_val(row.get(mapping.get('observaciones'))),
+                                cliente=cliente,
+                                ejecutivo=ejecutivo,
+                                coordinador=coordinador
+                            )
+                        created_count += 1
+                    elif model_type == 'seguimiento':
+                        folio_val = clean_val(row.get(mapping.get('contrato_folio')))
+                        if not folio_val:
+                            errors.append(f"Fila {index + 2}: Folio de contrato obligatorio para seguimiento")
+                            continue
+                        
+                        contrato = Contrato.objects.filter(folio=folio_val).first()
+                        if not contrato:
+                            errors.append(f"Fila {index + 2}: Contrato con folio {folio_val} no encontrado")
+                            continue
+
+                        # Parse dates
+                        def parse_date(val):
+                            if pd.isna(val) or not val: return None
+                            try: return pd.to_datetime(val, dayfirst=True).date()
+                            except: return None
+
+                        fecha_seg = parse_date(row.get(mapping.get('fecha')))
+                        prox_fecha = parse_date(row.get(mapping.get('fecha_seguimiento')))
+
+                        Seguimiento.objects.create(
+                            contrato=contrato,
+                            cliente=contrato.cliente,
+                            ejecutivo=contrato.ejecutivo,
+                            coordinador=contrato.coordinador or Coordinador.objects.filter(cliente=contrato.cliente).first(),
+                            tipo=clean_val(row.get(mapping.get('tipo')), 'General'),
+                            fecha=fecha_seg or datetime.date.today(),
+                            requerimiento=clean_val(row.get(mapping.get('requerimiento'))),
+                            estado=clean_val(row.get(mapping.get('estado')), 'Pendiente'),
+                            fecha_seguimiento=prox_fecha,
+                            cerrado=False
                         )
                         created_count += 1
                         # Success case for other models moved created_count here
