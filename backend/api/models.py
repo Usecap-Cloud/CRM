@@ -331,7 +331,6 @@ class Servicio(models.Model):
     )
     rubro = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
-    proveedor = models.ForeignKey('Proveedor', on_delete=models.SET_NULL, blank=True, null=True, related_name='servicios')
 
     def save(self, *args, **kwargs):
         self.nombre = normalize_text(self.nombre)

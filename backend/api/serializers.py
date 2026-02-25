@@ -120,7 +120,11 @@ class ContratoSerializer(serializers.ModelSerializer):
     ejecutivo_nombre = serializers.ReadOnlyField(source='ejecutivo.nombre')
     coordinador_nombre = serializers.ReadOnlyField(source='coordinador.nombre', default="-")
     
-    # Information lists for display
+    # Information lists for display (Detailed)
+    info_cursos = ContratoCursoSerializer(source='contratocurso_set', many=True, read_only=True)
+    info_servicios_proveedores = ContratoProveedorSerializer(source='contratoproveedor_set', many=True, read_only=True)
+    
+    # Mantener los actuales por compatibilidad mientras migramos el frontend
     servicios_info = ServicioSerializer(source='servicios', many=True, read_only=True)
     cursos_info = CursoSerializer(source='cursos', many=True, read_only=True)
     proveedores_info = ProveedorSerializer(source='proveedores', many=True, read_only=True)

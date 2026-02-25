@@ -115,6 +115,55 @@
         border-color: #1e90ff;
         outline: none;
     }
+
+    /* Accordion Aesthetic Styles */
+    .main-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .main-row:hover {
+        background: rgba(30, 144, 255, 0.05) !important;
+    }
+    .main-row.active {
+        background: rgba(30, 144, 255, 0.08) !important;
+        border-left: 4px solid #1e90ff;
+    }
+    .detail-row td {
+        background: var(--bg-color) !important;
+        padding: 0 !important;
+    }
+    .detail-container {
+        padding: 0 40px;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 2px solid transparent;
+        opacity: 0;
+    }
+    .detail-container.show {
+        padding: 25px 40px;
+        max-height: 1000px; /* Allow expansion */
+        border-bottom-color: var(--border-color);
+        opacity: 1;
+    }
+    .detail-section {
+        padding: 20px;
+        background: var(--sidebar-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+    .detail-section:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .contratos-table th {
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+    }
 </style>
 {% endblock %}
 
@@ -145,13 +194,13 @@
         <table class="contratos-table" id="contratos-table" style="display: none;">
             <thead>
                 <tr>
-                    <th>Folio</th>
+                    <th style="width: 40px;"></th>
                     <th>Empresa</th>
                     <th>Estado</th>
                     <th>Fecha</th>
                     <th>Finanzas</th>
-                    <th>Detalle</th>
                     <th></th>
+                    <th style="text-align: right;"></th>
                 </tr>
             </thead>
             <tbody id="contratos-body"></tbody>
@@ -254,6 +303,25 @@
 
 {% block scripts %}
 <script>
+    function toggleAccordion(id) {
+        const detailRow = document.getElementById(`detail-${id}`);
+        const container = detailRow.querySelector('.detail-container');
+        const icon = document.getElementById(`icon-${id}`);
+        const isVisible = container.classList.contains('show');
+
+        if (isVisible) {
+            container.classList.remove('show');
+            setTimeout(() => { if (!container.classList.contains('show')) detailRow.style.display = 'none'; }, 350);
+            icon.style.transform = 'rotate(0deg)';
+            detailRow.closest('tr').previousElementSibling.classList.remove('active');
+        } else {
+            detailRow.style.display = 'table-row';
+            setTimeout(() => container.classList.add('show'), 10);
+            icon.style.transform = 'rotate(90deg)';
+            detailRow.closest('tr').previousElementSibling.classList.add('active');
+        }
+    }
+
     let currentContratos = [];
 
 
@@ -323,7 +391,8 @@
     async function loadContratos() {
         try {
             const response = await fetch('/api/contratos/');
-            currentContratos = await response.json();
+            const data = await response.json();
+            currentContratos = Array.isArray(data) ? data : (data.results || []);
             document.getElementById('loading').style.display = 'none';
 
             if (currentContratos.length === 0) {
@@ -333,9 +402,10 @@
                 document.getElementById('no-data').style.display = 'none';
                 document.getElementById('contratos-table').style.display = 'table';
                 const tbody = document.getElementById('contratos-body');
+                
                 tbody.innerHTML = currentContratos.map(c => {
                     const clean = (val) => {
-                        if (!val || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
+                        if (val === null || val === undefined || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
                         return val;
                     };
                     const cap = (val) => {
@@ -345,7 +415,6 @@
                     };
                     const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     
-                    // Calcular próximo seguimiento pendiente
                     const pendingSegs = (c.seguimientos_info || []).filter(s => !s.cerrado);
                     const nextSeg = pendingSegs.length > 0 
                         ? pendingSegs.sort((a,b) => new Date(a.fecha_seguimiento || a.fecha) - new Date(b.fecha_seguimiento || b.fecha))[0]
@@ -355,58 +424,114 @@
                     const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 
                                      (c.tipo_registro && c.tipo_registro.toLowerCase().includes('propuesta') ? 'warning' : 'info');
                     const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
-                                      (c.estado && c.estado.toLowerCase().includes('pendiente') ? 'warning' : '');
+                                      (c.estado && (c.estado.toLowerCase().includes('pendiente') || c.estado.toLowerCase().includes('cerrado')) ? 'warning' : '');
                     
                     return `
-                    <tr style="background: rgba(30,144,255,0.02); border-top: 2px solid var(--border-color);">
-                        <td colspan="6" style="padding: 12px 15px; border-bottom: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-weight: 800; color: #1e90ff; font-size: 0.85rem; letter-spacing: 0.5px;">FOLIO: ${clean(c.folio)}</span>
-                                <a href="/api/seguimiento-page/" class="pill-btn" style="background-color: #1e90ff; color: white; text-decoration: none; text-align: center; font-size: 0.75rem; padding: 8px 20px; font-weight: 700; border-radius: 20px; box-shadow: 0 4px 10px rgba(30,144,255,0.2);">Seguimiento</a>
-                            </div>
+                    <tr class="main-row" onclick="toggleAccordion(${c.id})">
+                        <td style="text-align: center; color: #1e90ff;">
+                            <span id="icon-${c.id}">&#x25B8;</span>
                         </td>
-                        <td style="border-bottom: none;"></td>
-                    </tr>
-                    <tr style="border-bottom: 2px solid var(--border-color);">
-                        <td style="border-top: none;"></td>
-                        <td style="width: 180px; border-top: none;">
-                            <div style="margin-bottom: 5px;">
-                                <span class="td-main">${clean(c.empresa_nombre || c.empresa)}</span>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                                <span class="status-badge ${tipoClass}">${clean(c.tipo_registro)}</span>
-                                <span style="font-size: 0.7rem; color: #888; font-weight: 600;">${clean(c.ejecutivo_nombre)}</span>
-                            </div>
+                        <td>
+                            <div style="font-weight: 800; color: #1e90ff; font-size: 0.75rem; margin-bottom: 2px;">${clean(c.folio)}</div>
+                            <div class="td-main">${clean(c.empresa_nombre || c.empresa)}</div>
+                            <span class="status-badge ${tipoClass}" style="font-size: 0.65rem;">${clean(c.tipo_registro)}</span>
                         </td>
-                        <td style="border-top: none;">
+                        <td>
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="font-weight: 600; color: #888; border-top: none; text-align: center;">${clean(c.fecha)}</td>
-                        <td style="font-size: 0.85rem; border-top: none;">
-                            <div style="display: flex; flex-direction: column; margin-top: 8px; font-size: 0.75rem; color: #888;">
-                                <span>Gral: ${fmtCur(c.valor_general)}</span>
-                                <span>OTIC: ${fmtCur(c.a_pagar_otic)}</span>
-                                <span>Emp: ${fmtCur(c.a_pagar_empresa)}</span>
+                        <td style="color: var(--text-muted); font-weight: 500;">${clean(c.fecha)}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span>Gral: <strong>${fmtCur(c.valor_general)}</strong></span>
+                                <span style="font-size: 0.7rem; opacity: 0.8;">OTIC: ${fmtCur(c.a_pagar_otic)}</span>
+                                <span style="font-size: 0.7rem; opacity: 0.8;">Emp: ${fmtCur(c.a_pagar_empresa)}</span>
                             </div>
                         </td>
-                        <td style="border-top: none;">
-                            <div style="max-width: 250px; font-size: 0.75rem; color: #888; line-height: 1.4;">
-                                <strong>Servicios:</strong> ${c.servicios_info && c.servicios_info.length > 0 ? c.servicios_info.map(s => s.nombre).join(', ') : '-'}<br>
-                                <strong>Proveedores:</strong> ${c.proveedores_info && c.proveedores_info.length > 0 ? c.proveedores_info.map(p => p.nombre).join(', ') : '-'}<br>
-                                <strong>Cursos:</strong> ${c.cursos_info && c.cursos_info.length > 0 ? c.cursos_info.map(cu => cu.nombre).join(', ') : '-'}<br>
-                                <strong style="color: #ff9f43;">Próx. Seguimiento:</strong> ${nextSegDate}
+                        <td>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                ${c.servicios_info && c.servicios_info.length > 0 ? `<span class="status-badge info" title="Servicios">S: ${c.servicios_info.length}</span>` : ''}
+                                ${c.cursos_info && c.cursos_info.length > 0 ? `<span class="status-badge info" style="background: #e1f5fe; color: #01579b;" title="Cursos">C: ${c.cursos_info.length}</span>` : ''}
+                                ${pendingSegs.length > 0 ? `<span class="status-badge warning" title="Pendientes">P: ${pendingSegs.length}</span>` : ''}
                             </div>
                         </td>
-                        <td style="text-align: right; border-top: none;">
-                            <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
-                                <button class="pill-btn edit" onclick='editContrato(${c.id})'>Editar</button>
-                                <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>Eliminar</button>
+                        <td style="text-align: right;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;" onclick="event.stopPropagation()">
+                                <a href="/api/seguimiento-page/" class="pill-btn" style="padding: 4px 10px; font-size: 0.7rem; background: #1e90ff; color: #fff;">Seguimiento</a>
+                                <button class="pill-btn edit" onclick='editContrato(${c.id})'>&#x270E;</button>
+                                <button class="pill-btn delete" onclick='deleteContrato(${c.id})'>&#x1F5D1;</button>
                             </div>
                         </td>
                     </tr>
-                `}).join('');
+                    <tr id="detail-${c.id}" class="detail-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="detail-container">
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                                    <div class="detail-section">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            &#x1F4DA; Cursos Asociados
+                                        </h4>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                            ${c.info_cursos && c.info_cursos.length > 0 
+                                                ? c.info_cursos.map(cu => `
+                                                    <div style="padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px;">
+                                                        <div style="font-weight: 700; color: var(--text-color);">${cu.tipo_curso}</div>
+                                                        <div style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">Relator: ${cu.relator || '-'} | Partic: ${cu.numero_participantes || 0}</div>
+                                                        <div style="font-size: 0.7rem; color: #1e90ff; margin-top: 2px;">Costo: ${fmtCur(cu.costo)}</div>
+                                                    </div>
+                                                `).join('')
+                                                : (c.cursos_info && c.cursos_info.length > 0 
+                                                    ? c.cursos_info.map(cu => `<div style="padding: 5px; border-bottom: 1px solid var(--border-color);">&#x2022; ${cu.nombre}</div>`).join('')
+                                                    : '<p style="font-style: italic; opacity: 0.5; padding: 10px;">Sin cursos detallados</p>')
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="detail-section">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            &#x1F4C2; Servicios y Proveedores
+                                        </h4>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                            ${c.info_servicios_proveedores && c.info_servicios_proveedores.length > 0 
+                                                ? c.info_servicios_proveedores.map(sp => `
+                                                    <div style="padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px;">
+                                                        <div style="font-weight: 700; color: var(--text-color);">${sp.servicio_nombre}</div>
+                                                        <div style="font-size: 0.75rem; color: #3b82f6; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
+                                                            &#x1F69A; <strong>${sp.proveedor_nombre}</strong>
+                                                        </div>
+                                                        <div style="font-size: 0.7rem; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px; opacity: 0.9;">
+                                                            ${sp.detalle || '-'}
+                                                        </div>
+                                                    </div>
+                                                `).join('')
+                                                : (c.servicios_info && c.servicios_info.length > 0 
+                                                    ? c.servicios_info.map(s => `<div style="padding: 5px; border-bottom: 1px solid var(--border-color);">&#x2022; ${s.nombre}</div>`).join('')
+                                                    : '<p style="font-style: italic; opacity: 0.5; padding: 10px;">Sin servicios/proveedores</p>')
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="detail-section">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            &#x1F4D1; Notas y Próximo Paso
+                                        </h4>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
+                                            <p style="background: rgba(30,144,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #1e90ff; margin-bottom: 15px;">
+                                                ${c.observaciones || 'No hay observaciones.'}
+                                            </p>
+                                            <div style="padding: 12px; background: #fff8f0; border: 1px solid #ffe8cc; border-radius: 8px;">
+                                                <div style="font-weight: 800; color: #f08c00; font-size: 0.65rem; text-transform: uppercase;">Pendiente Seguimiento</div>
+                                                <div style="font-size: 0.85rem; margin-top: 2px; font-weight: 600;">${nextSegDate}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    `}).join('');
             }
-        } catch (error) { document.getElementById('loading').textContent = 'Error cargando datos'; }
+        } catch (error) { 
+            console.error('Error loadContratos:', error);
+            document.getElementById('loading').textContent = 'Error cargando datos'; 
+        }
     }
 
     function editContrato(id) {
