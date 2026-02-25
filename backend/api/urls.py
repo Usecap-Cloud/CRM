@@ -17,7 +17,7 @@ router.register(r'cursos', CursoViewSet)
 router.register(r'contratos', ContratoViewSet)
 router.register(r'contratos-cursos', ContratoCursoViewSet)
 router.register(r'contratos-proveedores', ContratoProveedorViewSet)
-router.register(r'seguimientos', SeguimientoViewSet)
+router.register(r'seguimientos', SeguimientoViewSet, basename='seguimiento')
 router.register(r'import-history', ImportHistoryViewSet)
 router.register(r'audit-logs', AuditLogViewSet)
 
