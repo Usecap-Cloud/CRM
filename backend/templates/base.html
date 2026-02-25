@@ -539,54 +539,54 @@
             {% with rol=request.user.ejecutivo.rol.nombre %}
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' or rol == 'Coordinador Académico' %}
             <a href="/api/clientes-page/" class="nav-item {% block nav_clientes %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F451;</span> Clientes
+                Clientes
             </a>
             <a href="/api/ejecutivos-page/" class="nav-item {% block nav_ejecutivos %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F3C6;</span> Ejecutivos
+                Ejecutivos
             </a>
             {% endif %}
 
             <a href="/api/coordinadores-page/" class="nav-item {% block nav_coordinadores %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F91D;</span> Encargados
+                Encargados
             </a>
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' or rol == 'Coordinador Académico' %}
             <a href="/api/cursos-page/" class="nav-item {% block nav_cursos %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4DA;</span> Cursos
+                Cursos
             </a>
             <a href="/api/contratos-page/" class="nav-item {% block nav_contratos %}{% endblock %}">
-                <span class="icon blue-icon">&#x270D;</span> Contratos
+                Contratos
             </a>
             <a href="/api/servicios-page/" class="nav-item {% block nav_servicios %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4C2;</span> Servicios
+                Servicios
             </a>
             <a href="/api/proveedores-page/" class="nav-item {% block nav_proveedores %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4E6;</span> Proveedores
+                Proveedores
             </a>
             {% endif %}
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
             <a href="/api/seguimiento-page/" class="nav-item {% block nav_seguimiento %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F514;</span> Seguimiento
+                Seguimiento
                 <span id="seguimiento-badge" class="nav-badge" style="display: none;">0</span>
             </a>
             {% endif %}
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
             <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4BF;</span> Importar
+                Importar
             </a>
             <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
-                <span class="icon blue-icon">&#x2728;</span> Cartera
+                Cartera
             </a>
             {% endif %}
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' %}
             <a href="/api/estadisticas-page/" class="nav-item {% block nav_estadisticas %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4CA;</span> Estadísticas
+                Estadísticas
             </a>
             <a href="/api/audit-log-page/" class="nav-item {% block nav_audit %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F50D;</span> Auditoría
+                Auditoría
             </a>
             {% endif %}
             {% endwith %}

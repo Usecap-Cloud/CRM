@@ -1,69 +1,65 @@
 # USECAP CRM
 
-## Status
-- Last Branding Update: 2026-02-13 18:20 (Triggering Deployment)
+Sistema de Gestión de Clientes y Seguimiento para USECAP Chile.
 
-# Crear entorno virtual con CMD
+## Requisitos Previos
+- Python 3.10+
+- MySQL Server
+
+## Instalación y Configuración
+
+### 1. Preparar Entorno
+```powershell
+# Clonar y entrar al proyecto
+cd crm_usecap
+
+# Crear entorno virtual
 python -m venv venv
-venv\Scripts\activate
+.\venv\Scripts\activate
 
 # Instalar dependencias
 pip install -r requirements.txt
+```
 
-# Configurar .env
-cp .env.example .env
+### 2. Variables de Entorno
+Crea un archivo `.env` en la raíz basado en `.env.example`:
+```powershell
+copy .env.example .env
+```
+Edita el `.env` con tus credenciales de MySQL local.
 
-
-# Ejecutar migraciones de Django
+### 3. Base de Datos y Datos Iniciales
+```powershell
+# Ejecutar migraciones
 python manage.py migrate
 
-# Crear superusuario
+# Cargar roles y datos base (IMPORTANTE)
+python manage.py seed_data
+
+# Crear superusuario (para acceso total)
 python manage.py createsuperuser
+```
 
-# PASO 4: Iniciar Backend
+### 4. Archivos Estáticos
+Para que los estilos se vean correctamente en entornos de prueba/producción:
+```powershell
+python manage.py collectstatic --noinput
+```
+
+### 5. Iniciar Servidor
+```powershell
 python manage.py runserver
+```
+- **App**: http://localhost:8000
+- **Admin**: http://localhost:8000/admin
 
-Backend corriendo en: http://localhost:8000  
-Admin panel: http://localhost:8000/admin  
-API: http://localhost:8000/api/
+---
 
+## Comandos de Mantenimiento
+- **Normalizar Datos**: `python manage.py normalize_data` (Limpia RUTs y Teléfonos existentes).
+- **Limpiar RUTs**: `python manage.py clean_ruts`.
 
-# PROBAR EL BACKEND
-
-# Opción 1: Panel de Admin Django
-1. Ve a: http://localhost:8000/admin
-2. Ingresa con tu superusuario
-3. Puedes crear/editar todos los registros desde aquí
-
-# Opción 2: API REST (con Postman/Thunder Client)
-
-# Login
-
-POST http://localhost:8000/api/auth/login/
-Content-Type: application/json
-
-{
-  "username": "admin",
-  "password": "tu_password"
-}
-
-# Crear Cliente
-POST http://localhost:8000/api/clientes/
-Authorization: Bearer tu_token_aqui
-Content-Type: application/json
-
-{
-  "razon_social": "Empresa Demo",
-  "rut_empresa": "76123456-7",
-  "contacto_principal": "Juan Pérez",
-  "email_contacto": "juan@empresa.cl",
-  "estado_cliente": "prospecto",
-  "ejecutivo_asignado": 1
-}
-
-# Comandos utiles
-python manage.py makemigrations 
-python manage.py migrate
-python manage.py runserver
+## Estructura de Documentación
+- [DOCUMENTACION.md](./DOCUMENTACION.md): Manual técnico de arquitectura, roles y lógica de negocio.
 
 

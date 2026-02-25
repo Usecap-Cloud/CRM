@@ -12,21 +12,47 @@ Este documento detalla el funcionamiento, la arquitectura y las reglas de negoci
 
 ### Jerarquía de Roles y Permisos:
 
+El sistema distingue entre el personal interno (con acceso al sistema) y los contactos de clientes.
+
 #### 1. Administrador / Gerencia (Acceso Total)
-*   **Gestión Administrativa**: Control total sobre todos los módulos del sistema.
-*   **Estadísticas**: Acceso exclusivo al Dashboard de métricas y gráficos de rendimiento.
-*   **Auditoría**: Único rol con permiso para ver el `Audit Log` (historial de cambios de todos los usuarios).
-*   **Importación**: Autorizado para realizar cargas masivas de datos vía Excel (`Importación Universal`).
-*   **Sincronización**: Acceso a herramientas de mantenimiento técnico (Sync de datos).
+*   **Gestión Administrativa**: Control total sobre todos los módulos.
+*   **Estadísticas**: Acceso exclusivo al Dashboard de métricas globales.
+*   **Auditoría**: Único rol con permiso para ver el `Audit Log`.
+*   **Importación**: Autorizado para realizar cargas masivas de datos.
 
-#### 2. Vendedor / Ejecutivo Comercial (Acceso Operativo)
-*   **Gestión de Cartera**: Puede crear, editar y visualizar Clientes, Encargados, Contratos y Seguimientos.
-*   **Módulos de Apoyo**: Acceso a los catálogos de Cursos, Servicios y Proveedores.
+#### 2. Vendedor / Ejecutivo Comercial (Gestión Operativa Total)
+*   **Acceso Broad**: Pueden visualizar y gestionar casi todos los módulos operativos (Clientes, Contratos, Cursos, Proveedores, etc.).
 *   **Restricciones**:
-    *   **NO** puede visualizar el Dashboard de estadísticas globales.
-    *   **NO** tiene acceso al historial de auditoría del sistema.
-    *   **NO** está autorizado para realizar importaciones masivas (protección de integridad de datos).
+    *   **NO** pueden visualizar Estadísticas globales.
+    *   **NO** tienen acceso a la Auditoría del sistema.
 
+#### 3. Coordinador Académico (Operación de Cursos)
+*   **Enfoque**: Gestión del día a día de clientes, cursos y profesores.
+*   **Visto**: Clientes, Ejecutivos, Encargados, Cursos, Contratos, Servicios y Proveedores.
+*   **Restricciones**:
+    *   **NO** ven el módulo de **Seguimiento** (Calendario).
+    *   **NO** ven **Importación** ni **Cartera**.
+    *   **NO** ven Estadísticas ni Auditoría.
+
+---
+
+### Matriz de Visibilidad (Sidebar)
+
+| Módulo | Admin / Gerencia | Ejecutivo Comercial | Coordinador Académico |
+| :--- | :---: | :---: | :---: |
+| Inicio | SI | SI | SI |
+| Clientes / Ejecutivos | SI | SI | SI |
+| Encargados (Externos) | SI | SI | SI |
+| Cursos / Contratos | SI | SI | SI |
+| Servicios / Prov. | SI | SI | SI |
+| Seguimiento | SI | SI | NO |
+| Importar / Cartera | SI | SI | NO |
+| Estadísticas / Aud. | SI | NO | NO |
+
+> [!NOTE]
+> Los **Encargados** (antes llamados Coordinadores) son contactos externos en las empresas cliente y **no tienen acceso al sistema**. El rol **Coordinador Académico** es personal interno de USECAP.
+
+---
 ---
 
 ## 2. Sistema de Normalización de Datos (Data Integrity)
@@ -73,10 +99,10 @@ El sistema cuenta con un motor de carga universal (`UniversalImportView`) diseñ
 ## 4. Guía de Interfaz (UI/UX)
 El sistema utiliza un código de colores semántico para facilitar la navegación rápida:
 
-*   🟢 **Éxito / Activo**: Usado para estados "Activo", "Firmado" y Registros tipo "Contrato".
-*   🔵 **Información / Edición**: Usado para estados "En Proceso" y Registros tipo "Propuesta".
-*   🟠 **Advertencia**: Usado para estados "Pendiente" o "Por Cerrar".
-*   🔴 **Peligro / Inactivo**: Usado para eliminar registros o estados "Inactivos".
+*   Verde (Exito / Activo): Usado para estados "Activo", "Firmado" y Registros tipo "Contrato".
+*   Azul (Información / Edición): Usado para estados "En Proceso" y Registros tipo "Propuesta".
+*   Naranja (Advertencia): Usado para estados "Pendiente" o "Por Cerrar".
+*   Rojo (Peligro / Inactivo): Usado para eliminar registros o estados "Inactivos".
 
 ---
 
@@ -96,10 +122,10 @@ La barra lateral (sidebar) incluye un sistema de notificaciones inteligentes:
 ### Agenda Inteligente y Vencimientos
 El sistema gestiona la criticidad del tiempo mediante:
 *   **Código de Colores de Urgencia**: En el calendario de seguimientos, las actividades se marcan con:
-    *   🔴 **Rojo**: Gestiones **vencidas** (atrasadas).
-    *   🟡 **Naranja/Amarillo**: Gestiones para **hoy o mañana**.
-    *   🔵 **Azul**: Gestiones programadas para el **futuro**.
-    *   ⚫ **Gris oscuro**: Gestiones ya completadas (**cerradas**).
+    *   Rojo: Gestiones vencidas (atrasadas).
+    *   Naranja/Amarillo: Gestiones para hoy o mañana.
+    *   Azul: Gestiones programadas para el futuro.
+    *   Gris oscuro: Gestiones ya completadas (cerradas).
 *   **Dashboard Priorizado**: La sección de "Agenda" en el inicio ordena automáticamente los contratos próximos a vencer, permitiendo una gestión proactiva de renovaciones.
 *   **Centro de Seguimiento (Calendario)**: Integra `FullCalendar` para visualizar hitos temporales. Las "Acciones Próximas" se programan basándose en la `Fecha Seguimiento`, apareciendo automáticamente en el calendario del ejecutivo.
 *   **Panel de Alertas Próximas**: Filtra y destaca automáticamente todas las gestiones que deben realizarse en los próximos **7 días**, garantizando que ningún compromiso con el cliente se olvide.
