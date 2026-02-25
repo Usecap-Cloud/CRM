@@ -179,7 +179,7 @@ class Ejecutivo(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     estado = models.CharField(
         max_length=10,
-        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+        choices=[("Activo", "Activo"), ("Inactivo", "Inactivo")]
     )
     area_departamento = models.CharField(
         max_length=50,
@@ -230,7 +230,7 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(
         max_length=10,
-        choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
+        choices=[("Activo", "Activo"), ("Inactivo", "Inactivo")]
     )
     sector_industria = models.CharField(max_length=50, blank=True, null=True)
     direccion = models.CharField(max_length=150, blank=True, null=True)
@@ -243,8 +243,8 @@ class Cliente(models.Model):
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
         max_length=20, 
-        choices=[("otic", "OTIC"), ("sence", "SENCE"), ("particular", "Particular")],
-        default="particular"
+        choices=[("OTIC", "OTIC"), ("SENCE", "SENCE"), ("Particular", "Particular")],
+        default="Particular"
     )
     cantidad_sucursales = models.IntegerField(default=1)
     observaciones = models.TextField(blank=True, null=True)
@@ -432,8 +432,8 @@ class Contrato(models.Model):
 
     estado = models.CharField(
         max_length=20,
-        choices=[("activo", "Activo"), ("cerrado", "Cerrado"), ("finalizado", "Finalizado")],
-        default="activo"
+        choices=[("Activo", "Activo"), ("Cerrado", "Cerrado"), ("Finalizado", "Finalizado")],
+        default="Activo"
     )
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
