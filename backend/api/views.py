@@ -937,7 +937,7 @@ def importar_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
             return redirect('dashboard')
     return render(request, "importar.html")
 
@@ -961,7 +961,7 @@ def clientes_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'clientes.html')
 
@@ -969,7 +969,7 @@ def coordinadores_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, "coordinadores.html")
 
@@ -977,7 +977,7 @@ def cursos_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'cursos.html')
 
@@ -985,7 +985,7 @@ def contratos_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'contratos.html')
 
@@ -993,7 +993,7 @@ def proveedores_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'proveedores.html')
 
@@ -1001,7 +1001,7 @@ def ejecutivos_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'ejecutivos.html')
 
@@ -1098,7 +1098,7 @@ def servicios_view(request):
     from django.shortcuts import render, redirect
     if not request.user.is_superuser:
         ej = getattr(request.user, 'ejecutivo', None)
-        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'servicios.html')
 

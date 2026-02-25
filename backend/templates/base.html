@@ -537,13 +537,10 @@
                 </button>
             </div>
             {% with rol=request.user.ejecutivo.rol.nombre %}
-            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
+            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' or rol == 'Coordinador Académico' %}
             <a href="/api/clientes-page/" class="nav-item {% block nav_clientes %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F451;</span> Clientes
             </a>
-            {% endif %}
-
-            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' %}
             <a href="/api/ejecutivos-page/" class="nav-item {% block nav_ejecutivos %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F3C6;</span> Ejecutivos
             </a>
@@ -553,19 +550,13 @@
                 <span class="icon blue-icon">&#x1F91D;</span> Encargados
             </a>
 
-            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Coordinador Académico' %}
+            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' or rol == 'Coordinador Académico' %}
             <a href="/api/cursos-page/" class="nav-item {% block nav_cursos %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F4DA;</span> Cursos
             </a>
-            {% endif %}
-
-            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
             <a href="/api/contratos-page/" class="nav-item {% block nav_contratos %}{% endblock %}">
                 <span class="icon blue-icon">&#x270D;</span> Contratos
             </a>
-            {% endif %}
-
-            {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Coordinador Académico' %}
             <a href="/api/servicios-page/" class="nav-item {% block nav_servicios %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F4C2;</span> Servicios
             </a>
@@ -580,15 +571,15 @@
             </a>
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' or rol == 'Ejecutivo Comercial' %}
+            <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">
+                <span class="icon blue-icon">&#x1F4BF;</span> Importar
+            </a>
             <a href="/api/portfolio/" class="nav-item {% block nav_portfolio %}{% endblock %}">
                 <span class="icon blue-icon">&#x2728;</span> Cartera
             </a>
             {% endif %}
 
             {% if request.user.is_superuser or rol == 'Administrador' or rol == 'Gerencia' %}
-            <a href="/api/importar-page/" class="nav-item {% block nav_importar %}{% endblock %}">
-                <span class="icon blue-icon">&#x1F4BF;</span> Importar
-            </a>
             <a href="/api/estadisticas-page/" class="nav-item {% block nav_estadisticas %}{% endblock %}">
                 <span class="icon blue-icon">&#x1F4CA;</span> Estadísticas
             </a>
