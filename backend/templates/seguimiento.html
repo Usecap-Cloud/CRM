@@ -146,12 +146,14 @@
         border: 1px solid var(--border-color) !important;
     }
 
-    .fc-col-header {
-        background: var(--card-bg) !important;
-    }
-
+    /* Aggressive fix for white background in headers */
+    .fc-scrollgrid-section-header,
+    .fc-scrollgrid-section-header th,
+    .fc-scrollgrid-section-header td,
+    .fc-col-header,
     .fc-col-header-cell {
-        background: rgba(255, 255, 255, 0.03) !important;
+        background: var(--card-bg) !important;
+        background-color: var(--card-bg) !important;
     }
 
     .fc-col-header-cell-cushion {
@@ -160,7 +162,7 @@
         font-weight: 600 !important;
         text-transform: capitalize;
         display: block;
-        padding: 10px 0 !important;
+        padding: 12px 0 !important;
     }
 
     .fc-daygrid-day-number {
