@@ -192,9 +192,9 @@
                 <div class="form-group">
                     <label>Estado Inicial</label>
                     <select name="estado" id="form-estado" required>
-                        <option value="activo">Activo</option>
-                        <option value="cerrado">Cerrado</option>
-                        <option value="finalizado">Finalizado</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Cerrado">Cerrado</option>
+                        <option value="Finalizado">Finalizado</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -276,11 +276,10 @@
             document.getElementById('form-tipo_registro').value = data.tipo_registro || 'Contrato';
             document.getElementById('form-fecha').value = data.fecha || '';
             document.getElementById('form-estado').value = data.estado;
-            document.getElementById('form-subtotal').value = data.subtotal;
             document.getElementById('form-valor_general').value = data.valor_general || 0;
             document.getElementById('form-a_pagar_otic').value = data.a_pagar_otic || 0;
             document.getElementById('form-a_pagar_empresa').value = data.a_pagar_empresa || 0;
-            document.getElementById('coordinador-select').value = data.coordinador || '';
+            document.getElementById('encargado-select').value = data.coordinador || '';
             
 
             // Handle Multi-selects
