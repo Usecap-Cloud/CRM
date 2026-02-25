@@ -181,7 +181,7 @@ class Ejecutivo(models.Model):
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
-    departamento = models.CharField(
+    area_departamento = models.CharField(
         max_length=50,
         blank=True,
         null=True,
@@ -213,7 +213,7 @@ class Ejecutivo(models.Model):
         if self.telefono:
             self.telefono = normalize_phone(self.telefono)
         self.estado = normalize_estado(self.estado)
-        self.departamento = normalize_text(self.departamento)
+        self.area_departamento = normalize_text(self.area_departamento)
         self.especialidad_tipo_clientes = normalize_text(self.especialidad_tipo_clientes)
         super().save(*args, **kwargs)
 
