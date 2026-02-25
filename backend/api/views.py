@@ -375,12 +375,14 @@ class UniversalImportView(APIView):
                     elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
                         mapping['ejecutivo_rut'] = col
                 elif model_type == 'contrato':
-                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial']:
+                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']:
                         mapping['cliente_rut'] = col
                     elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador']:
                         mapping['coordinador_rut'] = col
-                    elif norm in ['folio', 'foliocontrato', 'numerocontrato']:
+                    elif norm in ['folio', 'foliocontrato', 'numerocontrato', 'id_contrato', 'idcontrato', 'numero']:
                         mapping['folio'] = col
+                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
+                        mapping['ejecutivo_rut'] = col
                 elif model_type == 'seguimiento':
                     if norm in ['foliocontrato', 'folio', 'contrato']:
                         mapping['contrato_folio'] = col
@@ -427,11 +429,13 @@ class UniversalImportView(APIView):
 
                 # 4. Model-Specific Fields
                 if model_type == 'contrato':
-                    if norm in ['tiporegistro', 'tipo']: mapping['tipo_registro'] = col
-                    elif norm in ['fecharecepcion', 'recepcion']: mapping['fecha_recepcion'] = col
-                    elif norm in ['fechaemision', 'emision']: mapping['fecha_emision'] = col
-                    elif norm in ['fechainicio', 'iniciocontrato', 'fecinicio']: mapping['fecha_inicio'] = col
+                    if norm in ['tiporegistro', 'tipo', 'tipo_registro']: mapping['tipo_registro'] = col
+                    elif norm in ['fecharecepcion', 'recepcion', 'fecha_recepcion']: mapping['fecha_recepcion'] = col
+                    elif norm in ['fechaemision', 'emision', 'fecha_emision']: mapping['fecha_emision'] = col
+                    elif norm in ['fechainicio', 'iniciocontrato', 'fecinicio', 'fecha_inicio']: mapping['fecha_inicio'] = col
                     elif norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
+                    elif norm in ['detalle', 'detalleopcional', 'nota']: mapping['detalle'] = col
+                    elif norm in ['observaciones', 'obs', 'comentarios', 'observacionesopcional']: mapping['observaciones'] = col
 
             created_count = 0
             errors = []
@@ -753,18 +757,22 @@ class UniversalImportView(APIView):
                             contrato.fecha_inicio = fecha_ini or contrato.fecha_inicio
                             contrato.subtotal = subtotal if subtotal > 0 else contrato.subtotal
                             contrato.estado = clean_val(row.get(mapping.get('estado')), contrato.estado)
+                            detalle_val = clean_val(row.get(mapping.get('detalle')))
+                            if detalle_val: contrato.detalle = detalle_val
+                            obs_val = clean_val(row.get(mapping.get('observaciones')))
+                            if obs_val: contrato.observaciones = obs_val
                             contrato.save()
                         else:
                             # Create new
                             Contrato.objects.create(
                                 folio=folio_val,
-                                tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Servicio'),
+                                tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Contrato'),
                                 empresa=cliente.razon_social,
                                 fecha_recepcion=fecha_rec,
                                 fecha_emision=fecha_emi,
                                 fecha_inicio=fecha_ini,
                                 subtotal=subtotal,
-                                estado=clean_val(row.get(mapping.get('estado')), 'Por Cerrar'),
+                                estado=clean_val(row.get(mapping.get('estado')), 'activo'),
                                 detalle=clean_val(row.get(mapping.get('detalle'))),
                                 observaciones=clean_val(row.get(mapping.get('observaciones'))),
                                 cliente=cliente,
