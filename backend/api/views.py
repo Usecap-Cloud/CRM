@@ -934,11 +934,19 @@ class ImportHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImportHistorySerializer
 
 def importar_view(request):
-    from django.shortcuts import render
-    return render(request, 'importar.html')
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+            return redirect('dashboard')
+    return render(request, "importar.html")
 
 def portfolio_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
+            return redirect('dashboard')
     return render(request, 'portfolio.html')
 
 def estadisticas_view(request):
@@ -950,29 +958,59 @@ def estadisticas_view(request):
     return render(request, 'estadisticas.html')
 
 def clientes_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
+            return redirect('dashboard')
     return render(request, 'clientes.html')
 
 def coordinadores_view(request):
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+            return redirect('dashboard')
     return render(request, "coordinadores.html")
 
 def cursos_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+            return redirect('dashboard')
     return render(request, 'cursos.html')
 
 def contratos_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial']:
+            return redirect('dashboard')
     return render(request, 'contratos.html')
 
 def proveedores_view(request):
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+            return redirect('dashboard')
     return render(request, 'proveedores.html')
 
 def ejecutivos_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia']:
+            return redirect('dashboard')
     return render(request, 'ejecutivos.html')
 
 def seguimiento_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
+            return redirect('dashboard')
     return render(request, 'seguimiento.html')
 
 class CreateEjecutivoAPIView(APIView):
@@ -1057,7 +1095,11 @@ class CreateEjecutivoAPIView(APIView):
             return Response({"error": str(e)}, status=400)
 
 def servicios_view(request):
-    from django.shortcuts import render
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Coordinador Académico']:
+            return redirect('dashboard')
     return render(request, 'servicios.html')
 
 def audit_log_view(request):
