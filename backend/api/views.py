@@ -130,8 +130,22 @@ class SeguimientoViewSet(AuditMixin, viewsets.ModelViewSet):
         return queryset
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AuditLog.objects.all().order_by('-fecha')
     serializer_class = AuditLogSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return AuditLog.objects.none()
+            
+        is_admin = user.is_superuser
+        if not is_admin:
+            ej = getattr(user, 'ejecutivo', None)
+            if ej:
+                is_admin = ej.rol.nombre in ['Administrador', 'Gerencia']
+        
+        if is_admin:
+            return AuditLog.objects.all().order_by('-fecha')
+        return AuditLog.objects.none()
 
 class DashboardStatsView(APIView):
     def get(self, request):
