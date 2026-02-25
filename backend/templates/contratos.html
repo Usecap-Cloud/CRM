@@ -205,18 +205,19 @@
                 </div>
             </div>
 
+
             <div class="form-row">
                 <div class="form-group">
-                    <label>Subtotal (Neto)</label>
-                    <input type="number" name="subtotal" id="form-subtotal" placeholder="1000000" required oninput="calculateFinances()">
+                    <label>Valor General</label>
+                    <input type="number" name="valor_general" id="form-valor_general" placeholder="0">
                 </div>
                 <div class="form-group">
-                    <label>IVA (19%)</label>
-                    <input type="number" id="form-iva" readonly style="background: rgba(255,255,255,0.05);">
+                    <label>A Pagar OTIC</label>
+                    <input type="number" name="a_pagar_otic" id="form-a_pagar_otic" placeholder="0">
                 </div>
                 <div class="form-group">
-                    <label>Total</label>
-                    <input type="number" id="form-total" readonly style="background: rgba(255,255,255,0.05); font-weight: 800; color: #1e90ff;">
+                    <label>A Pagar Empresa</label>
+                    <input type="number" name="a_pagar_empresa" id="form-a_pagar_empresa" placeholder="0">
                 </div>
             </div>
 
@@ -255,13 +256,6 @@
 <script>
     let currentContratos = [];
 
-    function calculateFinances() {
-        const subtotal = parseFloat(document.getElementById('form-subtotal').value) || 0;
-        const iva = subtotal * 0.19;
-        const total = subtotal + iva;
-        document.getElementById('form-iva').value = Math.round(iva);
-        document.getElementById('form-total').value = Math.round(total);
-    }
 
     function showForm(data = null) {
         document.getElementById('list-view').style.display = 'none';
@@ -283,9 +277,11 @@
             document.getElementById('form-fecha').value = data.fecha || '';
             document.getElementById('form-estado').value = data.estado;
             document.getElementById('form-subtotal').value = data.subtotal;
+            document.getElementById('form-valor_general').value = data.valor_general || 0;
+            document.getElementById('form-a_pagar_otic').value = data.a_pagar_otic || 0;
+            document.getElementById('form-a_pagar_empresa').value = data.a_pagar_empresa || 0;
             document.getElementById('coordinador-select').value = data.coordinador || '';
             
-            calculateFinances();
 
             // Handle Multi-selects
             if (data.servicios) {
@@ -312,8 +308,9 @@
             document.getElementById('form-title').textContent = 'Nuevo Contrato';
             document.getElementById('contrato-id').value = '';
             document.getElementById('contrato-form').reset();
-            document.getElementById('form-iva').value = '';
-            document.getElementById('form-total').value = '';
+            document.getElementById('form-valor_general').value = 0;
+            document.getElementById('form-a_pagar_otic').value = 0;
+            document.getElementById('form-a_pagar_empresa').value = 0;
             document.getElementById('submit-btn').textContent = 'Crear Contrato';
         }
     }
@@ -348,10 +345,6 @@
                         return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
-                    
-                    const subtotal = fmtCur(c.subtotal);
-                    const iva = fmtCur(c.iva);
-                    const total = fmtCur(c.total);
                     
                     // Calcular próximo seguimiento pendiente
                     const pendingSegs = (c.seguimientos_info || []).filter(s => !s.cerrado);
@@ -391,10 +384,10 @@
                         </td>
                         <td style="font-weight: 600; color: #888; border-top: none; text-align: center;">${clean(c.fecha)}</td>
                         <td style="font-size: 0.85rem; border-top: none;">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="color:#888;">Neto: ${subtotal}</span>
-                                <span style="color:#888;">IVA: ${iva}</span>
-                                <span style="font-weight: 800; color: #1e90ff; border-top: 1px solid var(--border-color); margin-top: 4px;">Total: ${total}</span>
+                            <div style="display: flex; flex-direction: column; margin-top: 8px; font-size: 0.75rem; color: #888;">
+                                <span>Gral: ${fmtCur(c.valor_general)}</span>
+                                <span>OTIC: ${fmtCur(c.a_pagar_otic)}</span>
+                                <span>Emp: ${fmtCur(c.a_pagar_empresa)}</span>
                             </div>
                         </td>
                         <td style="border-top: none;">
@@ -514,7 +507,9 @@
             empresa: form.empresa.options[form.empresa.selectedIndex].text,
             fecha: form.fecha.value || null,
             estado: form.estado.value,
-            subtotal: parseFloat(form.subtotal.value),
+            valor_general: parseFloat(form.valor_general.value) || 0,
+            a_pagar_otic: parseFloat(form.a_pagar_otic.value) || 0,
+            a_pagar_empresa: parseFloat(form.a_pagar_empresa.value) || 0,
             coordinador: form.encargado.value ? parseInt(form.encargado.value) : null,
             servicios: getSelected('servicios-select'),
             proveedores: getSelected('proveedores-select'),

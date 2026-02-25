@@ -46,7 +46,7 @@ def normalize_estado(value):
         'finalizado': 'Finalizado', 'firmado': 'Firmado',
         'en proceso': 'En Proceso', 'por cerrar': 'Por Cerrar',
         'pendiente': 'Pendiente', 'completado': 'Completado',
-        'particular': 'Particular', 'sence': 'SENCE', 'otech': 'OTEC', 'otec': 'OTEC',
+        'particular': 'Particular', 'sence': 'SENCE', 'otic': 'OTIC', 'otech': 'OTIC', 'otec': 'OTIC',
     }
     return mapping.get(val_clean, value.strip().capitalize())
 
@@ -243,7 +243,7 @@ class Cliente(models.Model):
     numero_colaboradores = models.IntegerField(default=0)
     tipo_convenio = models.CharField(
         max_length=20, 
-        choices=[("otech", "OTEC"), ("sence", "SENCE"), ("particular", "Particular")],
+        choices=[("otic", "OTIC"), ("sence", "SENCE"), ("particular", "Particular")],
         default="particular"
     )
     cantidad_sucursales = models.IntegerField(default=1)
@@ -290,8 +290,8 @@ class Coordinador(models.Model):
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True, validators=[validate_phone])
     cargo = models.CharField(max_length=50, blank=True, null=True)
-    fecha_cumpleanos = models.DateField(blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
+    fecha_cumpleanos = models.DateField(blank=True, null=True)
     estado = models.CharField(
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
@@ -420,12 +420,16 @@ class Contrato(models.Model):
     )
     empresa = models.CharField(max_length=100)
     fecha = models.DateField(blank=True, null=True)
+    fecha_envio = models.DateField(blank=True, null=True)
     
     # Identificación y Finanzas
     folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Nuevos campos de valorización
+    valor_general = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    a_pagar_otic = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    a_pagar_empresa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
     estado = models.CharField(
         max_length=20,
         choices=[("activo", "Activo"), ("cerrado", "Cerrado"), ("finalizado", "Finalizado")],
@@ -451,9 +455,6 @@ class Contrato(models.Model):
         self.tipo_registro = normalize_text(self.tipo_registro)
         self.estado = normalize_estado(self.estado)
 
-        # Cálculos Financieros
-        self.iva = float(self.subtotal) * 0.19
-        self.total = float(self.subtotal) + self.iva
 
         # Generación de Folio (si está vacío)
         if not self.folio:

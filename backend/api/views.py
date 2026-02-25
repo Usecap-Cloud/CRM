@@ -187,7 +187,7 @@ class DashboardStatsView(APIView):
         from django.db.models import Q
         stats = {
             "empresas_activas": Cliente.objects.count(),
-            "cursos_proceso": Curso.objects.filter(estado__iexact='en proceso').count(),
+            "cursos_proceso": Curso.objects.filter(estado__iexact='activo').count(),
             "contratos": Contrato.objects.count(),
             "contratos_activos": Contrato.objects.filter(tipo_registro='Contrato').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
             "propuestas_activas": Contrato.objects.filter(tipo_registro='Propuesta').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
@@ -251,7 +251,20 @@ def logout_view(request):
 
 class PortfolioAPIView(APIView):
     def get(self, request):
+        user = request.user
         ejecutivos = Ejecutivo.objects.all()
+        
+        # Determine if we should filter by current executive
+        is_admin = user.is_superuser
+        if not is_admin:
+            ej_user = getattr(user, 'ejecutivo', None)
+            if ej_user:
+                is_admin = ej_user.rol.nombre in ['Administrador', 'Gerencia']
+                if not is_admin:
+                    ejecutivos = ejecutivos.filter(id=ej_user.id)
+            else:
+                return Response([], status=200)
+
         data = []
         for ej in ejecutivos:
             clientes = Cliente.objects.filter(ejecutivo=ej)
@@ -743,11 +756,6 @@ class UniversalImportView(APIView):
                         fecha_emi = parse_date(row.get(mapping.get('fecha_emision')))
                         fecha_ini = parse_date(row.get(mapping.get('fecha_inicio')))
 
-                        subtotal_val = row.get(mapping.get('subtotal'))
-                        try:
-                            subtotal = float(subtotal_val) if not pd.isna(subtotal_val) else 0
-                        except:
-                            subtotal = 0
 
                         if contrato:
                             # Update existing contract
@@ -755,7 +763,9 @@ class UniversalImportView(APIView):
                             contrato.fecha_recepcion = fecha_rec or contrato.fecha_recepcion
                             contrato.fecha_emision = fecha_emi or contrato.fecha_emision
                             contrato.fecha_inicio = fecha_ini or contrato.fecha_inicio
-                            contrato.subtotal = subtotal if subtotal > 0 else contrato.subtotal
+                            contrato.valor_general = float(row.get(mapping.get('valor_general'), contrato.valor_general))
+                            contrato.a_pagar_otic = float(row.get(mapping.get('a_pagar_otic'), contrato.a_pagar_otic))
+                            contrato.a_pagar_empresa = float(row.get(mapping.get('a_pagar_empresa'), contrato.a_pagar_empresa))
                             contrato.estado = clean_val(row.get(mapping.get('estado')), contrato.estado)
                             detalle_val = clean_val(row.get(mapping.get('detalle')))
                             if detalle_val: contrato.detalle = detalle_val
@@ -771,7 +781,9 @@ class UniversalImportView(APIView):
                                 fecha_recepcion=fecha_rec,
                                 fecha_emision=fecha_emi,
                                 fecha_inicio=fecha_ini,
-                                subtotal=subtotal,
+                                valor_general=float(row.get(mapping.get('valor_general'), 0)),
+                                a_pagar_otic=float(row.get(mapping.get('a_pagar_otic'), 0)),
+                                a_pagar_empresa=float(row.get(mapping.get('a_pagar_empresa'), 0)),
                                 estado=clean_val(row.get(mapping.get('estado')), 'activo'),
                                 detalle=clean_val(row.get(mapping.get('detalle'))),
                                 observaciones=clean_val(row.get(mapping.get('observaciones'))),

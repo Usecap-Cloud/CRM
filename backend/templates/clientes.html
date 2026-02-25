@@ -119,7 +119,7 @@
         outline: none;
     }
     .convenio-pill { text-transform: capitalize; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
-    .convenio-otech { background: #e0f2fe; color: #0369a1; }
+    .convenio-otic { background: #e0f2fe; color: #0369a1; }
     .convenio-sence { background: #fef3c7; color: #92400e; }
     .convenio-particular { background: #f1f5f9; color: #475569; }
 
@@ -204,10 +204,6 @@
                     <label>Teléfono Empresarial</label>
                     <input type="text" name="telefono_empresarial" id="form-telefono-emp" placeholder="+56 9 ...">
                 </div>
-                <div class="form-group">
-                    <label>Email Empresarial</label>
-                    <input type="email" name="email_empresa" id="form-email-emp" placeholder="contacto@empresa.cl">
-                </div>
             </div>
 
             <div class="form-row">
@@ -227,7 +223,7 @@
                     <select name="tipo_convenio" id="form-convenio">
                         <option value="particular">Particular</option>
                         <option value="sence">SENCE</option>
-                        <option value="otech">OTEC</option>
+                        <option value="otic">OTIC</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -242,6 +238,10 @@
 
 
             <div class="form-row">
+                <div class="form-group">
+                    <label>Email Empresarial</label>
+                    <input type="email" name="email_empresa" id="form-email-emp" placeholder="contacto@empresa.cl">
+                </div>
                 <div class="form-group">
                     <label>Ejecutivo Asignado</label>
                     <select name="ejecutivo" id="ejecutivo-select" required>
@@ -368,7 +368,8 @@
                     };
                     const cap = (val) => {
                         if (!val || typeof val !== 'string') return val;
-                        const s = val.trim();
+                        const s = val.trim().toUpperCase();
+                        if (['OTIC', 'SENCE', 'RUT'].includes(s)) return s;
                         return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
                     return `
@@ -399,16 +400,13 @@
                                     <div style="color: #888; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px;">Convenio</div>
                                     <span class="convenio-pill convenio-${(client.tipo_convenio || 'particular').toLowerCase()}">${cap(clean(client.tipo_convenio || 'Particular'))}</span>
                                 </div>
-                                <div style="margin-top: 5px;">
-                                    <div style="color: #888; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px;">Email Empresarial</div>
-                                    <span class="td-main" style="font-size: 0.85rem; color: #1e90ff;">${clean(client.email_empresa)}</span>
-                                </div>
                             </div>
                         </td>
                         <td style="font-size: 0.8rem;">
                             <div style="margin-bottom: 10px;">
                                 <div style="color: #888; font-size: 0.7rem; font-weight: 700;">Empresa</div>
                                 <div class="td-main">${clean(client.telefono_empresarial)}</div>
+                                <div class="td-sub" style="color: #1e90ff;">${clean(client.email_empresa)}</div>
                             </div>
                             <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
                                 <div style="color: #1e90ff; font-size: 0.7rem; font-weight: 700;">Encargado</div>
