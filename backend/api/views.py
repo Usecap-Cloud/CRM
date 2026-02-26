@@ -87,8 +87,41 @@ class CursoViewSet(AuditMixin, viewsets.ModelViewSet):
     serializer_class = CursoSerializer
 
 class ContratoViewSet(AuditMixin, viewsets.ModelViewSet):
-    queryset = Contrato.objects.all()
+    queryset = Contrato.objects.none() # Required for base class metadata
     serializer_class = ContratoSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return Contrato.objects.none()
+
+        queryset = Contrato.objects.all().order_by('-id')
+        
+        # Determine Admin/Gerencia vs Regular Executive
+        is_privileged = user.is_superuser
+        ej = getattr(user, 'ejecutivo', None)
+        if ej:
+            if ej.rol.nombre in ['Administrador', 'Gerencia']:
+                is_privileged = True
+            
+        # If not privileged, filter by executive
+        if not is_privileged and ej:
+            queryset = queryset.filter(ejecutivo=ej)
+        elif not is_privileged and not ej:
+            return Contrato.objects.none()
+
+        # Split logic: Propuestas vs Contratos based on basename
+        # Propuestas: Pre-sale + Final decision (Approved/Rejected)
+        # Contratos: Execution/Operation
+        propuesta_statuses = ['nuevo requerimiento', 'aprobado', 'rechazado']
+        
+        if self.basename == 'propuestas':
+            queryset = queryset.filter(estado__in=propuesta_statuses)
+        else:
+            # Operational contracts: en proceso, liquidado, finalizado
+            queryset = queryset.exclude(estado__in=propuesta_statuses)
+
+        return queryset
 
 class ContratoCursoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = ContratoCurso.objects.all()
@@ -189,8 +222,7 @@ class DashboardStatsView(APIView):
             "empresas_activas": Cliente.objects.count(),
             "cursos_proceso": Curso.objects.filter(estado__iexact='activo').count(),
             "contratos": Contrato.objects.count(),
-            "contratos_activos": Contrato.objects.filter(tipo_registro='Contrato').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
-            "propuestas_activas": Contrato.objects.filter(tipo_registro='Propuesta').exclude(estado__iexact='finalizado').exclude(estado__iexact='cerrado').count(),
+            "contratos_activos": Contrato.objects.filter(estado__iexact='en proceso').count(),
             "seguimientos_pendientes": Seguimiento.objects.filter(cerrado=False).count(),
             "recent_activity": recent_activity,
             "agenda": agenda
@@ -388,37 +420,43 @@ class UniversalImportView(APIView):
                     elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
                         mapping['ejecutivo_rut'] = col
                 elif model_type == 'contrato':
-                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']:
-                        mapping['cliente_rut'] = col
-                    elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador']:
-                        mapping['coordinador_rut'] = col
-                    elif norm in ['folio', 'foliocontrato', 'numerocontrato', 'id_contrato', 'idcontrato', 'numero']:
-                        mapping['folio'] = col
-                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
-                        mapping['ejecutivo_rut'] = col
+                    if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']: mapping['cliente_rut'] = col
+                    elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador', 'encargado_rut']: mapping['coordinador_rut'] = col
+                    elif norm in ['folio', 'foliocontrato', 'numerocontrato', 'id_contrato', 'idcontrato', 'numero']: mapping['folio'] = col
+                    elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']: mapping['ejecutivo_rut'] = col
+                    elif norm in ['fecha', 'fechacontrato']: mapping['fecha'] = col
+                    elif norm in ['valorpersona', 'valor_persona']: mapping['valor_persona'] = col
+                    elif norm in ['valortotal', 'valor_total', 'subtotal', 'neto', 'valorneto', 'monto']: mapping['valor_total'] = col
+                    elif norm in ['pago_otic', 'pagootic', 'otic']: mapping['pago_otic'] = col
+                    elif norm in ['pago_empresa', 'pagoempresa', 'empresa_pago']: mapping['pago_empresa'] = col
+                    elif norm in ['fechaenvio', 'fecha_envio', 'envio']: mapping['fecha_envio'] = col
+                    elif norm in ['tipo_convenio', 'tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
+                    elif norm in ['curso', 'id_curso', 'nombre_curso', 'curso_nombre']: mapping['curso_ident'] = col
+                    elif norm in ['servicios', 'servicios_lista', 'listaservicios', 'serviciosasociados']: mapping['servicios_lista'] = col
+                    elif norm in ['proveedores', 'proveedores_lista', 'listaproveedores']: mapping['proveedores_lista'] = col
+                    elif norm in ['detalle', 'detalleopcional', 'nota']: mapping['detalle'] = col
+                    elif norm in ['observaciones', 'obs', 'comentarios', 'observacionesopcional']: mapping['observaciones'] = col
+                    # Operational parameters (ContratoCurso)
+                    elif norm in ['ordencompra', 'oc', 'orden_compra']: mapping['orden_compra'] = col
+                    elif norm in ['numerofactura', 'nfactura', 'factura', 'numero_factura']: mapping['numero_factura'] = col
+                    elif norm in ['rus', 'rut_unico_servicio']: mapping['rus'] = col
+                    elif norm in ['relator', 'nombre_relator', 'relator_nombre']: mapping['relator'] = col
+                    elif norm in ['fechainicio', 'fecha_inicio', 'inicio_curso']: mapping['fecha_inicio_curso'] = col
+                    elif norm in ['fechafinal', 'fecha_fin', 'termino_curso', 'fin_curso']: mapping['fecha_fin_curso'] = col
+                    elif norm in ['horas', 'duracion', 'duracion_horas', 'h_totales']: mapping['duracion_horas'] = col
+                    elif norm in ['participantes', 'n_participantes', 'numero_participantes', 'alumnos']: mapping['numero_participantes'] = col
                 elif model_type == 'seguimiento':
-                    if norm in ['foliocontrato', 'folio', 'contrato']:
-                        mapping['contrato_folio'] = col
-                    elif norm in ['fecha', 'fechasoluicitud', 'fecharegistro', 'fecha_solicitud', 'fechasolicitud']:
-                        mapping['fecha'] = col
-                    elif norm in ['tipo', 'tipo_contrato', 'tipopropuesta']:
-                        mapping['tipo'] = col
-                    elif norm in ['requerimiento', 'solicitud', 'detalle', 'requirimiento']:
-                        mapping['requerimiento'] = col
-                    elif norm in ['estado', 'status', 'estadosolicitud', 'estado_solicitud']:
-                        mapping['estado'] = col
-                    elif norm in ['proxima_fecha', 'proximo_seguimiento', 'fecha_seguimiento', 'fechaseguimiento']:
-                        mapping['fecha_seguimiento'] = col
-                    elif norm in ['fechaenvio', 'fecha_envio', 'envio']:
-                        mapping['fecha_envio'] = col
-                    elif norm in ['respuesta', 'respuestacliente']:
-                        mapping['respuesta'] = col
-                    elif norm in ['accion', 'accionrealizada', 'tipoacccion']:
-                        mapping['accion'] = col
-                    elif norm in ['cerrado', 'cerradosino', 'closed', 'siono']:
-                        mapping['cerrado'] = col
-                    elif norm in ['respuestaseguimiento', 'respuesta_seguimiento', 'notasseguimiento']:
-                        mapping['respuesta_seguimiento'] = col
+                    if norm in ['foliocontrato', 'folio', 'contrato']: mapping['contrato_folio'] = col
+                    elif norm in ['fecha', 'fechasoluicitud', 'fecharegistro', 'fecha_solicitud', 'fechasolicitud']: mapping['fecha'] = col
+                    elif norm in ['tipo', 'tipo_contrato', 'tipopropuesta']: mapping['tipo'] = col
+                    elif norm in ['requerimiento', 'solicitud', 'detalle', 'requirimiento']: mapping['requerimiento'] = col
+                    elif norm in ['estado', 'status', 'estadosolicitud', 'estado_solicitud']: mapping['estado'] = col
+                    elif norm in ['proxima_fecha', 'proximo_seguimiento', 'fecha_seguimiento', 'fechaseguimiento']: mapping['fecha_seguimiento'] = col
+                    elif norm in ['fechaenvio', 'fecha_envio', 'envio']: mapping['fecha_envio'] = col
+                    elif norm in ['respuesta', 'respuestacliente']: mapping['respuesta'] = col
+                    elif norm in ['accion', 'accionrealizada', 'tipoacccion']: mapping['accion'] = col
+                    elif norm in ['cerrado', 'cerradosino', 'closed', 'siono']: mapping['cerrado'] = col
+                    elif norm in ['respuestaseguimiento', 'respuesta_seguimiento', 'notasseguimiento']: mapping['respuesta_seguimiento'] = col
 
                 # 3. Common Fields
                 if norm in ['razonsocial', 'empresa', 'razon']: mapping['razon_social'] = col
@@ -442,12 +480,18 @@ class UniversalImportView(APIView):
 
                 # 4. Model-Specific Fields
                 if model_type == 'contrato':
-                    if norm in ['tiporegistro', 'tipo', 'tipo_registro']: mapping['tipo_registro'] = col
-                    elif norm in ['fecharecepcion', 'recepcion', 'fecha_recepcion']: mapping['fecha_recepcion'] = col
-                    elif norm in ['fechaemision', 'emision', 'fecha_emision']: mapping['fecha_emision'] = col
-                    elif norm in ['fechainicio', 'iniciocontrato', 'fecinicio', 'fecha_inicio']: mapping['fecha_inicio'] = col
-                    elif norm in ['subtotal', 'neto', 'valorneto', 'monto']: mapping['subtotal'] = col
-                    elif norm in ['detalle', 'detalleopcional', 'nota']: mapping['detalle'] = col
+                    if norm in ['folio', 'foliocontrato', 'numerocontrato', 'id_contrato', 'idcontrato', 'numero']: mapping['folio'] = col
+                    elif norm in ['fecha', 'fechacontrato']: mapping['fecha'] = col
+                    elif norm in ['valorpersona', 'valor_persona']: mapping['valor_persona'] = col
+                    elif norm in ['valortotal', 'valor_total', 'subtotal', 'neto', 'valorneto', 'monto']: mapping['valor_total'] = col
+                    elif norm in ['pago_otic', 'pagootic', 'otic']: mapping['pago_otic'] = col
+                    elif norm in ['pago_empresa', 'pagoempresa', 'empresa_pago']: mapping['pago_empresa'] = col
+                    elif norm in ['fechaenvio', 'fecha_envio', 'envio']: mapping['fecha_envio'] = col
+                    elif norm in ['tipo_convenio', 'tipoconvenio', 'convenio']: mapping['tipo_convenio'] = col
+                    elif norm in ['curso', 'id_curso', 'nombre_curso', 'curso_nombre']: mapping['curso_ident'] = col
+                    elif norm in ['servicios', 'servicios_lista', 'listaservicios', 'serviciosasociados']: mapping['servicios_lista'] = col
+                    elif norm in ['proveedores', 'proveedores_lista', 'listaproveedores']: mapping['proveedores_lista'] = col
+                    elif norm in ['detalle', 'detalleopcional', 'nota', 'glosa']: mapping['detalle'] = col
                     elif norm in ['observaciones', 'obs', 'comentarios', 'observacionesopcional']: mapping['observaciones'] = col
 
             created_count = 0
@@ -635,7 +679,7 @@ class UniversalImportView(APIView):
                             contacto=clean_val(row.get(mapping.get('nombre_contacto'))),
                             email=clean_val(row.get(mapping.get('email'))),
                             telefono=clean_val(row.get(mapping.get('telefono'))),
-                            rubro=clean_val(row.get(mapping.get('rubro')))
+                            categoria=clean_val(row.get(mapping.get('rubro')) or row.get(mapping.get('categoria'))),
                         )
                         created_count += 1
                     elif model_type == 'coordinador':
@@ -744,6 +788,13 @@ class UniversalImportView(APIView):
                         if coor_rut:
                             coordinador = Coordinador.objects.filter(rut_coordinador=coor_rut).first()
 
+                        # Link single Course
+                        curso_obj = None
+                        curso_ident = clean_val(row.get(mapping.get('curso_ident')))
+                        if curso_ident:
+                            curso_obj = Curso.objects.filter(nombre__iexact=curso_ident).first() or \
+                                        Curso.objects.filter(codigo__iexact=curso_ident).first()
+
                         # Date parsing
                         def parse_date(val):
                             if pd.isna(val) or not val: return None
@@ -752,44 +803,137 @@ class UniversalImportView(APIView):
                                 return pd.to_datetime(val, dayfirst=True).date()
                             except: return None
 
-                        fecha_rec = parse_date(row.get(mapping.get('fecha_recepcion')))
-                        fecha_emi = parse_date(row.get(mapping.get('fecha_emision')))
-                        fecha_ini = parse_date(row.get(mapping.get('fecha_inicio')))
+                        fecha_val = parse_date(row.get(mapping.get('fecha')))
+                        fecha_envio_val = parse_date(row.get(mapping.get('fecha_envio')))
 
+                        def clean_num(val):
+                            if pd.isna(val) or val == '': return 0.0
+                            try:
+                                if isinstance(val, str):
+                                    # Handle things like "$ 1.234,56" or "1,234.56"
+                                    # This is a bit complex but let's do common chilean format
+                                    val = val.replace('$','').replace('.','').replace(',','.').strip()
+                                return float(val)
+                            except: return 0.0
+
+                        v_pers = clean_num(row.get(mapping.get('valor_persona')))
+                        v_total = clean_num(row.get(mapping.get('valor_total')))
+                        p_otic = clean_num(row.get(mapping.get('pago_otic')))
+                        p_emp = clean_num(row.get(mapping.get('pago_empresa')))
+
+                        # Many-to-Many Linking Helper (Smart Lookup)
+                        def link_m2m(obj, field_name, model_class, values_str):
+                            if not values_str or pd.isna(values_str): return
+                            parts = [p.strip() for p in str(values_str).split(',') if p.strip()]
+                            for val in parts:
+                                # 1. Try by exact name (case insensitive)
+                                item = model_class.objects.filter(nombre__iexact=val).first()
+                                
+                                # 2. If not found and it's Proveedor, try by RUT
+                                if not item and model_class == Proveedor:
+                                    # Try to normalize and search by RUT
+                                    try:
+                                        if validate_rut_chile(val):
+                                            rut_fmt = format_rut_chile(val)
+                                            item = Proveedor.objects.filter(rut_proveedor=rut_fmt).first()
+                                        else:
+                                            # Try raw numeric search if it looks like a RUT
+                                            clean_v = val.replace('.','').replace('-','').upper()
+                                            for p in Proveedor.objects.all():
+                                                if p.rut_proveedor.replace('.','').replace('-','').upper() == clean_v:
+                                                    item = p
+                                                    break
+                                    except: pass
+                                
+                                if item:
+                                    getattr(obj, field_name).add(item)
 
                         if contrato:
                             # Update existing contract
-                            contrato.tipo_registro = clean_val(row.get(mapping.get('tipo_registro')), contrato.tipo_registro)
-                            contrato.fecha_recepcion = fecha_rec or contrato.fecha_recepcion
-                            contrato.fecha_emision = fecha_emi or contrato.fecha_emision
-                            contrato.fecha_inicio = fecha_ini or contrato.fecha_inicio
-                            contrato.valor_general = float(row.get(mapping.get('valor_general'), contrato.valor_general))
-                            contrato.a_pagar_otic = float(row.get(mapping.get('a_pagar_otic'), contrato.a_pagar_otic))
-                            contrato.a_pagar_empresa = float(row.get(mapping.get('a_pagar_empresa'), contrato.a_pagar_empresa))
-                            contrato.estado = clean_val(row.get(mapping.get('estado')), contrato.estado)
+                            contrato.fecha = fecha_val or contrato.fecha
+                            contrato.fecha_envio = fecha_envio_val or contrato.fecha_envio
+                            contrato.valor_persona = v_pers or contrato.valor_persona
+                            contrato.valor_total = v_total or contrato.valor_total
+                            contrato.pago_otic = p_otic or contrato.pago_otic
+                            contrato.pago_empresa = p_emp or contrato.pago_empresa
+                            contrato.estado = clean_val(row.get(mapping.get('estado')), contrato.estado).lower()
+                            contrato.tipo_convenio = clean_val(row.get(mapping.get('tipo_convenio')), contrato.tipo_convenio)
+                            contrato.curso = curso_obj or contrato.curso
                             detalle_val = clean_val(row.get(mapping.get('detalle')))
                             if detalle_val: contrato.detalle = detalle_val
                             obs_val = clean_val(row.get(mapping.get('observaciones')))
                             if obs_val: contrato.observaciones = obs_val
                             contrato.save()
+                            
+                            # Update M2M
+                            link_m2m(contrato, 'servicios', Servicio, row.get(mapping.get('servicios_lista')) or row.get(mapping.get('detalle')))
+                            link_m2m(contrato, 'proveedores', Proveedor, row.get(mapping.get('proveedores_lista')))
+
+                            # Update ContratoCurso (Operational record)
+                            from .models import ContratoCurso
+                            op_obj = ContratoCurso.objects.filter(contrato=contrato, curso=curso_obj or contrato.curso).first()
+                            if op_obj:
+                                op_obj.orden_compra = clean_val(row.get(mapping.get('orden_compra')), op_obj.orden_compra)
+                                op_obj.numero_factura = clean_val(row.get(mapping.get('numero_factura')), op_obj.numero_factura)
+                                op_obj.rus = clean_val(row.get(mapping.get('rus')), op_obj.rus)
+                                op_obj.relator = clean_val(row.get(mapping.get('relator')), op_obj.relator)
+                                op_obj.fecha_inicio_curso = parse_date(row.get(mapping.get('fecha_inicio_curso'))) or op_obj.fecha_inicio_curso
+                                op_obj.fecha_fin_curso = parse_date(row.get(mapping.get('fecha_fin_curso'))) or op_obj.fecha_fin_curso
+                                op_obj.duracion_horas = int(row.get(mapping.get('duracion_horas'), op_obj.duracion_horas)) if not pd.isna(row.get(mapping.get('duracion_horas'))) else op_obj.duracion_horas
+                                op_obj.numero_participantes = int(row.get(mapping.get('numero_participantes'), op_obj.numero_participantes)) if not pd.isna(row.get(mapping.get('numero_participantes'))) else op_obj.numero_participantes
+                                op_obj.save()
+                            elif curso_obj or contrato.curso:
+                                ContratoCurso.objects.create(
+                                    contrato=contrato,
+                                    curso=curso_obj or contrato.curso,
+                                    orden_compra=clean_val(row.get(mapping.get('orden_compra'))),
+                                    numero_factura=clean_val(row.get(mapping.get('numero_factura'))),
+                                    rus=clean_val(row.get(mapping.get('rus'))),
+                                    relator=clean_val(row.get(mapping.get('relator'))),
+                                    fecha_inicio_curso=parse_date(row.get(mapping.get('fecha_inicio_curso'))),
+                                    fecha_fin_curso=parse_date(row.get(mapping.get('fecha_fin_curso'))),
+                                    duracion_horas=int(row.get(mapping.get('duracion_horas'), 0)) if not pd.isna(row.get(mapping.get('duracion_horas'), 0)) else 0,
+                                    numero_participantes=int(row.get(mapping.get('numero_participantes'), 0)) if not pd.isna(row.get(mapping.get('numero_participantes'), 0)) else 0,
+                                    tipo_curso='SENCE'
+                                )
                         else:
                             # Create new
-                            Contrato.objects.create(
+                            new_c = Contrato.objects.create(
                                 folio=folio_val,
-                                tipo_registro=clean_val(row.get(mapping.get('tipo_registro')), 'Contrato'),
                                 empresa=cliente.razon_social,
-                                fecha_recepcion=fecha_rec,
-                                fecha_emision=fecha_emi,
-                                fecha_inicio=fecha_ini,
-                                valor_general=float(row.get(mapping.get('valor_general'), 0)),
-                                a_pagar_otic=float(row.get(mapping.get('a_pagar_otic'), 0)),
-                                a_pagar_empresa=float(row.get(mapping.get('a_pagar_empresa'), 0)),
-                                estado=clean_val(row.get(mapping.get('estado')), 'activo'),
+                                fecha=fecha_val,
+                                fecha_envio=fecha_envio_val,
+                                valor_persona=v_pers,
+                                valor_total=v_total,
+                                pago_otic=p_otic,
+                                pago_empresa=p_emp,
+                                estado=clean_val(row.get(mapping.get('estado')), 'nuevo requerimiento').lower(),
+                                tipo_convenio=clean_val(row.get(mapping.get('tipo_convenio')), 'Particular'),
+                                curso=curso_obj,
                                 detalle=clean_val(row.get(mapping.get('detalle'))),
                                 observaciones=clean_val(row.get(mapping.get('observaciones'))),
                                 cliente=cliente,
                                 ejecutivo=ejecutivo,
                                 coordinador=coordinador
+                            )
+                            # Link M2M
+                            link_m2m(new_c, 'servicios', Servicio, row.get(mapping.get('servicios_lista')) or row.get(mapping.get('detalle')))
+                            link_m2m(new_c, 'proveedores', Proveedor, row.get(mapping.get('proveedores_lista')))
+
+                            # Create ContratoCurso (Operational record)
+                            from .models import ContratoCurso
+                            ContratoCurso.objects.create(
+                                contrato=new_c,
+                                curso=curso_obj,
+                                orden_compra=clean_val(row.get(mapping.get('orden_compra'))),
+                                numero_factura=clean_val(row.get(mapping.get('numero_factura'))),
+                                rus=clean_val(row.get(mapping.get('rus'))),
+                                relator=clean_val(row.get(mapping.get('relator'))),
+                                fecha_inicio_curso=parse_date(row.get(mapping.get('fecha_inicio_curso'))),
+                                fecha_fin_curso=parse_date(row.get(mapping.get('fecha_fin_curso'))),
+                                duracion_horas=int(row.get(mapping.get('duracion_horas'), 0)) if not pd.isna(row.get(mapping.get('duracion_horas'), 0)) else 0,
+                                numero_participantes=int(row.get(mapping.get('numero_participantes'), 0)) if not pd.isna(row.get(mapping.get('numero_participantes'), 0)) else 0,
+                                tipo_curso='SENCE' # Default
                             )
                         created_count += 1
                     elif model_type == 'seguimiento':
@@ -1024,6 +1168,14 @@ def cursos_view(request):
         if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
             return redirect('dashboard')
     return render(request, 'cursos.html')
+
+def propuestas_view(request):
+    from django.shortcuts import render, redirect
+    if not request.user.is_superuser:
+        ej = getattr(request.user, 'ejecutivo', None)
+        if not ej or ej.rol.nombre not in ['Administrador', 'Gerencia', 'Ejecutivo Comercial', 'Coordinador Académico']:
+            return redirect('dashboard')
+    return render(request, 'propuestas.html')
 
 def contratos_view(request):
     from django.shortcuts import render, redirect

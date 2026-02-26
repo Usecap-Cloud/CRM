@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Contratos - USECAP CRM{% endblock %}
+{% block title %}Contratos Operativos - USECAP CRM{% endblock %}
 {% block nav_contratos %}active{% endblock %}
 
 {% block extra_styles %}
@@ -159,10 +159,11 @@
         transform: translateY(-2px);
     }
     .contratos-table th {
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        letter-spacing: 1px;
+        text-transform: capitalize;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
         color: var(--text-muted);
+        font-weight: 600;
     }
 </style>
 {% endblock %}
@@ -188,7 +189,7 @@
     </div>
 
     <div class="card">
-        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Contratos...</div>
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Contratos Operativos...</div>
         <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información
             disponible</div>
         <table class="contratos-table" id="contratos-table" style="display: none;">
@@ -196,10 +197,10 @@
                 <tr>
                     <th style="width: 40px;"></th>
                     <th>Empresa</th>
+                    <th>Facturación</th>
+                    <th>RUS</th>
                     <th>Estado</th>
-                    <th>Fecha</th>
-                    <th>Finanzas</th>
-                    <th></th>
+                    <th>Seguimiento</th>
                     <th style="text-align: right;"></th>
                 </tr>
             </thead>
@@ -219,74 +220,125 @@
             <input type="hidden" name="id" id="contrato-id">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Tipo de Registro</label>
-                    <select name="tipo_registro" id="form-tipo_registro" required>
-                        <option value="Propuesta">Propuesta</option>
-                        <option value="Contrato">Contrato</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label>Empresa</label>
                     <select name="empresa" id="empresa-select" required>
                         <option value="">Seleccionar empresa...</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="form-row">
                 <div class="form-group">
-                    <label>Fecha</label>
-                    <input type="date" name="fecha" id="form-fecha">
-                </div>
-                <div class="form-group">
-                    <label>Estado Inicial</label>
+                    <label>Estado</label>
                     <select name="estado" id="form-estado" required>
-                        <option value="Activo">Activo</option>
-                        <option value="Cerrado">Cerrado</option>
-                        <option value="Finalizado">Finalizado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Encargado (Contacto)</label>
-                    <select name="encargado" id="encargado-select">
-                        <option value="">Seleccionar encargado...</option>
+                        <option value="aprobado">Aprobado (Pasar a Propuestas)</option>
+                        <option value="rechazado">Rechazado (Pasar a Propuestas)</option>
+                        <option value="en proceso">En Proceso</option>
+                        <option value="liquidado">Liquidado</option>
+                        <option value="finalizado">Finalizado</option>
                     </select>
                 </div>
             </div>
 
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Valor General</label>
-                    <input type="number" name="valor_general" id="form-valor_general" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>A Pagar OTIC</label>
-                    <input type="number" name="a_pagar_otic" id="form-a_pagar_otic" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>A Pagar Empresa</label>
-                    <input type="number" name="a_pagar_empresa" id="form-a_pagar_empresa" placeholder="0">
+            <div class="form-row" style="background: rgba(30,144,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border-color); margin-bottom: 24px;">
+                <div style="width: 100%;">
+                    <h4 style="font-size: 0.8rem; color: #1e90ff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        &#x2699; Parámetros Operativos (ContratoCurso)
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Orden de Compra (OC)</label>
+                            <input type="text" name="orden_compra" id="form-orden_compra" placeholder="OC-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Número Factura</label>
+                            <input type="text" name="numero_factura" id="form-numero_factura" placeholder="0001">
+                        </div>
+                        <div class="form-group">
+                            <label>RUS</label>
+                            <input type="text" name="rus" id="form-rus" placeholder="RUS-XXXX">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Relator</label>
+                            <input type="text" name="relator" id="form-relator" placeholder="Nombre del relator">
+                        </div>
+                        <div class="form-group">
+                            <label>Modalidad</label>
+                            <select name="modalidad" id="form-modalidad">
+                                <option value="E-learning">E-learning</option>
+                                <option value="Presencial">Presencial</option>
+                                <option value="Mixta">Mixta</option>
+                                <option value="Sincrónica">Sincrónica</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha Inicio Curso</label>
+                            <input type="date" name="fecha_inicio_curso" id="form-fecha_inicio_curso">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Fin Curso</label>
+                            <input type="date" name="fecha_fin_curso" id="form-fecha_fin_curso">
+                        </div>
+                        <div class="form-group">
+                            <label>Horas</label>
+                            <input type="number" name="duracion_horas" id="form-duracion_horas" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Participantes</label>
+                            <input type="number" name="numero_participantes" id="form-numero_participantes" placeholder="0">
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Servicios</label>
-                    <select name="servicios" id="servicios-select" multiple style="height: 100px;">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Proveedores</label>
-                    <select name="proveedores" id="proveedores-select" multiple style="height: 100px;">
+                    <label>Curso</label>
+                    <select name="curso" id="curso-select">
+                        <option value="">Seleccionar curso...</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Cursos</label>
-                    <select name="cursos" id="cursos-select" multiple style="height: 100px;">
+                    <label>Servicios (Selección Múltiple)</label>
+                    <select name="servicios" id="servicios-select" multiple 
+                            style="height: 120px; border: 2px solid var(--border-color); border-radius: 12px; padding: 10px; font-size: 0.8rem; cursor: pointer;"
+                            onchange="checkOtrosServicio()">
+                    </select>
+                    <small style="color: var(--text-muted); font-size: 0.65rem;">Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar varios</small>
+
+                    <!-- Detalle para 'Otros' -->
+                    <div id="otro-servicio-container" style="display: none; margin-top: 15px; padding: 15px; background: rgba(30,144,255,0.05); border-radius: 12px; border: 1px dashed #1e90ff;">
+                        <label style="font-size: 0.75rem; color: #1e90ff; font-weight: 700; margin-bottom: 8px; display: block;">Detalle de Nuevo Servicio</label>
+                        <input type="text" id="form-otro_servicio" name="otro_servicio" placeholder="Ej: Consultoría en IA, Soporte 24/7..." 
+                               style="background: #fff; border: 1px solid #1e90ff;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Costos y Proveedores por Servicio -->
+            <div id="proveedores-costos-container" style="margin-bottom: 24px;">
+                <h4 style="font-size: 0.8rem; color: #1e90ff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    &#x1F69A; Asignación de Costos y Proveedores
+                </h4>
+                <div id="servicios-items-list" style="display: grid; gap: 12px;">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+                <div id="no-servicios-msg" style="text-align: center; padding: 20px; border: 1px dashed var(--border-color); border-radius: 12px; color: var(--text-muted); font-size: 0.8rem;">
+                    Seleccione servicios arriba para asignar proveedores y costos
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo de Convenio</label>
+                    <select name="tipo_convenio" id="form-tipo_convenio">
+                        <option value="Particular">Particular</option>
+                        <option value="OTIC">OTIC</option>
+                        <option value="SENCE">SENCE</option>
                     </select>
                 </div>
             </div>
@@ -330,24 +382,41 @@
         document.getElementById('form-view').classList.add('active');
         
         // Reset multi-selects
-        ['servicios-select', 'proveedores-select', 'cursos-select'].forEach(id => {
+        ['servicios-select', 'proveedores-select'].forEach(id => {
             const select = document.getElementById(id);
             if (select) {
                 Array.from(select.options).forEach(opt => opt.selected = false);
             }
         });
+        const serviciosSelect = document.getElementById('servicios-select');
+        if (serviciosSelect) {
+            Array.from(serviciosSelect.options).forEach(opt => opt.selected = false);
+        }
+        document.getElementById('otro-servicio-container').style.display = 'none';
+        document.getElementById('form-otro_servicio').value = '';
+        document.getElementById('servicios-items-list').innerHTML = '';
+        document.getElementById('no-servicios-msg').style.display = 'block';
+    
 
         if (data) {
             document.getElementById('form-title').textContent = 'Editar Contrato';
             document.getElementById('contrato-id').value = data.id;
             document.getElementById('empresa-select').value = data.cliente;
-            document.getElementById('form-tipo_registro').value = data.tipo_registro || 'Contrato';
-            document.getElementById('form-fecha').value = data.fecha || '';
             document.getElementById('form-estado').value = data.estado;
-            document.getElementById('form-valor_general').value = data.valor_general || 0;
-            document.getElementById('form-a_pagar_otic').value = data.a_pagar_otic || 0;
-            document.getElementById('form-a_pagar_empresa').value = data.a_pagar_empresa || 0;
-            document.getElementById('encargado-select').value = data.coordinador || '';
+            document.getElementById('form-tipo_convenio').value = data.tipo_convenio || 'Particular';
+            document.getElementById('curso-select').value = data.curso || '';
+
+            // Populate Operativo Data (from first ContratoCurso)
+            const op = (data.contratocurso_set && data.contratocurso_set.length > 0) ? data.contratocurso_set[0] : {};
+            document.getElementById('form-orden_compra').value = op.orden_compra || '';
+            document.getElementById('form-numero_factura').value = op.numero_factura || '';
+            document.getElementById('form-rus').value = op.rus || '';
+            document.getElementById('form-relator').value = op.relator || '';
+            document.getElementById('form-modalidad').value = op.modalidad || 'E-learning';
+            document.getElementById('form-fecha_inicio_curso').value = op.fecha_inicio_curso || '';
+            document.getElementById('form-fecha_fin_curso').value = op.fecha_fin_curso || '';
+            document.getElementById('form-duracion_horas').value = op.duracion_horas || 0;
+            document.getElementById('form-numero_participantes').value = op.numero_participantes || 0;
             
 
             // Handle Multi-selects
@@ -357,15 +426,15 @@
                     if (opt) opt.selected = true;
                 });
             }
+            if (data.otro_servicio) {
+                const otrosOpt = document.querySelector('#servicios-select option[value="otros"]');
+                if (otrosOpt) otrosOpt.selected = true;
+                document.getElementById('form-otro_servicio').value = data.otro_servicio;
+                document.getElementById('otro-servicio-container').style.display = 'block';
+            }
             if (data.proveedores) {
                 data.proveedores.forEach(id => {
                     const opt = document.querySelector(`#proveedores-select option[value="${id}"]`);
-                    if (opt) opt.selected = true;
-                });
-            }
-            if (data.cursos) {
-                data.cursos.forEach(id => {
-                    const opt = document.querySelector(`#cursos-select option[value="${id}"]`);
                     if (opt) opt.selected = true;
                 });
             }
@@ -375,10 +444,107 @@
             document.getElementById('form-title').textContent = 'Nuevo Contrato';
             document.getElementById('contrato-id').value = '';
             document.getElementById('contrato-form').reset();
-            document.getElementById('form-valor_general').value = 0;
-            document.getElementById('form-a_pagar_otic').value = 0;
-            document.getElementById('form-a_pagar_empresa').value = 0;
+            document.getElementById('form-valor_persona').value = 0;
+            document.getElementById('form-valor_total').value = 0;
+            document.getElementById('form-pago_otic').value = 0;
+            document.getElementById('form-pago_empresa').value = 0;
             document.getElementById('submit-btn').textContent = 'Crear Contrato';
+        }
+
+        // Always sync the cost rows after setting data
+        updateServiceCostRows(data);
+    }
+
+    let allProveedores = [];
+    async function getProveedoresList() {
+        if (allProveedores.length > 0) return allProveedores;
+        try {
+            const response = await fetch('/api/proveedores/');
+            const data = await response.json();
+            allProveedores = Array.isArray(data) ? data : (data.results || []);
+            return allProveedores;
+        } catch (e) { return []; }
+    }
+
+    async function updateServiceCostRows(data = null) {
+        const select = document.getElementById('servicios-select');
+        const list = document.getElementById('servicios-items-list');
+        const msg = document.getElementById('no-servicios-msg');
+        
+        const selectedOptions = Array.from(select.options).filter(opt => opt.selected && opt.value !== 'others');
+        
+        if (selectedOptions.length === 0) {
+            list.innerHTML = '';
+            msg.style.display = 'block';
+            return;
+        }
+        
+        msg.style.display = 'none';
+        const proveedores = await getProveedoresList();
+        
+        // Keep track of existing values in the DOM to not lose them on re-render if possible
+        const currentVals = {};
+        list.querySelectorAll('.service-cost-row').forEach(row => {
+            const sid = row.dataset.servicioId;
+            currentVals[sid] = {
+                prov: row.querySelector('.prov-sel').value,
+                cost: row.querySelector('.cost-inp').value
+            };
+        });
+
+        list.innerHTML = '';
+        selectedOptions.forEach(opt => {
+            const sid = opt.value;
+            const sname = opt.textContent;
+            
+            // Check if we have data from the database (edit mode)
+            let dbProv = "";
+            let dbCost = "";
+            if (data && data.contratoproveedor_set) {
+                const match = data.contratoproveedor_set.find(cp => cp.servicio == sid);
+                if (match) {
+                    dbProv = match.proveedor;
+                    dbCost = match.costo_negociado;
+                }
+            }
+            
+            const saved = currentVals[sid] || { prov: dbProv, cost: dbCost };
+
+            const row = document.createElement('div');
+            row.className = 'service-cost-row';
+            row.dataset.servicioId = sid;
+            row.style = "display: grid; grid-template-columns: 1fr 1fr 120px; gap: 15px; align-items: flex-end; padding: 12px; background: #fff; border: 1px solid var(--border-color); border-radius: 10px; border-left: 4px solid #1e90ff;";
+            
+            row.innerHTML = `
+                <div>
+                    <label style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Servicio</label>
+                    <div style="font-size: 0.8rem; font-weight: 600;">${sname}</div>
+                </div>
+                <div>
+                    <label style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Proveedor</label>
+                    <select class="prov-sel" style="padding: 6px; font-size: 0.8rem; border-radius: 6px;" onchange="checkOtroProv(this)">
+                        <option value="">Seleccionar...</option>
+                        ${proveedores.map(p => `<option value="${p.id}" ${p.id == saved.prov ? 'selected' : ''}>${p.nombre}</option>`).join('')}
+                        <option value="otros" ${saved.prov == 'otros' ? 'selected' : ''} style="font-weight:700; color:#1e90ff;">OTRO (Nuevo...)</option>
+                    </select>
+                    <!-- Detalle para nuevo proveedor -->
+                    <input type="text" class="otro-prov-inp" value="${saved.otro || ''}" 
+                           placeholder="Nombre del nuevo proveedor" 
+                           style="display: ${saved.prov == 'otros' ? 'block' : 'none'}; margin-top: 8px; padding: 6px; font-size: 0.75rem; border-radius: 6px; border: 1px solid #1e90ff; width: 100%;">
+                </div>
+                <div>
+                    <label style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Costo Negociado</label>
+                    <input type="number" class="cost-inp" value="${saved.cost}" placeholder="0" style="padding: 6px; font-size: 0.8rem; border-radius: 6px;">
+                </div>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    function checkOtroProv(select) {
+        const inp = select.nextElementSibling;
+        if (inp && inp.classList.contains('otro-prov-inp')) {
+            inp.style.display = select.value === 'otros' ? 'block' : 'none';
         }
     }
 
@@ -415,16 +581,17 @@
                     };
                     const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
                     
+                    // Get first ContratoCurso for main table display
+                    const op = (c.contratocurso_set && c.contratocurso_set.length > 0) ? c.contratocurso_set[0] : {};
+                    
                     const pendingSegs = (c.seguimientos_info || []).filter(s => !s.cerrado);
                     const nextSeg = pendingSegs.length > 0 
                         ? pendingSegs.sort((a,b) => new Date(a.fecha_seguimiento || a.fecha) - new Date(b.fecha_seguimiento || b.fecha))[0]
                         : null;
                     const nextSegDate = nextSeg ? (nextSeg.fecha_seguimiento || nextSeg.fecha) : '-';
                     
-                    const tipoClass = c.tipo_registro && c.tipo_registro.toLowerCase().includes('contrato') ? 'success' : 
-                                     (c.tipo_registro && c.tipo_registro.toLowerCase().includes('propuesta') ? 'warning' : 'info');
-                    const estadoClass = c.estado && (c.estado.toLowerCase().includes('activo') || c.estado.toLowerCase().includes('firmado')) ? 'active' : 
-                                      (c.estado && (c.estado.toLowerCase().includes('pendiente') || c.estado.toLowerCase().includes('cerrado')) ? 'warning' : '');
+                    const estadoClass = c.estado && (c.estado.toLowerCase().includes('proceso') || c.estado.toLowerCase().includes('aprobado')) ? 'active' : 
+                                       (c.estado && (c.estado.toLowerCase().includes('nuevo') || c.estado.toLowerCase().includes('liquidado')) ? 'warning' : '');
                     
                     return `
                     <tr class="main-row" onclick="toggleAccordion(${c.id})">
@@ -434,26 +601,19 @@
                         <td>
                             <div style="font-weight: 800; color: #1e90ff; font-size: 0.75rem; margin-bottom: 2px;">${clean(c.folio)}</div>
                             <div class="td-main">${clean(c.empresa_nombre || c.empresa)}</div>
-                            <span class="status-badge ${tipoClass}" style="font-size: 0.65rem;">${clean(c.tipo_registro)}</span>
+                        </td>
+                        <td>
+                            <div class="td-main">${clean(op.orden_compra)}</div>
+                            <div class="td-sub">${clean(op.numero_factura)}</div>
+                        </td>
+                        <td>
+                            <div class="td-main">${clean(op.rus)}</div>
+                            <div class="td-sub">${clean(op.relator)}</div>
                         </td>
                         <td>
                             <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
                         </td>
-                        <td style="color: var(--text-muted); font-weight: 500;">${clean(c.fecha)}</td>
-                        <td style="font-size: 0.8rem; color: var(--text-muted);">
-                            <div style="display: flex; flex-direction: column; gap: 2px;">
-                                <span>Gral: <strong>${fmtCur(c.valor_general)}</strong></span>
-                                <span style="font-size: 0.7rem; opacity: 0.8;">OTIC: ${fmtCur(c.a_pagar_otic)}</span>
-                                <span style="font-size: 0.7rem; opacity: 0.8;">Emp: ${fmtCur(c.a_pagar_empresa)}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                ${c.servicios_info && c.servicios_info.length > 0 ? `<span class="status-badge info" title="Servicios">S: ${c.servicios_info.length}</span>` : ''}
-                                ${c.cursos_info && c.cursos_info.length > 0 ? `<span class="status-badge info" style="background: #e1f5fe; color: #01579b;" title="Cursos">C: ${c.cursos_info.length}</span>` : ''}
-                                ${pendingSegs.length > 0 ? `<span class="status-badge warning" title="Pendientes">P: ${pendingSegs.length}</span>` : ''}
-                            </div>
-                        </td>
+                        <td style="color: #d9480f; font-weight: 700; font-size: 0.8rem;">${nextSegDate}</td>
                         <td style="text-align: right;">
                             <div style="display: flex; gap: 8px; justify-content: flex-end;" onclick="event.stopPropagation()">
                                 <a href="/api/seguimiento-page/" class="pill-btn" style="padding: 4px 10px; font-size: 0.7rem; background: #1e90ff; color: #fff;">Seguimiento</a>
@@ -465,67 +625,79 @@
                     <tr id="detail-${c.id}" class="detail-row" style="display: none;">
                         <td colspan="7">
                             <div class="detail-container">
-                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                                <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.5fr; gap: 20px;">
+                                    <!-- Column 1: Detalles Operativos -->
                                     <div class="detail-section">
                                         <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
-                                            &#x1F4DA; Cursos Asociados
+                                            Curso
                                         </h4>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
-                                            ${c.info_cursos && c.info_cursos.length > 0 
-                                                ? c.info_cursos.map(cu => `
-                                                    <div style="padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px;">
-                                                        <div style="font-weight: 700; color: var(--text-color);">${cu.tipo_curso}</div>
-                                                        <div style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">Relator: ${cu.relator || '-'} | Partic: ${cu.numero_participantes || 0}</div>
-                                                        <div style="font-size: 0.7rem; color: #1e90ff; margin-top: 2px;">Costo: ${fmtCur(cu.costo)}</div>
-                                                    </div>
-                                                `).join('')
-                                                : (c.cursos_info && c.cursos_info.length > 0 
-                                                    ? c.cursos_info.map(cu => `<div style="padding: 5px; border-bottom: 1px solid var(--border-color);">&#x2022; ${cu.nombre}</div>`).join('')
-                                                    : '<p style="font-style: italic; opacity: 0.5; padding: 10px;">Sin cursos detallados</p>')
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="detail-section">
-                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
-                                            &#x1F4C2; Servicios y Proveedores
-                                        </h4>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
-                                            ${c.info_servicios_proveedores && c.info_servicios_proveedores.length > 0 
-                                                ? c.info_servicios_proveedores.map(sp => `
-                                                    <div style="padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px;">
-                                                        <div style="font-weight: 700; color: var(--text-color);">${sp.servicio_nombre}</div>
-                                                        <div style="font-size: 0.75rem; color: #3b82f6; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
-                                                            &#x1F69A; <strong>${sp.proveedor_nombre}</strong>
-                                                        </div>
-                                                        <div style="font-size: 0.7rem; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px; opacity: 0.9;">
-                                                            ${sp.detalle || '-'}
-                                                        </div>
-                                                    </div>
-                                                `).join('')
-                                                : (c.servicios_info && c.servicios_info.length > 0 
-                                                    ? c.servicios_info.map(s => `<div style="padding: 5px; border-bottom: 1px solid var(--border-color);">&#x2022; ${s.nombre}</div>`).join('')
-                                                    : '<p style="font-style: italic; opacity: 0.5; padding: 10px;">Sin servicios/proveedores</p>')
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="detail-section">
-                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
-                                            &#x1F4D1; Notas y Próximo Paso
-                                        </h4>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
-                                            <p style="background: rgba(30,144,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #1e90ff; margin-bottom: 15px;">
-                                                ${c.observaciones || 'No hay observaciones.'}
-                                            </p>
-                                            <div style="padding: 12px; background: #fff8f0; border: 1px solid #ffe8cc; border-radius: 8px;">
-                                                <div style="font-weight: 800; color: #f08c00; font-size: 0.65rem; text-transform: uppercase;">Pendiente Seguimiento</div>
-                                                <div style="font-size: 0.85rem; margin-top: 2px; font-weight: 600;">${nextSegDate}</div>
+                                        <div style="padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                            <div style="font-weight: 700; color: var(--text-color); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; font-size: 0.9rem;">
+                                                ${c.curso_nombre || 'Sin curso asignado'}
+                                                <div style="font-size: 0.65rem; color: #1e90ff; font-weight: 400; margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                                                    <span>SENCE: ${c.curso_codigo_sence && c.curso_codigo_sence !== '-' ? c.curso_codigo_sence : 'N/A'}</span>
+                                                    <span style="width: 4px; height: 4px; background: var(--border-color); border-radius: 50%;"></span>
+                                                    <span>Modalidad: <strong>${clean(op.modalidad)}</strong></span>
+                                                </div>
                                             </div>
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.8rem;">
+                                                <div><span style="color: var(--text-muted);">Fecha Inicio:</span> <br><strong>${clean(op.fecha_inicio_curso)}</strong></div>
+                                                <div><span style="color: var(--text-muted);">Fecha Fin:</span> <br><strong>${clean(op.fecha_fin_curso)}</strong></div>
+                                                <div><span style="color: var(--text-muted);">Duración:</span> <br><strong>${clean(op.duracion_horas)} Horas</strong></div>
+                                                <div><span style="color: var(--text-muted);">Participantes:</span> <br><strong>${clean(op.numero_participantes)}</strong></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 2: Distribución Pagos -->
+                                    <div class="detail-section">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            Distribución Pagos
+                                        </h4>
+                                        <div style="padding: 15px; background: rgba(30,144,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; height: calc(100% - 30px);">
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
+                                                <span>Pago OTIC:</span>
+                                                <span style="font-weight: 600;">${fmtCur(c.pago_otic)}</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
+                                                <span>Pago Empresa:</span>
+                                                <span style="font-weight: 600;">${fmtCur(c.pago_empresa)}</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                                                <span>Total:</span>
+                                                <strong style="color: #1e90ff;">${fmtCur(c.valor_total)}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 3: Asignación de Proveedores -->
+                                    <div class="detail-section">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            Proveedores y Costos
+                                        </h4>
+                                        <div style="padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; height: calc(100% - 30px);">
+                                            ${c.contratoproveedor_set && c.contratoproveedor_set.length > 0 
+                                                ? c.contratoproveedor_set.map(cp => `
+                                                    <div style="padding: 8px; background: rgba(30,144,255,0.05); border-radius: 8px; margin-bottom: 6px; font-size: 0.75rem;">
+                                                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                            <strong style="color: #1e90ff;">${cp.proveedor_nombre || 'Prov #' + cp.proveedor}</strong>
+                                                            <span style="color: var(--text-muted);">${cp.servicio_nombre || 'Serv #' + cp.servicio}</span>
+                                                        </div>
+                                                        <div style="display: flex; justify-content: space-between;">
+                                                            <span>Costo:</span>
+                                                            <strong style="color: #e63946;">${fmtCur(cp.costo_negociado)}</strong>
+                                                        </div>
+                                                    </div>
+                                                `).join('')
+                                                : '<div style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.75rem;">Sin proveedores asignados</div>'
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </td>
                     </tr>
+
                     `}).join('');
             }
         } catch (error) { 
@@ -559,6 +731,8 @@
             const response = await fetch('/api/servicios/');
             const data = await response.json();
             const select = document.getElementById('servicios-select');
+            if (!select) return;
+            select.innerHTML = '';
             const items = Array.isArray(data) ? data : (data.results || []);
             items.forEach(s => {
                 const opt = document.createElement('option');
@@ -566,7 +740,22 @@
                 opt.textContent = s.nombre;
                 select.appendChild(opt);
             });
+            // Siempre agregar 'Otros'
+            const optOtros = document.createElement('option');
+            optOtros.value = 'otros';
+            optOtros.textContent = 'OTRO (Especificar...)';
+            optOtros.style.fontWeight = '700';
+            optOtros.style.color = '#1e90ff';
+            select.appendChild(optOtros);
         } catch (error) { console.error('Error loading servicios'); }
+    }
+
+    function checkOtrosServicio() {
+        const select = document.getElementById('servicios-select');
+        const container = document.getElementById('otro-servicio-container');
+        const isOtrosSelected = Array.from(select.options).some(opt => opt.selected && opt.value === 'otros');
+        container.style.display = isOtrosSelected ? 'block' : 'none';
+        updateServiceCostRows();
     }
 
     async function loadProveedores() {
@@ -588,12 +777,14 @@
         try {
             const response = await fetch('/api/cursos/');
             const data = await response.json();
-            const select = document.getElementById('cursos-select');
+            const select = document.getElementById('curso-select');
             const items = Array.isArray(data) ? data : (data.results || []);
             items.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
-                opt.textContent = c.nombre;
+                opt.textContent = c.codigo_sence && c.codigo_sence !== '-' 
+                    ? `${c.nombre} (SENCE: ${c.codigo_sence})` 
+                    : c.nombre;
                 select.appendChild(opt);
             });
         } catch (error) { console.error('Error loading cursos'); }
@@ -608,7 +799,9 @@
             items.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
-                opt.textContent = c.nombre;
+                opt.textContent = c.codigo_sence && c.codigo_sence !== '-' 
+                    ? `${c.nombre} (SENCE: ${c.codigo_sence})` 
+                    : c.nombre;
                 select.appendChild(opt);
             });
         } catch (error) { console.error('Error loading encargados'); }
@@ -619,25 +812,33 @@
         const form = e.target;
         const id = document.getElementById('contrato-id').value;
 
-        // Get multi-select values
-        const getSelected = (id) => {
-            const select = document.getElementById(id);
-            return Array.from(select.options).filter(opt => opt.selected).map(opt => parseInt(opt.value));
-        };
-
-        const data = {
+        const body = {
             cliente: parseInt(form.empresa.value),
-            tipo_registro: form.tipo_registro.value,
-            empresa: form.empresa.options[form.empresa.selectedIndex].text,
-            fecha: form.fecha.value || null,
             estado: form.estado.value,
-            valor_general: parseFloat(form.valor_general.value) || 0,
-            a_pagar_otic: parseFloat(form.a_pagar_otic.value) || 0,
-            a_pagar_empresa: parseFloat(form.a_pagar_empresa.value) || 0,
-            coordinador: form.encargado.value ? parseInt(form.encargado.value) : null,
-            servicios: getSelected('servicios-select'),
-            proveedores: getSelected('proveedores-select'),
-            cursos: getSelected('cursos-select')
+            tipo_convenio: form.tipo_convenio.value,
+            curso: form.curso.value ? parseInt(form.curso.value) : null,
+            servicios: Array.from(document.getElementById('servicios-select').options)
+                        .filter(opt => opt.selected && opt.value !== 'otros')
+                        .map(opt => parseInt(opt.value)),
+            otro_servicio: document.getElementById('form-otro_servicio').value,
+            operativo_data: {
+                orden_compra: form.orden_compra.value,
+                numero_factura: form.numero_factura.value,
+                rus: form.rus.value,
+                relator: form.relator.value,
+                modalidad: form.modalidad.value,
+                fecha_inicio_curso: form.fecha_inicio_curso.value || null,
+                fecha_fin_curso: form.fecha_fin_curso.value || null,
+                duracion_horas: parseInt(form.duracion_horas.value) || 0,
+                numero_participantes: parseInt(form.numero_participantes.value) || 0,
+                tipo_curso: 'SENCE'
+            },
+            proveedores_data: Array.from(document.querySelectorAll('.service-cost-row')).map(row => ({
+                servicio: parseInt(row.dataset.servicioId),
+                proveedor: row.querySelector('.prov-sel').value === 'otros' ? 'otros' : (row.querySelector('.prov-sel').value ? parseInt(row.querySelector('.prov-sel').value) : null),
+                otro_proveedor: row.querySelector('.otro-prov-inp').value,
+                costo_negociado: parseFloat(row.querySelector('.cost-inp').value) || 0
+            })).filter(item => item.proveedor !== null || (item.proveedor === 'otros' && item.otro_proveedor))
         };
 
         try {
@@ -649,7 +850,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(body)
             });
             if (response.ok) {
                 showAlert(id ? 'Contrato actualizado' : 'Contrato creado', 'success');

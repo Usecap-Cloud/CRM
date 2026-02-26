@@ -329,13 +329,13 @@ class Servicio(models.Model):
         max_length=10,
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
-    rubro = models.CharField(max_length=50, blank=True, null=True)
+    categoria = models.CharField(max_length=50, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.nombre = normalize_text(self.nombre)
         self.tipo = normalize_text(self.tipo)
-        self.rubro = normalize_text(self.rubro)
+        self.categoria = normalize_text(self.categoria)
         self.estado = normalize_estado(self.estado)
         super().save(*args, **kwargs)
 
@@ -412,67 +412,74 @@ class Curso(models.Model):
 # Tabla Contratos
 # =========================
 class Contrato(models.Model):
-    tipo_registro = models.CharField(
-        max_length=20,
-        choices=[("Contrato", "Contrato"), ("Propuesta", "Propuesta")],
-        default="Contrato"
-    )
-    empresa = models.CharField(max_length=100)
+    # Identificación (Requested Order: folio, fecha, empresa, curso, servicio, tipo_convenio, valor_persona, valor_total, pago_otic, pago_empresa, fecha_envio, estado)
+    folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
     fecha = models.DateField(blank=True, null=True)
+    
+    # Relaciones principales
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    empresa = models.CharField(max_length=100) # Nombre descriptivo o razón social
+    curso = models.ForeignKey('Curso', on_delete=models.SET_NULL, null=True, blank=True)
+    servicios = models.ManyToManyField('Servicio', blank=True)
+    
+    tipo_convenio = models.CharField(
+        max_length=20, 
+        choices=[("OTIC", "OTIC"), ("SENCE", "SENCE"), ("Particular", "Particular")],
+        default="Particular",
+        blank=True, null=True
+    )
     fecha_envio = models.DateField(blank=True, null=True)
     
-    # Identificación y Finanzas
-    folio = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    # Finanzas
+    valor_persona = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    valor_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     
-    # Nuevos campos de valorización
-    valor_general = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    a_pagar_otic = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    a_pagar_empresa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-
     estado = models.CharField(
-        max_length=20,
-        choices=[("Activo", "Activo"), ("Cerrado", "Cerrado"), ("Finalizado", "Finalizado")],
-        default="Activo"
+        max_length=30,
+        choices=[
+            ("nuevo requerimiento", "Nuevo Requerimiento"),
+            ("aprobado", "Aprobado"),
+            ("rechazado", "Rechazado"),
+            ("en proceso", "En Proceso"),
+            ("liquidado", "Liquidado"),
+            ("finalizado", "Finalizado")
+        ],
+        default="nuevo requerimiento"
     )
+
+    # Campos técnicos y otros
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
-    
-    # Trazabilidad
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Relaciones
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    # Otras relaciones existentes
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
     coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
-    servicios = models.ManyToManyField('Servicio', blank=True)
-    cursos = models.ManyToManyField('Curso', blank=True)
-    proveedores = models.ManyToManyField('Proveedor', blank=True)
 
     def save(self, *args, **kwargs):
         # Normalización
+        if self.cliente and not self.empresa:
+            self.empresa = self.cliente.razon_social
         self.empresa = normalize_text(self.empresa)
-        self.tipo_registro = normalize_text(self.tipo_registro)
-        self.estado = normalize_estado(self.estado)
+        
+        # Nota: normalize_estado podría necesitar actualización para los nuevos estados en español
+        # pero por ahora lo dejamos así o lo ajustamos si es necesario.
+        # self.estado = normalize_estado(self.estado) 
 
+        # Si el cliente está presente y la empresa está vacía, copiar razón social
+        if self.cliente and not self.empresa:
+            self.empresa = self.cliente.razon_social
 
         # Generación de Folio (si está vacío)
-        if not self.folio:
-            year = timezone.now().year
-            # Intento simple de generar un correlativo si es la primera vez (en el primer save)
-            # Para folios más complejos se suele requerir que el objeto ya tenga ID
-            # Por ahora dejaremos un placeholder que se puede perfeccionar después del super().save()
-            pass
-
         super().save(*args, **kwargs)
 
-        # Si aún no tiene folio (nuevo registro), lo generamos ahora que tenemos ID
         if not self.folio:
             year = timezone.now().year
             self.folio = f"CON-{year}-{self.id:04d}"
             super().save(update_fields=['folio'])
 
     def __str__(self):
-        return f"Contrato {self.id} - {self.empresa}"
+        return f"{self.folio or 'S/F'} - {self.empresa}"
 
 
 # =========================

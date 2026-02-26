@@ -15,6 +15,7 @@ router.register(r'servicios', ServicioViewSet)
 router.register(r'proveedores', ProveedorViewSet)
 router.register(r'cursos', CursoViewSet)
 router.register(r'contratos', ContratoViewSet)
+router.register(r'propuestas', ContratoViewSet, basename='propuestas')
 router.register(r'contratos-cursos', ContratoCursoViewSet)
 router.register(r'contratos-proveedores', ContratoProveedorViewSet)
 router.register(r'seguimientos', SeguimientoViewSet, basename='seguimiento')
@@ -27,7 +28,7 @@ from .views import (
     cursos_view, contratos_view, proveedores_view, servicios_view,
     importar_view, AnalyzeHeadersView, ProcessMappedImportView, UniversalImportView,
     ejecutivos_view, CreateEjecutivoAPIView, seguimiento_view, audit_log_view,
-    SidebarAlertsView, ForceDataSyncView
+    SidebarAlertsView, ForceDataSyncView, propuestas_view
 )
 
 urlpatterns = [
@@ -44,6 +45,7 @@ urlpatterns = [
     path('clientes-page/', clientes_view, name='clientes-page'),
     path('coordinadores-page/', coordinadores_view, name='coordinadores-page'),
     path('cursos-page/', cursos_view, name='cursos-page'),
+    path('propuestas-page/', propuestas_view, name='propuestas-page'),
     path('contratos-page/', contratos_view, name='contratos-page'),
     path('proveedores-page/', proveedores_view, name='proveedores-page'),
     path('servicios-page/', servicios_view, name='servicios-page'),

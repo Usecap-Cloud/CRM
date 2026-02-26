@@ -1,0 +1,682 @@
+{% extends 'base.html' %}
+
+{% block title %}Propuestas - USECAP CRM{% endblock %}
+{% block nav_propuestas %}active{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Premium Styles for Contratos Page */
+    /* Premium Styles for Contratos Page */
+    .page-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    /* Fix Date Picker Icon */
+
+    /* Fix Date Picker Icon */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        filter: invert(53%) sepia(92%) saturate(1556%) hue-rotate(193deg) brightness(103%) contrast(101%);
+    }
+
+    .contratos-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .contratos-table th {
+        color: #888;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .contratos-table td {
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+
+    /* Form Page Styles */
+    #form-view {
+        display: none;
+        background: var(--bg-color);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    #form-view.active {
+        display: block;
+    }
+
+    .form-header {
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-header .back-btn {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .form-body {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 40px;
+        backdrop-filter: blur(8px);
+    }
+
+    .form-row {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: var(--text-color);
+        width: 100%;
+    }
+
+    .form-group input:focus {
+        border-color: #1e90ff;
+        outline: none;
+    }
+
+    /* Accordion Aesthetic Styles */
+    .main-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .main-row:hover {
+        background: rgba(30, 144, 255, 0.05) !important;
+    }
+    .main-row.active {
+        background: rgba(30, 144, 255, 0.08) !important;
+        border-left: 4px solid #1e90ff;
+    }
+    .detail-row td {
+        background: var(--bg-color) !important;
+        padding: 0 !important;
+    }
+    .detail-container {
+        padding: 0 40px;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 2px solid transparent;
+        opacity: 0;
+    }
+    .detail-container.show {
+        padding: 25px 40px;
+        max-height: 1000px; /* Allow expansion */
+        border-bottom-color: var(--border-color);
+        opacity: 1;
+    }
+    .detail-section {
+        padding: 20px;
+        background: var(--sidebar-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+    .detail-section:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .contratos-table th {
+        text-transform: capitalize;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- List View -->
+<div id="list-view">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Propuestas</h1>
+        </div>
+        <div class="page-actions">
+            <div class="pill-nav">
+                <button class="pill-btn primary" onclick="showForm()"><span>&#x002B;</span> Nueva Propuesta</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert" class="alert" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
+
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar por Empresa, Ejecutivo, Estado, Fechas..." onkeyup="filterTable('search-input', 'propuestas-table')">
+    </div>
+
+    <div class="card">
+        <div id="loading" style="text-align: center; padding: 50px; color: #888;">Buscando Propuestas...</div>
+        <div id="no-data" style="text-align: center; padding: 50px; color: #888; display: none;">No hay información disponible</div>
+        <table class="contratos-table" id="propuestas-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"></th>
+                    <th>Empresa</th>
+                    <th>Curso</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Seguimiento</th>
+                    <th style="text-align: right;"></th>
+                </tr>
+            </thead>
+            <tbody id="propuestas-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Form View -->
+<div class="form-page" id="form-view">
+    <div class="form-header">
+        <button class="back-btn" onclick="hideForm()">&#x2190;</button>
+        <h2 id="form-title">Nueva Propuesta</h2>
+    </div>
+    <div class="form-body">
+        <form id="contrato-form" onsubmit="savePropuesta(event)">
+            <input type="hidden" name="id" id="propuesta-id">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Empresa</label>
+                    <select name="empresa" id="empresa-select" required>
+                        <option value="">Seleccionar empresa...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Convenio</label>
+                    <select name="tipo_convenio" id="form-tipo_convenio">
+                        <option value="Particular">Particular</option>
+                        <option value="OTIC">OTIC</option>
+                        <option value="SENCE">SENCE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" id="form-fecha">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" id="form-estado" required>
+                        <option value="nuevo requerimiento">Nuevo Requerimiento</option>
+                        <option value="aprobado">Aprobado</option>
+                        <option value="rechazado">Rechazado</option>
+                        <option value="en proceso">En Proceso (Pasar a Operativo)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Encargado</label>
+                    <select name="encargado" id="encargado-select">
+                        <option value="">Seleccionar encargado...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor Persona</label>
+                    <input type="number" name="valor_persona" id="form-valor_persona" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Valor Total</label>
+                    <input type="number" name="valor_total" id="form-valor_total" placeholder="0">
+                </div>
+            </div>
+
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Curso</label>
+                    <select name="curso" id="curso-select">
+                        <option value="">Seleccionar curso...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Servicios (Selección Múltiple)</label>
+                    <select name="servicios" id="servicios-select" multiple 
+                            style="height: 120px; border: 2px solid var(--border-color); border-radius: 12px; padding: 10px; font-size: 0.8rem; cursor: pointer;"
+                            onchange="checkOtrosServicio()">
+                    </select>
+                    <small style="color: var(--text-muted); font-size: 0.65rem;">Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar varios</small>
+                    
+                    <!-- Detalle para 'Otros' -->
+                    <div id="otro-servicio-container" style="display: none; margin-top: 15px; padding: 15px; background: rgba(30,144,255,0.05); border-radius: 12px; border: 1px dashed #1e90ff;">
+                        <label style="font-size: 0.75rem; color: #1e90ff; font-weight: 700; margin-bottom: 8px; display: block;">Detalle de Nuevo Servicio</label>
+                        <input type="text" id="form-otro_servicio" name="otro_servicio" placeholder="Ej: Consultoría en IA, Soporte 24/7..." 
+                               style="background: #fff; border: 1px solid #1e90ff;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions"
+                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Crear Propuesta</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleAccordion(id) {
+        const detailRow = document.getElementById(`detail-${id}`);
+        const container = detailRow.querySelector('.detail-container');
+        const icon = document.getElementById(`icon-${id}`);
+        const isVisible = container.classList.contains('show');
+
+        if (isVisible) {
+            container.classList.remove('show');
+            setTimeout(() => { if (!container.classList.contains('show')) detailRow.style.display = 'none'; }, 350);
+            icon.style.transform = 'rotate(0deg)';
+            detailRow.closest('tr').previousElementSibling.classList.remove('active');
+        } else {
+            detailRow.style.display = 'table-row';
+            setTimeout(() => container.classList.add('show'), 10);
+            icon.style.transform = 'rotate(90deg)';
+            detailRow.closest('tr').previousElementSibling.classList.add('active');
+        }
+    }
+
+    let currentPropuestas = [];
+
+
+    function showForm(data = null) {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('form-view').classList.add('active');
+        
+        const form = document.getElementById('contrato-form');
+        form.reset();
+
+        // Reset multi-selects explicitly
+        const serviciosSelect = document.getElementById('servicios-select');
+        if (serviciosSelect) {
+            Array.from(serviciosSelect.options).forEach(opt => opt.selected = false);
+        }
+        document.getElementById('otro-servicio-container').style.display = 'none';
+        document.getElementById('form-otro_servicio').value = '';
+
+        if (data) {
+            document.getElementById('form-title').textContent = 'Editar Propuesta';
+            document.getElementById('propuesta-id').value = data.id;
+            document.getElementById('empresa-select').value = data.cliente || '';
+            document.getElementById('form-fecha').value = data.fecha || '';
+            document.getElementById('form-estado').value = data.estado;
+            document.getElementById('form-tipo_convenio').value = data.tipo_convenio || 'Particular';
+            document.getElementById('form-valor_persona').value = data.valor_persona || 0;
+            document.getElementById('form-valor_total').value = data.valor_total || 0;
+            document.getElementById('encargado-select').value = data.coordinador || '';
+            document.getElementById('curso-select').value = data.curso || '';
+            
+            // Handle Multi-selects
+            if (data.servicios) {
+                data.servicios.forEach(id => {
+                    const opt = document.querySelector(`#servicios-select option[value="${id}"]`);
+                    if (opt) opt.selected = true;
+                });
+            }
+
+            document.getElementById('submit-btn').textContent = 'Actualizar Propuesta';
+        } else {
+            document.getElementById('form-title').textContent = 'Nueva Propuesta';
+            document.getElementById('propuesta-id').value = '';
+            document.getElementById('form-valor_persona').value = 0;
+            document.getElementById('form-valor_total').value = 0;
+            document.getElementById('submit-btn').textContent = 'Crear Propuesta';
+        }
+    }
+
+    function hideForm() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('form-view').classList.remove('active');
+        document.getElementById('contrato-form').reset();
+    }
+
+    async function loadPropuestas() {
+        try {
+            const response = await fetch('/api/propuestas/');
+            const data = await response.json();
+            currentPropuestas = Array.isArray(data) ? data : (data.results || []);
+            document.getElementById('loading').style.display = 'none';
+
+            if (currentPropuestas.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('propuestas-table').style.display = 'none';
+            } else {
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('propuestas-table').style.display = 'table';
+                const tbody = document.getElementById('propuestas-body');
+                
+                tbody.innerHTML = currentPropuestas.map(c => {
+                    const clean = (val) => {
+                        if (val === null || val === undefined || val.toString().toLowerCase() === 'nan' || val.toString().toLowerCase() === 'none') return '-';
+                        return val;
+                    };
+                    const cap = (val) => {
+                        if (!val || typeof val !== 'string') return val;
+                        const s = val.trim();
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+                    };
+                    const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL').replace(/,/g, '.')}` : '$0';
+                    
+                    const pendingSegs = (c.seguimientos_info || []).filter(s => !s.cerrado);
+                    const nextSeg = pendingSegs.length > 0 
+                        ? pendingSegs.sort((a,b) => new Date(a.fecha_seguimiento || a.fecha) - new Date(b.fecha_seguimiento || b.fecha))[0]
+                        : null;
+                    const nextSegDate = nextSeg ? (nextSeg.fecha_seguimiento || nextSeg.fecha) : '-';
+                    
+                    const estadoClass = c.estado && (c.estado.toLowerCase().includes('proceso') || c.estado.toLowerCase().includes('aprobado')) ? 'active' : 
+                                      (c.estado && (c.estado.toLowerCase().includes('nuevo') || c.estado.toLowerCase().includes('liquidado')) ? 'warning' : '');
+                    
+                    return `
+                    <tr class="main-row" onclick="toggleAccordion(${c.id})">
+                        <td style="text-align: center; color: #1e90ff;">
+                            <span id="icon-${c.id}">&#x25B8;</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 800; color: #1e90ff; font-size: 0.75rem; margin-bottom: 2px;">${clean(c.folio)}</div>
+                            <div class="td-main">${clean(c.empresa_nombre || c.empresa)}</div>
+                        </td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">
+                            <div style="font-weight: 500;">${clean(c.curso_nombre)}</div>
+                            <small style="font-size: 0.65rem; color: #1e90ff;">${c.curso_codigo_sence && c.curso_codigo_sence !== '-' ? `SENCE: ${c.curso_codigo_sence}` : ''}</small>
+                        </td>
+                        <td>
+                            <span class="status-badge ${estadoClass}">${cap(clean(c.estado))}</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-weight: 500;">${clean(c.fecha)}</td>
+                        <td style="color: #d9480f; font-weight: 700; font-size: 0.8rem;">${nextSegDate}</td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;" onclick="event.stopPropagation()">
+                                <a href="/api/seguimiento-page/" class="pill-btn" style="padding: 4px 10px; font-size: 0.7rem; background: #1e90ff; color: #fff;">Seguimiento</a>
+                                <button class="pill-btn edit" onclick='editPropuesta(${c.id})'>&#x270E;</button>
+                                <button class="pill-btn delete" onclick='deletePropuesta(${c.id})'>&#x1F5D1;</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="detail-${c.id}" class="detail-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="detail-container">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch;">
+                                    <!-- Column 1: Valores y Convenio -->
+                                    <div class="detail-section" style="display: flex; flex-direction: column;">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            Valores
+                                        </h4>
+                                        <div style="padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1; display: flex; flex-direction: column;">
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 10px;">
+                                                <span>Valor Persona:</span>
+                                                <strong style="color: #1e90ff;">${fmtCur(c.valor_persona)}</strong>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 15px; padding-top: 8px; border-top: 1px dashed var(--border-color);">
+                                                <span>Monto Total:</span>
+                                                <strong style="color: #1e90ff;">${fmtCur(c.valor_total)}</strong>
+                                            </div>
+                                            <div style="margin-top: auto; padding: 10px; background: rgba(30,144,255,0.05); border-radius: 8px; font-size: 0.75rem; text-align: center; color: var(--text-color);">
+                                                Convenio: <strong>${clean(c.tipo_convenio)}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 2: Servicios -->
+                                    <div class="detail-section" style="display: flex; flex-direction: column;">
+                                        <h4 style="font-size: 0.85rem; margin-bottom: 12px; color: #1e90ff; display: flex; align-items: center; gap: 8px;">
+                                            Servicios
+                                        </h4>
+                                        <div style="padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1;">
+                                            <div style="margin-bottom: 10px;">
+                                                <h5 style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">Servicios Seleccionados:</h5>
+                                                ${c.servicios_info && c.servicios_info.length > 0 
+                                                    ? c.servicios_info.map(s => `
+                                                        <div style="padding: 6px 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 6px; font-size: 0.75rem; display: flex; justify-content: space-between; border: 1px solid #edf2f7;">
+                                                            <span>${s.nombre}</span>
+                                                            <span style="color: #10b981;">&#x2713;</span>
+                                                        </div>
+                                                    `).join('')
+                                                    : '<div style="text-align: center; padding: 20px; opacity: 0.5; font-size: 0.75rem;">Sin servicios</div>'
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    `}).join('');
+            }
+        } catch (error) { 
+            console.error('Error loadContratos:', error);
+            document.getElementById('loading').textContent = 'Error cargando datos'; 
+        }
+    }
+
+    function editPropuesta(id) {
+        const c = currentPropuestas.find(x => x.id === id);
+        if (c) showForm(c);
+    }
+
+    async function loadEmpresas() {
+        try {
+            const response = await fetch('/api/clientes/');
+            const data = await response.json();
+            const select = document.getElementById('empresa-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.razon_social;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading empresas'); }
+    }
+
+    async function loadCursos() {
+        try {
+            const response = await fetch('/api/cursos/');
+            const data = await response.json();
+            const select = document.getElementById('curso-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.codigo_sence && c.codigo_sence !== '-' 
+                    ? `${c.nombre} (SENCE: ${c.codigo_sence})` 
+                    : c.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading cursos'); }
+    }
+
+    async function loadEncargados() {
+        try {
+            const response = await fetch('/api/coordinadores/');
+            const data = await response.json();
+            const select = document.getElementById('encargado-select');
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+            });
+        } catch (error) { console.error('Error loading encargados'); }
+    }
+
+    async function savePropuesta(e) {
+        e.preventDefault();
+        const form = e.target;
+        const id = document.getElementById('propuesta-id').value;
+
+        // Get multi-select values
+        const getSelected = (id) => {
+            const select = document.getElementById(id);
+            return Array.from(select.options).filter(opt => opt.selected).map(opt => parseInt(opt.value));
+        };
+
+        const data = {
+            cliente: parseInt(form.empresa.value),
+            empresa: form.empresa.options[form.empresa.selectedIndex].text,
+            fecha: form.fecha.value || null,
+            estado: form.estado.value,
+            tipo_convenio: form.tipo_convenio.value,
+            valor_persona: parseFloat(form.valor_persona.value) || 0,
+            valor_total: parseFloat(form.valor_total.value) || 0,
+            coordinador: form.encargado.value ? parseInt(form.encargado.value) : null,
+            curso: form.curso.value ? parseInt(form.curso.value) : null,
+            servicios: Array.from(document.getElementById('servicios-select').options)
+                        .filter(opt => opt.selected && opt.value !== 'otros')
+                        .map(opt => parseInt(opt.value)),
+            otro_servicio: document.getElementById('form-otro_servicio').value
+        };
+
+        try {
+            const url = id ? `/api/propuestas/${id}/` : '/api/propuestas/';
+            const method = id ? 'PATCH' : 'POST';
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                showAlert(id ? 'Propuesta actualizada' : 'Propuesta creada', 'success');
+                hideForm();
+                loadPropuestas();
+            } else { 
+                const err = await response.json();
+                showAlert('Error: ' + JSON.stringify(err), 'error'); 
+            }
+        } catch (error) { showAlert('Error de conexion', 'error'); }
+    }
+
+    async function deletePropuesta(id) {
+        if (!confirm('¿Está seguro de eliminar esta propuesta? Esta acción no se puede deshacer.')) return;
+        try {
+            const response = await fetch(`/api/propuestas/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            if (response.ok) {
+                showAlert('Propuesta eliminada correctamente', 'success');
+                loadPropuestas();
+            } else {
+                showAlert('Error al eliminar propuesta.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error de conexión con el servidor', 'error');
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+        alert.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,0,0,0.2)';
+        setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    async function loadServicios() {
+        try {
+            const response = await fetch('/api/servicios/');
+            const data = await response.json();
+            const select = document.getElementById('servicios-select');
+            if (!select) return;
+            select.innerHTML = '';
+            const items = Array.isArray(data) ? data : (data.results || []);
+            items.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nombre;
+                select.appendChild(opt);
+            });
+            // Siempre agregar 'Otros'
+            const optOtros = document.createElement('option');
+            optOtros.value = 'otros';
+            optOtros.textContent = 'OTRO (Especificar...)';
+            optOtros.style.fontWeight = '700';
+            optOtros.style.color = '#1e90ff';
+            select.appendChild(optOtros);
+        } catch (error) { console.error('Error loading servicios'); }
+    }
+
+    function checkOtrosServicio() {
+        const select = document.getElementById('servicios-select');
+        const container = document.getElementById('otro-servicio-container');
+        const isOtrosSelected = Array.from(select.options).some(opt => opt.selected && opt.value === 'otros');
+        container.style.display = isOtrosSelected ? 'block' : 'none';
+    }
+
+    loadPropuestas();
+    loadEmpresas();
+    loadServicios();
+    loadCursos();
+    loadEncargados();
+</script>
+{% endblock %}
