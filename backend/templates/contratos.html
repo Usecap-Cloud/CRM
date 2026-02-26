@@ -525,7 +525,7 @@
                     <select class="prov-sel" style="padding: 6px; font-size: 0.8rem; border-radius: 6px;" onchange="checkOtroProv(this)">
                         <option value="">Seleccionar...</option>
                         ${proveedores.map(p => `<option value="${p.id}" ${p.id == saved.prov ? 'selected' : ''}>${p.nombre}</option>`).join('')}
-                        <option value="otros" ${saved.prov == 'otros' ? 'selected' : ''} style="font-weight:700; color:#1e90ff;">OTRO (Nuevo...)</option>
+                        <option value="otros" ${saved.prov == 'otros' ? 'selected' : ''} style="color:#1e90ff;">OTRO</option>
                     </select>
                     <!-- Detalle para nuevo proveedor -->
                     <input type="text" class="otro-prov-inp" value="${saved.otro || ''}" 
@@ -743,8 +743,7 @@
             // Siempre agregar 'Otros'
             const optOtros = document.createElement('option');
             optOtros.value = 'otros';
-            optOtros.textContent = 'OTRO (Especificar...)';
-            optOtros.style.fontWeight = '700';
+            optOtros.textContent = 'OTRO';
             optOtros.style.color = '#1e90ff';
             select.appendChild(optOtros);
         } catch (error) { console.error('Error loading servicios'); }
