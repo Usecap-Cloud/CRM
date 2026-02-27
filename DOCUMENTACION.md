@@ -147,9 +147,12 @@ Al importar ejecutivos masivamente o crearlos en el sistema, se genera automáti
 
 ### Asignación de Cartera (Vendedores)
 La asignación de ejecutivos comerciales a la data se realiza en tres niveles:
-1.  **Ficha de Cliente**: Cada empresa tiene un Ejecutivo asignado que es el dueño de la cuenta (el "Vendedor").
-2.  **Encargados**: Los contactos del cliente heredan el ejecutivo asignado a la empresa, pero pueden ser reasignados individualmente si un ejecutivo distinto gestiona a esa persona.
-3.  **Contratos y Seguimientos**: Cada contrato y cada acción de seguimiento quedan vinculados al Ejecutivo que los crea, asegurando que cada vendedor gestione solo su propia agenda (a menos que sea Administrador).
+1.  **Ficha de Cliente**: Cada empresa tiene un Ejecutivo asignado que es el dueño de la cuenta (el "Vendedor"). En caso de no tener uno, aparecerá como **"No Asignado"**, facilitando la identificación de carteras libres.
+2.  **Encargados**: Los contactos del cliente heredan el ejecutivo asignado a la empresa, pero pueden ser reasignados individualmente. Si no se selecciona un ejecutivo específico, el sistema mostrará la opción **"No Asignado"**.
+3.  **Contratos y Seguimientos**: Cada contrato y cada acción de seguimiento quedan vinculados al Ejecutivo que los crea.
+
+### Gestión de Servicios y Precios
+*   **Precios Opcionales**: Al igual que en el módulo de Cursos, los campos de `Valor Persona` y `Valor Total` en los **Servicios** son opcionales. Si no se ingresan, el sistema los guardará con valor 0 por defecto, permitiendo flexibilidad en la creación de servicios base.
 
 ---
 
