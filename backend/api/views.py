@@ -405,7 +405,34 @@ class UniversalImportView(APIView):
         )
         
         try:
-            df = pd.read_excel(file_obj)
+            # Detección Inteligente de Encabezados
+            # Lee el archivo inicialmente sin encabezados para buscar la fila correcta
+            df_check = pd.read_excel(file_obj, header=None)
+            header_row = 0
+            found_header = False
+            
+            # Indicadores de que una fila contiene encabezados (normalizados)
+            header_indicators = [
+                'rut', 'nombre', 'folio', 'razonsocial', 'email', 'correo', 
+                'rutejecutivo', 'rutcoordinador', 'nombrecurso', 'rutempresa', 'rutcliente'
+            ]
+            
+            # Escanea las primeras 10 filas
+            for i in range(min(10, len(df_check))):
+                row_values = [normalize_col(str(val)) for val in df_check.iloc[i]]
+                hits = sum(1 for val in row_values if val in header_indicators)
+                # Si encontramos al menos un indicador clave, asumimos que es la fila de encabezados
+                if hits >= 1:
+                    header_row = i
+                    found_header = True
+                    break
+            
+            # Re-leer con el encabezado detectado o usar el primero si no se detectó nada
+            file_obj.seek(0)
+            if found_header:
+                df = pd.read_excel(file_obj, header=header_row)
+            else:
+                df = pd.read_excel(file_obj)
             
             # Map columns fuzzily
             mapping = {}
