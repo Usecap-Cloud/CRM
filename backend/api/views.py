@@ -492,7 +492,14 @@ class UniversalImportView(APIView):
                     elif norm in ['servicios', 'servicios_lista', 'listaservicios', 'serviciosasociados']: mapping['servicios_lista'] = col
                     elif norm in ['proveedores', 'proveedores_lista', 'listaproveedores']: mapping['proveedores_lista'] = col
                     elif norm in ['detalle', 'detalleopcional', 'nota', 'glosa']: mapping['detalle'] = col
-                    elif norm in ['observaciones', 'obs', 'comentarios', 'observacionesopcional']: mapping['observaciones'] = col
+                elif model_type == 'curso':
+                    if norm in ['valorpersona', 'valor_persona']: mapping['valor_persona'] = col
+                    elif norm in ['valortotal', 'valor_total', 'subtotal', 'neto', 'valorneto', 'monto']: mapping['valor_total'] = col
+                    elif norm in ['codigo', 'id', 'cod', 'codigointerno']: mapping['codigo'] = col
+                    elif norm in ['sence', 'codigosence', 'codigo_sence']: mapping['codigo_sence'] = col
+                    elif norm in ['categoria', 'rubro', 'area']: mapping['categoria'] = col
+                    elif norm in ['detalle', 'descripcion', 'glosa']: mapping['detalle'] = col
+                    elif norm in ['observaciones', 'obs', 'notas']: mapping['observaciones'] = col
 
             created_count = 0
             errors = []
@@ -542,10 +549,10 @@ class UniversalImportView(APIView):
                             razon_social = nombre if nombre else "Sin Razon Social"
                         
                         # Find Ejecutivo
-                        ejecutivo = default_ejecutivo
+                        ejecutivo = None
                         rut_ej_val = clean_val(row.get(mapping.get('ejecutivo_rut')))
                         if rut_ej_val:
-                            ej_found = Ejecutivo.objects.filter(rut_ejecutivo=rut_ej_val).first()
+                            ej_found = Ejecutivo.objects.filter(rut_ejecutivo=format_rut_chile(rut_ej_val)).first()
                             if ej_found: ejecutivo = ej_found
 
                         # Date parsing for Cliente
@@ -736,7 +743,7 @@ class UniversalImportView(APIView):
                             cargo=str(row.get(mapping.get('cargo'), '')).strip(),
                             departamento=str(row.get(mapping.get('area'), '') or row.get(mapping.get('departamento'), '')).strip(),
                             fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None,
-                            ejecutivo=ejecutivo
+                            ejecutivo=ejecutivo # Optional
                         )
                         created_count += 1
                     elif model_type == 'curso':
@@ -744,16 +751,16 @@ class UniversalImportView(APIView):
                         nombre = str(nom_val).strip() if nom_val is not None else ""
                         if not nombre or nombre == 'nan': continue
                         
-                        cod_val = row.get(mapping.get('codigo'))
-                        codigo = str(cod_val).strip() if cod_val is not None else f"CUR_{index}_{int(pd.Timestamp.now().timestamp())}"
-                        
-                        est_val = row.get(mapping.get('estado'))
-                        estado = str(est_val).strip().lower() if est_val is not None else "activo"
-
                         Curso.objects.create(
-                            codigo=codigo,
+                            codigo=clean_val(row.get(mapping.get('codigo'))),
                             nombre=nombre,
-                            estado=estado
+                            estado=estado,
+                            categoria=clean_val(row.get(mapping.get('categoria'))),
+                            codigo_sence=clean_val(row.get(mapping.get('codigo_sence'))),
+                            valor_persona=clean_num(row.get(mapping.get('valor_persona'))),
+                            valor_total=clean_num(row.get(mapping.get('valor_total'))),
+                            detalle=clean_val(row.get(mapping.get('detalle'))),
+                            observaciones=clean_val(row.get(mapping.get('observaciones')))
                         )
                         created_count += 1
                     elif model_type == 'contrato':
@@ -780,13 +787,25 @@ class UniversalImportView(APIView):
                         ejecutivo = cliente.ejecutivo if cliente else (contrato.ejecutivo if contrato else None)
                         ej_rut = clean_val(row.get(mapping.get('ejecutivo_rut')))
                         if ej_rut:
-                            found_ej = Ejecutivo.objects.filter(rut_ejecutivo=ej_rut).first()
+                            found_ej = Ejecutivo.objects.filter(rut_ejecutivo=format_rut_chile(ej_rut)).first()
                             if found_ej: ejecutivo = found_ej
                         
                         coordinador = None
                         coor_rut = clean_val(row.get(mapping.get('coordinador_rut')))
                         if coor_rut:
-                            coordinador = Coordinador.objects.filter(rut_coordinador=coor_rut).first()
+                            coordinador = Coordinador.objects.filter(rut_coordinador=format_rut_chile(coor_rut)).first()
+                        
+                        # Fallback to cliente default if missing in row
+                        if not coordinador and cliente:
+                            coordinador = cliente.contacto_principal
+
+                        if not ejecutivo:
+                            errors.append(f"Fila {index + 2}: Contrato requiere un Ejecutivo asignado (RUT ejecutivo no encontrado o faltante)")
+                            continue
+                        
+                        if not coordinador:
+                            errors.append(f"Fila {index + 2}: Contrato requiere un Encargado (Coordinador) asignado")
+                            continue
 
                         # Link single Course
                         curso_obj = None

@@ -141,6 +141,8 @@
                     <th>Curso</th>
                     <th>Categoría</th>
                     <th>Código Sence</th>
+                    <th>Valor Persona</th>
+                    <th>Valor Total</th>
                     <th></th>
                 </tr>
             </thead>
@@ -165,8 +167,8 @@
                         required>
                 </div>
                 <div class="form-group">
-                    <label>Código Interno</label>
-                    <input type="text" name="codigo" id="form-codigo" placeholder="CUR-001" required>
+                    <label>Código Interno (Opcional)</label>
+                    <input type="text" name="codigo" id="form-codigo" placeholder="CUR-001">
                 </div>
             </div>
 
@@ -191,9 +193,17 @@
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado" id="form-estado">
-                        <option value="activo">Activo</option>
+                        <option value="activo" selected>Activo</option>
                         <option value="inactivo">Inactivo</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor Persona</label>
+                    <input type="number" name="valor_persona" id="form-valor_persona" placeholder="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Valor Total</label>
+                    <input type="number" name="valor_total" id="form-valor_total" placeholder="0" step="0.01">
                 </div>
             </div>
 
@@ -222,6 +232,8 @@
             document.getElementById('form-categoria').value = data.categoria || 'Otros';
             document.getElementById('form-sence').value = data.codigo_sence || '';
             document.getElementById('form-estado').value = data.estado || 'activo';
+            document.getElementById('form-valor_persona').value = data.valor_persona || 0;
+            document.getElementById('form-valor_total').value = data.valor_total || 0;
             document.getElementById('submit-btn').textContent = 'Actualizar Curso';
         } else {
             document.getElementById('form-title').textContent = 'Registro de Curso';
@@ -253,12 +265,12 @@
             } else {
                 document.getElementById('no-data').style.display = 'none';
                 document.getElementById('cursos-table').style.display = 'table';
-                const tbody = document.getElementById('cursos-body');
                 tbody.innerHTML = currentCursos.map(c => {
                     const clean = (val) => {
                         if (!val || val === 'nan' || val === 'None') return '-';
                         return val;
                     };
+                    const fmtCur = (val) => val ? `$${parseFloat(val).toLocaleString('es-CL')}` : '$0';
                     return `
                     <tr>
                         <td>
@@ -272,6 +284,8 @@
                         </td>
                         <td>${clean(c.categoria)}</td>
                         <td>${clean(c.codigo_sence)}</td>
+                        <td style="font-weight: 600; color: #1e90ff;">${fmtCur(c.valor_persona)}</td>
+                        <td style="font-weight: 600; color: #1e90ff;">${fmtCur(c.valor_total)}</td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <button class="pill-btn edit" onclick='editCurso(${c.id})'>&#x270E;</button>
@@ -301,7 +315,9 @@
             codigo: form.codigo.value,
             categoria: form.categoria.value,
             codigo_sence: form.codigo_sence.value,
-            estado: form.estado.value
+            estado: form.estado.value,
+            valor_persona: parseFloat(form.valor_persona.value) || 0,
+            valor_total: parseFloat(form.valor_total.value) || 0
         };
         try {
             const url = id ? `/api/cursos/${id}/` : '/api/cursos/';

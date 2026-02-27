@@ -244,8 +244,8 @@
                 </div>
                 <div class="form-group">
                     <label>Ejecutivo Asignado</label>
-                    <select name="ejecutivo" id="ejecutivo-select" required>
-                        <option value="">Seleccionar ejecutivo...</option>
+                    <select name="ejecutivo" id="ejecutivo-select">
+                        <option value="">No asignado</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -290,7 +290,7 @@
             document.getElementById('form-colaboradores').value = data.numero_colaboradores || 0;
             document.getElementById('form-sucursales').value = data.cantidad_sucursales || 1;
             document.getElementById('form-convenio').value = data.tipo_convenio || 'Particular';
-            document.getElementById('ejecutivo-select').value = data.ejecutivo;
+            document.getElementById('ejecutivo-select').value = data.ejecutivo || '';
             
             populateCoordinadores(data.id);
             document.getElementById('contacto-select').value = data.contacto_principal || '';
@@ -442,6 +442,8 @@
             const response = await fetch('/api/ejecutivos/');
             const data = await response.json();
             const select = document.getElementById('ejecutivo-select');
+            // Keep the "No asignado" option at top
+            select.innerHTML = '<option value="">No asignado</option>';
             data.forEach(ej => {
                 const opt = document.createElement('option');
                 opt.value = ej.id;
@@ -509,7 +511,7 @@
             cantidad_sucursales: parseInt(form.cantidad_sucursales.value) || 1,
             tipo_convenio: form.tipo_convenio.value,
             estado: form.estado.value,
-            ejecutivo: parseInt(form.ejecutivo.value),
+            ejecutivo: parseInt(form.ejecutivo.value) || null,
             contacto_principal: form.contacto_principal.value || null
         };
 

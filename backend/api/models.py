@@ -250,7 +250,7 @@ class Cliente(models.Model):
     observaciones = models.TextField(blank=True, null=True)
     
     # Relaciones
-    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.SET_NULL, null=True, blank=True)
     cliente_padre = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     contacto_principal = models.ForeignKey(
         "Coordinador",
@@ -300,7 +300,7 @@ class Coordinador(models.Model):
     
     # Relaciones
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE, null=True, blank=True)
+    ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.rut_coordinador = normalize_rut_str(self.rut_coordinador)
@@ -387,7 +387,7 @@ class Proveedor(models.Model):
 # Tabla Cursos
 # =========================
 class Curso(models.Model):
-    codigo = models.CharField(max_length=50, unique=True)
+    codigo = models.CharField(max_length=50, unique=True, blank=True, null=True)
     nombre = models.CharField(max_length=100)
     categoria = models.CharField(max_length=50, blank=True, null=True)
     estado = models.CharField(
@@ -395,6 +395,8 @@ class Curso(models.Model):
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
     codigo_sence = models.CharField(max_length=50, blank=True, null=True)
+    valor_persona = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    valor_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     detalle = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
 
@@ -402,7 +404,12 @@ class Curso(models.Model):
         self.nombre = normalize_text(self.nombre)
         self.categoria = normalize_text(self.categoria)
         self.estado = normalize_estado(self.estado)
+        
         super().save(*args, **kwargs)
+        
+        if not self.codigo:
+            self.codigo = f"CUR-{self.id:04d}"
+            super().save(update_fields=['codigo'])
 
     def __str__(self):
         return self.nombre
@@ -454,7 +461,7 @@ class Contrato(models.Model):
 
     # Otras relaciones existentes
     ejecutivo = models.ForeignKey(Ejecutivo, on_delete=models.CASCADE)
-    coordinador = models.ForeignKey(Coordinador, on_delete=models.SET_NULL, blank=True, null=True)
+    coordinador = models.ForeignKey(Coordinador, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         # Normalización

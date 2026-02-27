@@ -378,7 +378,7 @@
             const data = await response.json();
             const ejs = Array.isArray(data) ? data : (data.results || []);
             const select = document.getElementById('form-ejecutivo');
-            select.innerHTML = '<option value="">Seleccionar ejecutivo (opcional)</option>';
+            select.innerHTML = '<option value="">No asignado</option>';
             ejs.forEach(ej => {
                 const opt = document.createElement('option');
                 opt.value = ej.id;
