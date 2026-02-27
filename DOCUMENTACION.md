@@ -136,6 +136,10 @@ El sistema gestiona la criticidad del tiempo mediante:
 
 ## 6. Gestión de Usuarios y Ejecutivos
 
+### Gestión de Roles y Seguridad
+*   **Rol por Defecto**: Todo ejecutivo nuevo creado en el sistema recibe automáticamente el rol de **"Ejecutivo Comercial"**.
+*   **Restricción de Edición**: El cambio de rol en un ejecutivo existente está restringido únicamente a usuarios con privilegios de **Administrador**.
+
 ### Creación Automática de Accesos
 Al importar ejecutivos masivamente o crearlos en el sistema, se genera automáticamente un **Usuario de Sistema** vinculado:
 *   **Username**: Se deriva del email (parte anterior al @).

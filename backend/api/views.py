@@ -66,6 +66,30 @@ class EjecutivoViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Ejecutivo.objects.all()
     serializer_class = EjecutivoSerializer
 
+    def perform_create(self, serializer):
+        # Default all new executives to 'Ejecutivo Comercial' unless Admin
+        user = self.request.user
+        is_admin = not user.is_anonymous and (user.is_superuser or user.ejecutivo.rol.nombre == 'Administrador')
+        
+        if not is_admin:
+            comercial_rol = Rol.objects.filter(nombre__iexact='Ejecutivo Comercial').first()
+            if comercial_rol:
+                serializer.validated_data['rol'] = comercial_rol
+        
+        super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        # Restrict role changes to Admins only
+        user = self.request.user
+        is_admin = not user.is_anonymous and (user.is_superuser or user.ejecutivo.rol.nombre == 'Administrador')
+        
+        if 'rol' in serializer.validated_data and not is_admin:
+            # If not admin, ignore the rol change or raise error
+            # For now, let's preserve the existing rol
+            serializer.validated_data['rol'] = self.get_object().rol
+            
+        super().perform_update(serializer)
+
 class ClienteViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
@@ -445,6 +469,7 @@ class UniversalImportView(APIView):
                     elif norm in ['fechafinal', 'fecha_fin', 'termino_curso', 'fin_curso']: mapping['fecha_fin_curso'] = col
                     elif norm in ['horas', 'duracion', 'duracion_horas', 'h_totales']: mapping['duracion_horas'] = col
                     elif norm in ['participantes', 'n_participantes', 'numero_participantes', 'alumnos']: mapping['numero_participantes'] = col
+                    elif norm in ['grupos', 'n_grupos', 'numero_grupos', 'grupo']: mapping['numero_grupos'] = col
                 elif model_type == 'seguimiento':
                     if norm in ['foliocontrato', 'folio', 'contrato']: mapping['contrato_folio'] = col
                     elif norm in ['fecha', 'fechasoluicitud', 'fecharegistro', 'fecha_solicitud', 'fechasolicitud']: mapping['fecha'] = col
@@ -940,6 +965,7 @@ class UniversalImportView(APIView):
                                 op_obj.fecha_fin_curso = parse_date(row.get(mapping.get('fecha_fin_curso'))) or op_obj.fecha_fin_curso
                                 op_obj.duracion_horas = int(row.get(mapping.get('duracion_horas'), op_obj.duracion_horas)) if not pd.isna(row.get(mapping.get('duracion_horas'))) else op_obj.duracion_horas
                                 op_obj.numero_participantes = int(row.get(mapping.get('numero_participantes'), op_obj.numero_participantes)) if not pd.isna(row.get(mapping.get('numero_participantes'))) else op_obj.numero_participantes
+                                op_obj.numero_grupos = int(row.get(mapping.get('numero_grupos'), op_obj.numero_grupos)) if not pd.isna(row.get(mapping.get('numero_grupos'))) else op_obj.numero_grupos
                                 op_obj.save()
                             elif curso_obj or contrato.curso:
                                 ContratoCurso.objects.create(
@@ -953,6 +979,7 @@ class UniversalImportView(APIView):
                                     fecha_fin_curso=parse_date(row.get(mapping.get('fecha_fin_curso'))),
                                     duracion_horas=int(row.get(mapping.get('duracion_horas'), 0)) if not pd.isna(row.get(mapping.get('duracion_horas'), 0)) else 0,
                                     numero_participantes=int(row.get(mapping.get('numero_participantes'), 0)) if not pd.isna(row.get(mapping.get('numero_participantes'), 0)) else 0,
+                                    numero_grupos=int(row.get(mapping.get('numero_grupos'), 0)) if not pd.isna(row.get(mapping.get('numero_grupos'), 0)) else 0,
                                     tipo_curso='SENCE'
                                 )
                         else:
@@ -992,6 +1019,7 @@ class UniversalImportView(APIView):
                                 fecha_fin_curso=parse_date(row.get(mapping.get('fecha_fin_curso'))),
                                 duracion_horas=int(row.get(mapping.get('duracion_horas'), 0)) if not pd.isna(row.get(mapping.get('duracion_horas'), 0)) else 0,
                                 numero_participantes=int(row.get(mapping.get('numero_participantes'), 0)) if not pd.isna(row.get(mapping.get('numero_participantes'), 0)) else 0,
+                                numero_grupos=int(row.get(mapping.get('numero_grupos'), 0)) if not pd.isna(row.get(mapping.get('numero_grupos'), 0)) else 0,
                                 tipo_curso='SENCE' # Default
                             )
                         created_count += 1
