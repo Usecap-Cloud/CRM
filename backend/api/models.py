@@ -15,19 +15,34 @@ _UPPERCASE_ABBR = {
 
 def normalize_text(value):
     """
-    Convierte texto a Title Case inteligente, preservando abreviaciones
-    comunes como S.A., LTDA., SpA, etc.
+    Convierte texto a Title Case inteligente, preservando abreviaciones,
+    removiendo acentos y convirtiendo 'ñ' en 'n'.
     """
+    import unicodedata
     if not value or not isinstance(value, str):
         return value
+    
+    # 1. Quitar acentos y normalizar Ñ -> N
+    # NFD separa los caracteres base de sus tildes/acentos
+    # Luego filtramos los caracteres que son 'Mn' (Non-Spacing Mark / Acentos)
+    value = "".join(
+        c for c in unicodedata.normalize('NFD', value)
+        if unicodedata.category(c) != 'Mn'
+    )
+    
     value = value.strip()
     if not value:
         return value
+        
     words = value.split()
     result = []
     for word in words:
-        if word.upper() in _UPPERCASE_ABBR or word.upper().rstrip('.,') in _UPPERCASE_ABBR:
-            result.append(word.upper())
+        upper_word = word.upper()
+        # Limpiar ruidos comunes de puntuación para comparar con la lista de abreviaciones
+        clean_word = upper_word.rstrip('.,')
+        
+        if upper_word in _UPPERCASE_ABBR or clean_word in _UPPERCASE_ABBR:
+            result.append(upper_word)
         else:
             result.append(word.capitalize())
     return ' '.join(result)

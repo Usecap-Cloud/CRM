@@ -62,8 +62,10 @@ El sistema cuenta con un motor de normalización automática en el archivo `mode
 *   **RUT**:
     *   **Validación**: Algoritmo de Módulo 11 (Chile). No permite guardar RUTs inválidos o sin dígito verificador.
     *   **Normalización**: Transforma cualquier entrada a formato estándar `12.345.678-9`.
-*   **Nombres**: Para Clientes, el campo **Nombre de Fantasía** es obligatorio. La **Razón Social** puede completarse después para formalizar contratos.
-*   **Precios**: Puede usar números (`150000`) o moneda (`$150.000`).
+*   **Nombres y Textos**:
+    *   **Prioridad**: Para Clientes, el campo **Nombre de Fantasía** es obligatorio. La **Razón Social** es opcional inicialmente.
+    *   **Normalización Estricta**: Todo texto (nombres, direcciones, giros) se procesa para **eliminar tildes/acentos** y convertir la **`ñ` en `n`**. Esto garantiza máxima compatibilidad al exportar datos o visualizarlos en distintos sistemas.
+    *   **Smart Title Case**: Convierte automáticamente a Capital Case (ej: de "NIÑO ACCIÓN" a "Nino Accion"), preservando siglas protegidas (`OTEC`, `SENCE`, `SPA`, `LTDA`, etc.).
 
 ### B. Gestión Telefónica
 *   **Validación**: Exige exactamente **9 dígitos** (estándar nacional).
