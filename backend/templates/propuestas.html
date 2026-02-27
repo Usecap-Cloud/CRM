@@ -435,8 +435,8 @@
                         <td style="color: var(--text-muted); font-weight: 500;">${clean(c.fecha)}</td>
                         <td style="color: #d9480f; font-weight: 700; font-size: 0.8rem;">${nextSegDate}</td>
                         <td style="text-align: right;">
-                            <div style="display: flex; gap: 8px; justify-content: flex-end;" onclick="event.stopPropagation()">
-                                <a href="/api/seguimiento-page/" class="pill-btn" style="padding: 4px 10px; font-size: 0.7rem; background: #1e90ff; color: #fff;">Seguimiento</a>
+                            <div style="display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;" onclick="event.stopPropagation()">
+                                <a href="/api/seguimiento-page/" class="pill-btn" style="background: #1e90ff; color: #fff; justify-content: center;">Seguimiento</a>
                                 <button class="pill-btn edit" onclick='editPropuesta(${c.id})'>&#x270E;</button>
                                 <button class="pill-btn delete" onclick='deletePropuesta(${c.id})'>&#x1F5D1;</button>
                             </div>
