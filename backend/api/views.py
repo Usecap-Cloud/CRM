@@ -134,14 +134,14 @@ class ContratoViewSet(AuditMixin, viewsets.ModelViewSet):
         elif not is_privileged and not ej:
             return Contrato.objects.none()
 
-        # Propuestas: Pre-sale (New requirement and Rejections)
-        # Contratos: Operational (Approved, Signing, In Process, etc.)
-        propuesta_statuses = ['nuevo requerimiento', 'rechazado']
+        # Propuestas: Pre-sale + Final decision (Approved/Rejected)
+        # Contratos: Execution/Operation
+        propuesta_statuses = ['nuevo requerimiento', 'aprobado', 'rechazado']
         
         if self.basename == 'propuestas':
             queryset = queryset.filter(estado__in=propuesta_statuses)
         else:
-            # Operational contracts/proposals in final stages
+            # Operational contracts: en proceso, liquidado, finalizado
             queryset = queryset.exclude(estado__in=propuesta_statuses)
 
         return queryset

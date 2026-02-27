@@ -465,7 +465,6 @@ class Contrato(models.Model):
         choices=[
             ("nuevo requerimiento", "Nuevo Requerimiento"),
             ("aprobado", "Aprobado"),
-            ("en firma", "En Firma"),
             ("rechazado", "Rechazado"),
             ("en proceso", "En Proceso"),
             ("liquidado", "Liquidado"),
