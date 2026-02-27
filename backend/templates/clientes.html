@@ -190,21 +190,22 @@
                         oninput="this.value = formatRut(this.value)">
                 </div>
                 <div class="form-group">
-                    <label>Razón Social</label>
-                    <input type="text" name="razon_social" id="form-razon" placeholder="Empresa S.A." required>
+                    <label>Nombre de Fantasía</label>
+                    <input type="text" name="nombre" id="form-nombre" placeholder="Nombre Comercial" required>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Nombre de Fantasía</label>
-                    <input type="text" name="nombre" id="form-nombre" placeholder="Nombre Comercial">
+                    <label>Razón Social (Legal)</label>
+                    <input type="text" name="razon_social" id="form-razon" placeholder="Empresa S.A.">
                 </div>
                 <div class="form-group">
                     <label>Teléfono Empresarial</label>
                     <input type="text" name="telefono_empresarial" id="form-telefono-emp" placeholder="+56 9 ...">
                 </div>
             </div>
+
 
             <div class="form-row">
                 <div class="form-group">
@@ -375,13 +376,15 @@
                     return `
                     <tr>
                         <td>
-                            <div style="margin-bottom: 5px;">
-                                <span class="td-main">${clean(client.razon_social)}</span>
+                            <div style="margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
+                                <span class="td-main">${clean(client.nombre)}</span>
+                                ${!client.razon_social || client.razon_social.toString().toLowerCase() === 'nan' ? '<span title="Falta Razón Social" style="cursor:help;">⚠️</span>' : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="status-badge ${client.estado && client.estado.toLowerCase().includes('activo') ? 'active' : ''}">${cap(clean(client.estado))}</span>
                                 <span class="td-sub" style="margin:0">${clean(client.rut_empresa)}</span>
                             </div>
+                            ${client.razon_social && client.razon_social.toString().toLowerCase() !== 'nan' ? `<div class="td-sub" style="font-size: 0.75rem; margin-top: 4px;">${clean(client.razon_social)}</div>` : ''}
                         </td>
                         <td>
                             <span class="td-main">${clean(client.ejecutivo_nombre)}</span>

@@ -224,6 +224,9 @@
                     <select name="empresa" id="empresa-select" required>
                         <option value="">Seleccionar empresa...</option>
                     </select>
+                    <div id="razon-social-warning" style="display:none; margin-top: 8px; padding: 10px; background: rgba(255,165,0,0.1); border: 1px solid orange; color: #d9480f; border-radius: 8px; font-size: 0.8rem;">
+                        ⚠️ <strong>Atención:</strong> Esta empresa no tiene <b>Razón Social</b> registrada. Es necesaria para formalizar el contrato.
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Estado</label>
@@ -858,7 +861,7 @@
             allClientes.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id;
-                opt.textContent = e.razon_social;
+                opt.textContent = e.nombre; // Usamos Nombre de Fantasía
                 select.appendChild(opt);
             });
         } catch (error) { console.error('Error loading empresas'); }
@@ -866,9 +869,20 @@
 
     document.getElementById('empresa-select').addEventListener('change', function() {
         const clientId = this.value;
+        const warning = document.getElementById('razon-social-warning');
+        
         if (!clientId) {
             renderEncargadosDropdown();
+            warning.style.display = 'none';
             return;
+        }
+        
+        // Check for razon social
+        const client = allClientes.find(c => c.id == clientId);
+        if (client && (!client.razon_social || client.razon_social.toString().toLowerCase() === 'nan')) {
+            warning.style.display = 'block';
+        } else {
+            warning.style.display = 'none';
         }
         
         // Filter the coordinator list to show only those belonging to the selected client

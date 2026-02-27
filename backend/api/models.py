@@ -226,8 +226,8 @@ class Ejecutivo(models.Model):
 # =========================
 class Cliente(models.Model):
     rut_empresa = models.CharField(max_length=12, unique=True, validators=[validate_rut])
-    razon_social = models.CharField(max_length=100)
-    nombre = models.CharField(max_length=100, blank=True, null=True)
+    razon_social = models.CharField(max_length=100, blank=True, null=True)
+    nombre = models.CharField(max_length=100, default="") # Nombre de Fantasía (Mandatorio ahora)
     estado = models.CharField(
         max_length=10,
         choices=[("Activo", "Activo"), ("Inactivo", "Inactivo")]
@@ -262,8 +262,10 @@ class Cliente(models.Model):
 
     def save(self, *args, **kwargs):
         self.rut_empresa = normalize_rut_str(self.rut_empresa)
-        self.razon_social = normalize_text(self.razon_social)
-        self.nombre = normalize_text(self.nombre)
+        if self.razon_social:
+            self.razon_social = normalize_text(self.razon_social)
+        if self.nombre:
+            self.nombre = normalize_text(self.nombre)
         self.estado = normalize_estado(self.estado)
         self.sector_industria = normalize_text(self.sector_industria)
         self.direccion = normalize_text(self.direccion)

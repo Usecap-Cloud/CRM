@@ -441,8 +441,10 @@ class UniversalImportView(APIView):
                 
                 # 1. Primary Identification (Model-Specific Fields)
                 if model_type == 'cliente':
-                    if norm in ['rutempresa', 'empresarut', 'rut_empresa', 'rut']:
-                        mapping['rut_empresa'] = col
+                    if norm in ['nombre', 'nombrefantasia', 'fantasia', 'empresa', 'nombre_comercial']:
+                        mapping['nombre'] = col
+                    elif norm in ['razonsocial', 'razon_social', 'nombre_legal']:
+                        mapping['razon_social'] = col
                 elif model_type == 'ejecutivo':
                     if norm in ['rutejecutivo', 'ejecutivorut', 'rut_ejecutivo', 'rut']:
                         mapping['rut_ejecutivo'] = col

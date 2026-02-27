@@ -58,9 +58,12 @@ El sistema distingue entre el personal interno (con acceso al sistema) y los con
 ## 2. Sistema de Normalización de Datos (Data Integrity)
 El sistema cuenta con un motor de normalización automática en el archivo `models.py` que garantiza que la base de datos esté siempre limpia.
 
-### A. Gestión de RUTs
-*   **Validación**: Algoritmo de Módulo 11 (Chile). No permite guardar RUTs inválidos o sin dígito verificador.
-*   **Normalización**: Transforma cualquier entrada a formato estándar `12.345.678-9`.
+### A. Reglas de Integridad de Datos
+*   **RUT**:
+    *   **Validación**: Algoritmo de Módulo 11 (Chile). No permite guardar RUTs inválidos o sin dígito verificador.
+    *   **Normalización**: Transforma cualquier entrada a formato estándar `12.345.678-9`.
+*   **Nombres**: Para Clientes, el campo **Nombre de Fantasía** es obligatorio. La **Razón Social** puede completarse después para formalizar contratos.
+*   **Precios**: Puede usar números (`150000`) o moneda (`$150.000`).
 
 ### B. Gestión Telefónica
 *   **Validación**: Exige exactamente **9 dígitos** (estándar nacional).
@@ -75,8 +78,9 @@ El sistema cuenta con un motor de normalización automática en el archivo `mode
 ## 3. Módulos Principales
 
 ### Clientes y Encargados
+*   **Prioridad de Nombre**: El sistema utiliza el **Nombre de Fantasía** como identificador principal y obligatorio.
+*   **Requerimiento Progresivo**: La **Razón Social** es opcional para el registro inicial, pero el sistema alertará visualmente su ausencia cuando se intente generar un Contrato.
 *   Vínculo automático entre Empresa (Cliente) y sus contactos (Encargados).
-*   **Jerarquía de Empresas**: Soporte para **Casa Matriz y Filiales** mediante el campo `cliente_padre`.
 *   Cálculo automático de estado por convenio.
 
 ### Ejecutivos
@@ -91,6 +95,12 @@ El sistema cuenta con un motor de normalización automática en el archivo `mode
 El sistema cuenta con un motor de carga universal (`UniversalImportView`) diseñado para ser inteligente y autodetectable.
 *   **Prioridad de Campos del Modelo**: El importador está optimizado para reconocer automáticamente los nombres técnicos definidos en `models.py`. Si tu Excel tiene columnas como `rut_coordinador`, `rut_empresa`, `cliente_rut` o `rut_ejecutivo`, el sistema las mapeará de forma instantánea y precisa.
 *   **Lógica de Mapeo Inteligente (Fuzzy Logic)**: Si no se encuentran los nombres exactos, el sistema aplica un algoritmo de normalización para buscar variaciones comunes (ej: mapeará "RUT Empresa" o "Empresa RUT" automáticamente a `rut_empresa`).
+    Ejemplos de mapeo:
+    | Columna Excel | Campo Modelo | Ejemplo |
+    | :--- | :--- | :--- |
+    | RUT Empresa* | `rut_empresa` | `76.123.456-7` |
+    | Nombre de Fantasía* | `nombre` | `Empresa Comercial` |
+    | Razón Social | `razon_social` | `Empresa S.A.` |
 *   **Validación de Columnas Requeridas**: El sistema exige columnas mínimas según el módulo (ej: `rut_coordinador` para Encargados). Si falta una, el error te indicará exactamente el nombre del campo que el modelo de base de datos espera recibir.
 *   **Detección de Duplicados**: Antes de procesar, se verifica contra la base de datos para evitar registros repetidos (basado en el RUT).
 *   **Detección Inteligente de Encabezados**: El sistema escanea las primeras 10 filas del archivo para identificar automáticamente la fila que contiene los encabezados reales. Esto permite a los usuarios incluir una **fila de título** o decorativa al inicio del archivo Excel sin afectar la importación.
