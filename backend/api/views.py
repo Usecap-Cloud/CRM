@@ -477,6 +477,14 @@ class UniversalImportView(APIView):
                 elif norm in ['areadepartamento', 'area', 'departamento']: mapping['area'] = col
                 elif norm in ['observaciones', 'obs', 'comentarios']: mapping['observaciones'] = col
                 elif norm in ['rol', 'idrol', 'rolnombre']: mapping['rol'] = col
+                elif norm in ['sector', 'industria', 'sectorindustria', 'sector_industria']: mapping['sector_industria'] = col
+                elif norm in ['origen', 'referencia', 'procedencia', 'origen_referencia']: mapping['origen_referencia'] = col
+                elif norm in ['sucursales', 'cantidadsucursales', 'n_sucursales']: mapping['cantidad_sucursales'] = col
+                elif norm in ['nombrefantasia', 'nombreficticio', 'apodo', 'fantasia', 'nombre_fantasia']: mapping['nombre_fantasia'] = col
+                elif norm in ['especialidad', 'especialidad_tipo_clientes', 'tipo_clientes']: mapping['especialidad'] = col
+                elif norm in ['tipo', 'clase', 'categoria_proveedor']: mapping['tipo'] = col
+                elif norm in ['rubro', 'giro', 'actividad']: mapping['rubro'] = col
+                elif norm in ['contacto', 'nombrecontacto', 'persona_contacto', 'nombre_contacto']: mapping['nombre_contacto'] = col
 
                 # 4. Model-Specific Fields
                 if model_type == 'contrato':
@@ -684,10 +692,16 @@ class UniversalImportView(APIView):
                         Proveedor.objects.create(
                             rut_proveedor=rut,
                             nombre=clean_val(row.get(mapping.get('nombre')), 'Sin Nombre'),
+                            tipo=clean_val(row.get(mapping.get('tipo'))),
+                            estado=clean_val(row.get(mapping.get('estado')), 'activo').lower(),
                             contacto=clean_val(row.get(mapping.get('nombre_contacto'))),
                             email=clean_val(row.get(mapping.get('email'))),
                             telefono=clean_val(row.get(mapping.get('telefono'))),
-                            categoria=clean_val(row.get(mapping.get('rubro')) or row.get(mapping.get('categoria'))),
+                            direccion=clean_val(row.get(mapping.get('direccion'))),
+                            region=clean_val(row.get(mapping.get('region'))),
+                            comuna=clean_val(row.get(mapping.get('comuna'))),
+                            rubro=clean_val(row.get(mapping.get('rubro')) or row.get(mapping.get('categoria'))),
+                            observaciones=clean_val(row.get(mapping.get('observaciones')))
                         )
                         created_count += 1
                     elif model_type == 'coordinador':
@@ -744,6 +758,7 @@ class UniversalImportView(APIView):
                             cargo=str(row.get(mapping.get('cargo'), '')).strip(),
                             departamento=str(row.get(mapping.get('area'), '') or row.get(mapping.get('departamento'), '')).strip(),
                             fecha_cumpleanos=pd.to_datetime(row.get(mapping.get('fecha_cumpleanos'))).date() if not pd.isna(row.get(mapping.get('fecha_cumpleanos'))) else None,
+                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             ejecutivo=ejecutivo # Optional
                         )
                         created_count += 1
@@ -784,6 +799,7 @@ class UniversalImportView(APIView):
                             valor_persona=clean_num(row.get(mapping.get('valor_persona'))),
                             valor_total=clean_num(row.get(mapping.get('valor_total'))),
                             descripcion=clean_val(row.get(mapping.get('descripcion'))),
+                            observaciones=clean_val(row.get(mapping.get('observaciones'))),
                             proveedor=proveedor
                         )
                         created_count += 1
