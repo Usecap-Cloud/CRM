@@ -93,6 +93,7 @@ El sistema cuenta con un motor de carga universal (`UniversalImportView`) diseñ
 *   **Lógica de Mapeo Inteligente (Fuzzy Logic)**: Si no se encuentran los nombres exactos, el sistema aplica un algoritmo de normalización para buscar variaciones comunes (ej: mapeará "RUT Empresa" o "Empresa RUT" automáticamente a `rut_empresa`).
 *   **Validación de Columnas Requeridas**: El sistema exige columnas mínimas según el módulo (ej: `rut_coordinador` para Encargados). Si falta una, el error te indicará exactamente el nombre del campo que el modelo de base de datos espera recibir.
 *   **Detección de Duplicados**: Antes de procesar, se verifica contra la base de datos para evitar registros repetidos (basado en el RUT).
+*   **Detección Inteligente de Encabezados**: El sistema escanea las primeras 10 filas del archivo para identificar automáticamente la fila que contiene los encabezados reales. Esto permite a los usuarios incluir una **fila de título** o decorativa al inicio del archivo Excel sin afectar la importación.
 
 ---
 
