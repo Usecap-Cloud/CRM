@@ -151,7 +151,7 @@ La asignación de ejecutivos comerciales a la data se realiza en tres niveles:
 2.  **Encargados**: Los contactos del cliente heredan el ejecutivo asignado a la empresa, pero pueden ser reasignados individualmente. Si no se selecciona un ejecutivo específico, el sistema mostrará la opción **"No Asignado"**.
 3.  **Contratos y Seguimientos**: Cada contrato y cada acción de seguimiento quedan vinculados al Ejecutivo que los crea.
 
-### Gestión de Servicios y Precios
+### Gestión de Servicios y Cursos
 *   **Precios Opcionales**: Al igual que en el módulo de Cursos, los campos de `Valor Persona` y `Valor Total` en los **Servicios** son opcionales. Si no se ingresan, el sistema los guardará con valor 0 por defecto, permitiendo flexibilidad en la creación de servicios base.
 
 ---
