@@ -134,15 +134,14 @@ class ContratoViewSet(AuditMixin, viewsets.ModelViewSet):
         elif not is_privileged and not ej:
             return Contrato.objects.none()
 
-        # Split logic: Propuestas vs Contratos based on basename
-        # Propuestas: Pre-sale + Final decision (Approved/Rejected)
-        # Contratos: Execution/Operation
-        propuesta_statuses = ['nuevo requerimiento', 'aprobado', 'rechazado']
+        # Propuestas: Pre-sale (New requirement and Rejections)
+        # Contratos: Operational (Approved, Signing, In Process, etc.)
+        propuesta_statuses = ['nuevo requerimiento', 'rechazado']
         
         if self.basename == 'propuestas':
             queryset = queryset.filter(estado__in=propuesta_statuses)
         else:
-            # Operational contracts: en proceso, liquidado, finalizado
+            # Operational contracts/proposals in final stages
             queryset = queryset.exclude(estado__in=propuesta_statuses)
 
         return queryset
@@ -440,7 +439,7 @@ class UniversalImportView(APIView):
                 norm = normalize_col(col)
                 
                 # 1. Primary Identification (Model-Specific Fields)
-                if model_type == 'cliente':
+                if model_type in ['cliente', 'propuesta', 'contrato']:
                     if norm in ['nombre', 'nombrefantasia', 'fantasia', 'empresa', 'nombre_comercial']:
                         mapping['nombre'] = col
                     elif norm in ['razonsocial', 'razon_social', 'nombre_legal']:
@@ -472,7 +471,7 @@ class UniversalImportView(APIView):
                         mapping['cliente_rut'] = col
                     elif norm in ['rutejecutivo', 'ejecutivorut', 'ejecutivo', 'rut_ejecutivo']:
                         mapping['ejecutivo_rut'] = col
-                elif model_type == 'contrato':
+                elif model_type in ['contrato', 'propuesta']:
                     if norm in ['rutcliente', 'clienterut', 'rutempresa', 'razonsocial', 'rut_cliente']: mapping['cliente_rut'] = col
                     elif norm in ['rutcoordinador', 'coordinadorrut', 'coordinador', 'rut_coordinador', 'encargado_rut']: mapping['coordinador_rut'] = col
                     elif norm in ['folio', 'foliocontrato', 'numerocontrato', 'id_contrato', 'idcontrato', 'numero']: mapping['folio'] = col
@@ -572,6 +571,19 @@ class UniversalImportView(APIView):
                          Rol.objects.filter(id=2).first() or \
                          Rol.objects.first()
 
+            # Determine final model and defaults
+            target_model = Cliente
+            if model_type == 'ejecutivo': target_model = Ejecutivo
+            elif model_type == 'coordinador': target_model = Coordinador
+            elif model_type == 'proveedor': target_model = Proveedor
+            elif model_type == 'curso': target_model = Curso
+            elif model_type in ['contrato', 'propuesta']: target_model = Contrato
+            elif model_type == 'servicio': target_model = Servicio
+            
+            # Default status based on type
+            default_status = 'activo'
+            if model_type == 'propuesta': default_status = 'nuevo requerimiento'
+            elif model_type == 'contrato': default_status = 'aprobado'
             # Check for mandatory columns depending on model
             mandatory = []
             if model_type == 'cliente': mandatory = ['rut_empresa']

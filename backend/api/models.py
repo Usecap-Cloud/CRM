@@ -465,6 +465,7 @@ class Contrato(models.Model):
         choices=[
             ("nuevo requerimiento", "Nuevo Requerimiento"),
             ("aprobado", "Aprobado"),
+            ("en firma", "En Firma"),
             ("rechazado", "Rechazado"),
             ("en proceso", "En Proceso"),
             ("liquidado", "Liquidado"),
@@ -501,7 +502,8 @@ class Contrato(models.Model):
 
         if not self.folio:
             year = timezone.now().year
-            self.folio = f"CON-{year}-{self.id:04d}"
+            # El folio es principalmente para propuestas (P-)
+            self.folio = f"P-{year}-{self.id:04d}"
             super().save(update_fields=['folio'])
 
     def __str__(self):
