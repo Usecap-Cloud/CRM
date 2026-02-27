@@ -330,6 +330,8 @@ class Servicio(models.Model):
         choices=[("activo", "Activo"), ("inactivo", "Inactivo")]
     )
     categoria = models.CharField(max_length=50, blank=True, null=True)
+    valor_persona = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    valor_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     observaciones = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):

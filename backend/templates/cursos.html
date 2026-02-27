@@ -257,14 +257,18 @@
             const data = await response.json();
             currentCursos = Array.isArray(data) ? data : (data.results || []);
 
+            const tbody = document.getElementById('cursos-body');
             document.getElementById('loading').style.display = 'none';
 
             if (currentCursos.length === 0) {
-                document.getElementById('no-data').style.display = 'block';
+                document.getElementById('no-data').style.display = 'none';
                 document.getElementById('cursos-table').style.display = 'none';
+                // Also hide the card if empty
+                document.querySelector('.card').style.display = 'none';
             } else {
                 document.getElementById('no-data').style.display = 'none';
                 document.getElementById('cursos-table').style.display = 'table';
+                document.querySelector('.card').style.display = 'block';
                 tbody.innerHTML = currentCursos.map(c => {
                     const clean = (val) => {
                         if (!val || val === 'nan' || val === 'None') return '-';

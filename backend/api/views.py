@@ -517,6 +517,7 @@ class UniversalImportView(APIView):
             elif model_type == 'proveedor': mandatory = ['rut_proveedor']
             elif model_type == 'ejecutivo': mandatory = ['rut_ejecutivo']
             elif model_type == 'coordinador': mandatory = ['rut_coordinador', 'cliente_rut']
+            elif model_type == 'servicio': mandatory = ['nombre']
             
             missing = [m for m in mandatory if m not in mapping]
             if missing:
@@ -702,7 +703,7 @@ class UniversalImportView(APIView):
                         
                         rut = format_rut_chile(rut_raw)
                         if Coordinador.objects.filter(rut_coordinador=rut).exists():
-                            errors.append(f"Fila {index + 2}: El coordinador ya existe ({rut})")
+                            errors.append(f"Fila {index + 2}: El encargado ya existe ({rut})")
                             continue
 
                         # Find Cliente
@@ -763,6 +764,29 @@ class UniversalImportView(APIView):
                             observaciones=clean_val(row.get(mapping.get('observaciones')))
                         )
                         created_count += 1
+                    elif model_type == 'servicio':
+                        nom_val = row.get(mapping.get('nombre'))
+                        nombre = str(nom_val).strip() if nom_val is not None else ""
+                        if not nombre or nombre == 'nan': continue
+                        
+                        # Find provider (Optional)
+                        proveedor = None
+                        prov_ident = clean_val(row.get(mapping.get('proveedor')))
+                        if prov_ident:
+                            proveedor = Proveedor.objects.filter(nombre__iexact=prov_ident).first() or \
+                                        Proveedor.objects.filter(rut_proveedor=format_rut_chile(prov_ident)).first()
+
+                        Servicio.objects.create(
+                            nombre=nombre,
+                            tipo=clean_val(row.get(mapping.get('tipo'))),
+                            categoria=clean_val(row.get(mapping.get('categoria'))),
+                            estado=str(row.get(mapping.get('estado'), 'activo')).lower(),
+                            valor_persona=clean_num(row.get(mapping.get('valor_persona'))),
+                            valor_total=clean_num(row.get(mapping.get('valor_total'))),
+                            descripcion=clean_val(row.get(mapping.get('descripcion'))),
+                            proveedor=proveedor
+                        )
+                        created_count += 1
                     elif model_type == 'contrato':
                         folio_val = clean_val(row.get(mapping.get('folio')))
                         contrato = None
@@ -804,7 +828,7 @@ class UniversalImportView(APIView):
                             continue
                         
                         if not coordinador:
-                            errors.append(f"Fila {index + 2}: Contrato requiere un Encargado (Coordinador) asignado")
+                            errors.append(f"Fila {index + 2}: Contrato requiere un Encargado asignado")
                             continue
 
                         # Link single Course
